@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Portal — Tunu Library{% endblock %}
+
+{% block head %}
+<style>
+    .admin-nav {
+        background: var(--primary);
+        color: white;
+        padding: 14px 0;
+        margin-bottom: 30px;
+    }
+
+    .admin-nav-inner {
+        display: flex;
+        gap: 20px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .admin-nav-inner a {
+        color: #94a3b8;
+        padding: 6px 12px;
+        border-radius: var(--radius-sm);
+    }
+
+    .admin-nav-inner a.active, .admin-nav-inner a:hover {
+        color: white;
+        background: rgba(255,255,255,0.1);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .admin-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+    }
+
+    @media (max-width: 900px) {
+        .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-nav">
+    <div class="container admin-nav-inner">
+        <a href="{{ url_for('admin_dashboard') }}" class="active">Overview</a>
+        <a href="{{ url_for('admin_reservations') }}">Reservations Queue</a>
+        <a href="{{ url_for('admin_borrowing') }}">Borrowings</a>
+        <a href="{{ url_for('admin_borrowing') }}">Manage Books</a>
+        <a href="{{ url_for('admin_users') }}">Users</a>
+    </div>
+</div>
+
+<div class="container">
+    <h2>Admin Dashboard Overview</h2>
+    
+    <div class="stats-grid" style="margin-top: 20px;">
+        <div class="admin-card">
+            <h3 style="font-size: 32px; font-weight: 800;">{{ total_books or 0 }}</h3>
+            <p style="color: var(--text-muted); font-size: 13px;">Total Titles</p>
+        </div>
+        <div class="admin-card">
+            <h3 style="font-size: 32px; font-weight: 800; color: var(--yellow);">{{ pending_reservations or 0 }}</h3>
+            <p style="color: var(--text-muted); font-size: 13px;">Pending Reservations</p>
+        </div>
+        <div class="admin-card">
+            <h3 style="font-size: 32px; font-weight: 800; color: var(--brand);">{{ active_borrowings or 0 }}</h3>
+            <p style="color: var(--text-muted); font-size: 13px;">Books On Loan</p>
+        </div>
+        <div class="admin-card">
+            <h3 style="font-size: 32px; font-weight: 800;">{{ total_users or 0 }}</h3>
+            <p style="color: var(--text-muted); font-size: 13px;">Registered Members</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

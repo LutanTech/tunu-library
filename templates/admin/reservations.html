@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Reservations — Admin{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 40px 0;">
+    <h2>Reservation Approvals & Queue</h2>
+    
+    <div style="margin-top: 20px; background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <tr style="background: var(--bg-body); border-bottom: 1px solid var(--border);">
+                <th style="padding: 14px 20px;">Member</th>
+                <th style="padding: 14px 20px;">Book Title</th>
+                <th style="padding: 14px 20px;">Date Reserved</th>
+                <th style="padding: 14px 20px;">Actions</th>
+            </tr>
+            {% for res in reservations %}
+            <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 14px 20px;">{{ res.user.username if res.user else "User" }}</td>
+                <td style="padding: 14px 20px;">{{ res.book.title if res.book else "Book" }}</td>
+                <td style="padding: 14px 20px;">{{ res.created_at }}</td>
+                <td style="padding: 14px 20px;">
+                    <button class="btn btn-brand" style="padding: 4px 10px; font-size: 12px;">Approve Pick-up</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}

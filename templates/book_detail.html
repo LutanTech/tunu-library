@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}{{ book.title }} — Tunu Library{% endblock %}
+
+{% block head %}
+<style>
+    .detail-page {
+        --detail-ink: var(--ink, #17231f);
+        --detail-muted: var(--muted, #718078);
+        --detail-paper: var(--paper, #f7f5ef);
+        --detail-line: var(--line, #dfe3da);
+        --detail-leaf: var(--leaf, #2f6b4f);
+        --detail-leaf-soft: var(--leaf-soft, #e6f0e8);
+        --detail-coral: var(--coral, #e46d4d);
+        --detail-gold: var(--gold, #d6a84f);
+    }
+
+    .detail-container { width: min(100% - 48px, 1160px); margin-inline: auto; padding: clamp(27px, 5vw, 62px) 0 72px; }
+    .detail-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 29px; color: var(--detail-muted); font-size: 11px; font-weight: 800; transition: color .2s ease, gap .2s ease; }
+    .detail-back:hover { gap: 11px; color: var(--detail-coral); }
+    .detail-back i { font-size: 10px; }
+
+    .detail-grid { display: grid; grid-template-columns: minmax(245px, 330px) minmax(0, 1fr); align-items: start; gap: clamp(34px, 6vw, 76px); }
+    .detail-cover-column { position: sticky; top: calc(var(--nav-height, 78px) + 28px); }
+    .detail-cover-shell { position: relative; width: 100%; aspect-ratio: 3 / 4.15; overflow: hidden; border-radius: 24px 24px 24px 6px; background: var(--detail-ink); box-shadow: 16px 18px 0 rgba(228,109,77,.13), 0 25px 50px rgba(23,35,31,.17); transform: rotate(-1.2deg); }
+    .detail-cover-shell::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 52%, rgba(0,0,0,.35)); pointer-events: none; }
+    .detail-cover-shell img { width: 100%; height: 100%; object-fit: cover; transition: transform .45s cubic-bezier(.22,1,.36,1); }
+    .detail-cover-shell:hover img { transform: scale(1.04); }
+    .detail-cover-label { position: absolute; top: 15px; left: 15px; z-index: 2; padding: 6px 9px; border-radius: 999px; background: rgba(255,255,255,.9); color: var(--detail-ink); font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .detail-fallback-cover { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; padding: 24px; background: radial-gradient(circle at 16% 12%, rgba(228,109,77,.38), transparent 33%), linear-gradient(135deg, var(--detail-ink), #2c4b3c); color: #fff; text-align: center; }
+    .detail-fallback-cover i { color: #f3c889; font-size: 39px; }
+    .detail-fallback-title { display: -webkit-box; overflow: hidden; font-family: 'DM Serif Display', Georgia, serif; font-size: 21px; line-height: 1.12; -webkit-box-orient: vertical; -webkit-line-clamp: 5; }
+    .detail-cover-note { display: flex; align-items: flex-start; gap: 9px; margin: 23px 4px 0; color: var(--detail-muted); font-size: 10px; line-height: 1.55; }
+    .detail-cover-note i { margin-top: 2px; color: var(--detail-coral); }
+
+    .detail-content { min-width: 0; }
+    .detail-kicker { display: inline-flex; align-items: center; gap: 9px; margin: 0 0 14px; color: var(--detail-leaf); font-size: 10px; font-weight: 800; letter-spacing: .18em; line-height: 1; text-transform: uppercase; }
+
+    .detail-title { max-width: 720px; margin: 0; color: var(--detail-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(32px, 9vw, 40px); font-weight: 400; letter-spacing: -.06em; line-height: .96; }
+    .detail-author { margin-top: 13px; color: var(--detail-muted); font-size: 14px; font-weight: 700; }
+    .detail-author strong { color: var(--detail-ink); font-weight: 800; }
+    .detail-rule { height: 1px; margin: 29px 0 25px; background: var(--detail-line); }
+
+    .detail-meta-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; margin-bottom: 31px; }
+    .detail-meta-item { min-width: 0; padding: 14px 13px; border: 1px solid var(--detail-line); border-radius: 12px; background: rgba(255,255,255,.48); }
+    .detail-meta-label { display: block; margin-bottom: 6px; color: var(--detail-muted); font-size: 9px; font-weight: 800; letter-spacing: .1em; line-height: 1; text-transform: uppercase; }
+    .detail-meta-value { display: block; overflow: hidden; color: var(--detail-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 17px; font-weight: 400; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
+    .detail-meta-value.status-holder { overflow: visible; white-space: normal; }
+    .detail-status { display: inline-flex; align-items: center; gap: 6px; padding: 5px 7px; border-radius: 999px; font-family: 'Manrope', system-ui, sans-serif; font-size: 9px; font-weight: 800; white-space: nowrap; }
+    .detail-status i { font-size: 9px; }
+    .detail-status-available { background: #e8f4eb; color: #2d744b; }
+    .detail-status-unavailable { background: #fff0ed; color: #a54b3d; }
+
+    .detail-summary { max-width: 700px; margin-bottom: 30px; }
+    .detail-summary-heading { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; color: var(--detail-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 25px; font-weight: 400; letter-spacing: -.025em; }
+
+    .detail-summary p { margin: 0; color: var(--detail-muted); font-size: 13px; line-height: 1.8; }
+    .detail-fees { max-width: 760px; margin: 0 0 27px; padding: 17px; border: 1px solid #ead59b; border-radius: 15px; background: #fff9e8; }
+    .detail-fees-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; margin-bottom: 13px; }
+    .detail-fees-heading h2 { margin: 0; color: #80621b; font-size: 13px; font-weight: 800; }
+    .detail-fees-heading p { margin: 0; color: #967936; font-size: 10px; }
+    .detail-fee-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+    .detail-fee-item { display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; padding: 11px 12px; border: 1px solid rgba(214,168,79,.35); border-radius: 11px; background: rgba(255,255,255,.55); }
+    .detail-fee-item span { color: #80621b; font-size: 10px; font-weight: 800; }
+    .detail-fee-item strong { color: #6f5312; font-family: 'DM Serif Display', Georgia, serif; font-size: 20px; font-weight: 400; line-height: 1; }
+    .detail-fee-item small { grid-column: 1 / -1; color: #a0813a; font-size: 9px; line-height: 1.4; }
+
+    .detail-reservation, .detail-login { display: flex; align-items: center; justify-content: space-between; gap: 24px; max-width: 760px; padding: 19px; border: 1px solid; border-radius: 15px; }
+    .detail-reservation h2, .detail-login h2 { margin: 0 0 5px; font-size: 13px; font-weight: 800; }
+    .detail-reservation p, .detail-login p { margin: 0; font-size: 11px; line-height: 1.55; }
+    .detail-reservation .btn, .detail-login .btn { flex: 0 0 auto; min-height: 40px; white-space: nowrap; }
+    .detail-reservation-available { border-color: #bbddc5; background: #edf8ef; color: #27643f; }
+    .detail-reservation-available p { color: #4c7c5e; }
+    .detail-reservation-warning { border-color: #ead59b; background: #fff9e8; color: #80621b; }
+    .detail-reservation-warning p { color: #967936; }
+    .detail-reservation-unavailable { border-color: #efc2bb; background: #fff0ed; color: #963f34; }
+    .detail-reservation-unavailable p { color: #ae655b; }
+    .detail-login { border-color: #ead59b; background: #fff9e8; color: #80621b; }
+    .detail-login p { color: #967936; }
+
+    @media (max-width: 950px) {
+        .detail-grid { grid-template-columns: minmax(210px, 270px) minmax(0, 1fr); gap: 38px; }
+        .detail-meta-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .detail-title { font-size: clamp(20px, 7.5vw, 24px); }    }
+
+    @media (max-width: 720px) {
+        .detail-container { width: min(100% - 36px, 1160px); }
+        .detail-cover-column { position: static; }
+        .detail-grid { grid-template-columns: 1fr; gap: 39px; }
+        .detail-cover-shell { width: min(224px, 58vw); margin-inline: auto; }
+        .detail-cover-note { max-width: 255px; margin-inline: auto; }
+        .detail-title { font-size: clamp(20px, 7.5vw, 24px); }
+        .detail-reservation, .detail-login { align-items: stretch; flex-direction: column; gap: 16px; }
+        .detail-reservation .btn, .detail-login .btn { width: 100%; }
+    }
+
+    /* Compact mobile cover sizing prevents the cover from dominating the page. */
+    @media (max-width: 480px) {
+        .detail-container { width: min(100% - 28px, 1160px); padding-top: 25px; }
+        .detail-fees { padding: 15px; }
+        .detail-fees-heading { align-items: flex-start; flex-direction: column; gap: 5px; }
+        .detail-fee-list { grid-template-columns: 1fr; }
+        .detail-back { margin-bottom: 22px; }
+        .detail-grid { gap: 30px; }
+        .detail-cover-shell { width: min(174px, 52vw); max-height: 232px; }
+        .detail-cover-label { top: 9px; left: 9px; padding: 5px 7px; font-size: 8px; }
+        .detail-cover-note { margin-top: 17px; font-size: 9px; }
+        .detail-kicker { margin-bottom: 12px; }
+        .detail-title { font-size: clamp(20px, 7.5vw, 24px); }
+        .detail-author { margin-top: 10px; font-size: 12px; }
+        .detail-rule { margin: 22px 0 19px; }
+        .detail-meta-grid { gap: 8px; margin-bottom: 25px; }
+        .detail-meta-item { padding: 12px 10px; }
+        .detail-meta-label { font-size: 8px; }
+        .detail-meta-value { font-size: 15px; }
+        .detail-status { max-width: 100%; overflow: hidden; font-size: 8px; text-overflow: ellipsis; }
+        .detail-summary-heading { font-size: 23px; }
+        .detail-summary p { font-size: 12px; }
+        .detail-reservation, .detail-login { padding: 15px; }
+    }
+
+    @media (max-width: 360px) {
+        .detail-cover-shell { width: 148px; max-height: 198px; }
+        .detail-title { font-size: 38px; }
+        .detail-meta-value { font-size: 14px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .detail-cover-shell img, .detail-back { transition: none; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-page">
+    <div class="detail-container">
+        <a href="{{ url_for('books') }}" class="detail-back"><i class="fas fa-arrow-left" aria-hidden="true"></i> Back to the collection</a>
+
+        <div class="detail-grid">
+            <aside class="detail-cover-column">
+                <div class="detail-cover-shell">
+                    <span class="detail-cover-label">Tunu Library</span>
+                    {% if book.cover %}
+                        <img src="{{ book.cover }}" alt="Cover of {{ book.title }}" loading="eager" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="detail-fallback-cover" style="display: none;" aria-hidden="true"><i class="fa-solid fa-book"></i><span class="detail-fallback-title">{{ book.title }}</span></div>
+                    {% else %}
+                        <div class="detail-fallback-cover" aria-hidden="true"><i class="fa-solid fa-book"></i><span class="detail-fallback-title">{{ book.title }}</span></div>
+                    {% endif %}
+                </div>
+                <p class="detail-cover-note"><i class="fas fa-circle-info" aria-hidden="true"></i><span>Physical copy available for pickup. Borrowing costs 100 BOB for the 90-day borrowing window.</span></p>
+            </aside>
+
+            <main class="detail-content">
+                <p class="detail-kicker">Book details</p>
+                <h1 class="detail-title">{{ book.title }}</h1>
+                <p class="detail-author">By <strong>{{ book.authors or "Unknown Author" }}</strong></p>
+                <div class="detail-rule"></div>
+
+                <div class="detail-meta-grid" aria-label="Book information">
+                    <div class="detail-meta-item"><span class="detail-meta-label">Publisher</span><span class="detail-meta-value" title="{{ book.publisher or 'Tunu Publishers' }}">{{ book.publisher or "Tunu Publishers" }}</span></div>
+                    <div class="detail-meta-item"><span class="detail-meta-label">Grade / subject</span><span class="detail-meta-value" title="{{ book.grade or 'General Reading' }}">{{ book.grade or "General Reading" }}</span></div>
+                    <div class="detail-meta-item"><span class="detail-meta-label">ISBN</span><span class="detail-meta-value" title="{{ book.isbn or 'N/A' }}">{{ book.isbn or "N/A" }}</span></div>
+                    <div class="detail-meta-item"><span class="detail-meta-label">Status</span><span class="detail-meta-value status-holder">
+                        {% if book.available_copies and book.available_copies > 0 %}<span class="detail-status detail-status-available"><i class="fa-solid fa-check" aria-hidden="true"></i>{{ book.available_copies }} available</span>{% else %}<span class="detail-status detail-status-unavailable"><i class="fa-solid fa-clock" aria-hidden="true"></i>All reserved</span>{% endif %}
+                    </span></div>
+                </div>
+
+                <section class="detail-summary" aria-labelledby="summary-title">
+                    <h2 id="summary-title" class="detail-summary-heading">Book summary</h2>
+                    <p>{{ book.description or "No summary available for this title at the moment." }}</p>
+                </section>
+
+                <section class="detail-fees" aria-labelledby="fees-title">
+                    <div class="detail-fees-heading"><h2 id="fees-title">Simple, clear fees</h2><p>Membership and borrowing are separate.</p></div>
+                    <div class="detail-fee-list">
+                        {% if current_user %}
+                        <div class="detail-fee-item"><span>Annual membership</span><strong>100 BOB</strong><small>Valid for 12 months.</small> {% if is_member %} <span class="active-member"> Active Member</span> {% else %}<span class="inactive-member"> Inactive</span> {% endif %}</div>
+                        {% endif %}
+                        <div class="detail-fee-item"><span>Borrowing this book</span><strong>100 BOB</strong><small>For the 90-day borrowing window.</small></div>
+                    </div>
+                </section>
+
+                {% if current_user %}
+                    {% if is_already_borrowed %}
+                        <section class="detail-reservation detail-reservation-warning" aria-labelledby="borrowing-title">
+                            <div><h2 id="borrowing-title">Already borrowed</h2><p>This book is already in your borrowings list.</p></div>
+                            <a href="{{ url_for('my_borrowings') }}" class="btn btn-brand">View my Borrowings <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                        </section>
+  
+                    {% elif book.available_copies and book.available_copies > 0 %}
+                        <form method="POST" action="{{ url_for('borrow_book', book_id=book.id) }}" class="detail-reservation detail-reservation-available">
+                            <div><h2>Borrow this book</h2><p>Borrow now without upfront payment. The borrowing fee will be required when picking up your book and the book has a 90-day reading window.</p></div>
+                            <button type="submit" class="btn btn-brand"><i class="fa-solid fa-bookmark" aria-hidden="true"></i> Borrow now</button>
+                            <button type="button" class="btn" style="border:1px solid black" onclick='addToReserve()'><i class="fa-solid fa-bookmark" aria-hidden="true"></i> Add to reserve</button>
+                        </form>
+                    {% else %}
+                        <section class="detail-reservation detail-reservation-unavailable" aria-labelledby="unavailable-title">
+                            <div><h2 id="unavailable-title">Currently unavailable</h2><p>All physical copies are currently checked out or reserved.</p></div>
+                        </section>
+                    {% endif %}
+                {% else %}
+                    <section class="detail-login" aria-labelledby="login-title">
+                        <div><h2 id="login-title">Sign in to borrow</h2><p>Log into your member account to borrow this book. Annual membership is 100 BOB.</p></div>
+                        <a href="{{ url_for('login', next=request.path) }}" class="btn btn-brand"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> Log in to borrow</a>
+                        <button type="button" class="btn btn-brand"><i class="fa-solid fa-bookmark" aria-hidden="true"></i> Add to reserve</button>
+                    </section>
+                {% endif %}
+                
+            </main>
+        </div>
+    </div>
+</div>
+<script>
+    window.activeBook = {{ book | tojson }}
+    console.log(window.activeBook)
+</script>
+{% endblock %}

@@ -1,0 +1,516 @@
+{% extends "base.html" %}
+
+{% block title %}Tunu Library — Welcome to Tunu Library{% endblock %}
+
+{% block head %}
+<style>
+    /* Homepage design: editorial library aesthetic */
+    .home-page {
+        --home-ink: var(--ink, #17231f);
+        --home-muted: var(--muted, #718078);
+        --home-paper: var(--paper, #f7f5ef);
+        --home-line: var(--line, #dfe3da);
+        --home-leaf: var(--leaf, #2f6b4f);
+        --home-leaf-soft: var(--leaf-soft, #e6f0e8);
+        --home-coral: var(--coral, #e46d4d);
+    }
+
+    .home-container {
+        width: min(100% - 48px, 1160px);
+        margin-inline: auto;
+    }
+
+    .home-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        margin: 0 0 18px;
+        color: var(--home-leaf);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .18em;
+        line-height: 1;
+        text-transform: uppercase;
+    }
+
+
+    .home-section-heading {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 26px;
+    }
+
+    .home-section-heading h2 {
+        max-width: 560px;
+        margin: 0;
+        color: var(--home-ink);
+        font-family: 'DM Serif Display', Georgia, serif;
+        font-size: clamp(29px, 4vw, 43px);
+        font-weight: 400;
+        letter-spacing: -.045em;
+        line-height: 1.02;
+    }
+
+    .home-text-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        flex: 0 0 auto;
+        padding-bottom: 5px;
+        border-bottom: 1px solid var(--home-line);
+        color: var(--home-ink);
+        font-size: 12px;
+        font-weight: 800;
+        transition: color .2s ease, border-color .2s ease, gap .2s ease;
+    }
+
+    .home-text-link:hover { gap: 12px; border-color: var(--home-coral); color: var(--home-coral); }
+    .home-text-link i { font-size: 10px; }
+
+    /* Hero */
+    .home-hero {
+        position: relative;
+        padding: clamp(44px, 7vw, 80px) 0 42px;
+        overflow: hidden;
+    }
+
+    .home-hero::before {
+        content: '';
+        position: absolute;
+        top: -170px;
+        right: -90px;
+        width: 420px;
+        height: 420px;
+        border: 1px solid rgba(47, 107, 79, .12);
+        border-radius: 50%;
+        box-shadow: 0 0 0 32px rgba(47, 107, 79, .035), 0 0 0 65px rgba(47, 107, 79, .025);
+        pointer-events: none;
+    }
+
+    .home-hero-grid {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: minmax(0, .94fr) minmax(390px, 1.06fr);
+        align-items: center;
+        gap: clamp(36px, 7vw, 92px);
+    }
+
+    .home-hero-copy { max-width: 550px; }
+
+    .home-hero-title {
+        max-width: 560px;
+        margin: 0;
+        color: var(--home-ink);
+        font-family: 'DM Serif Display', Georgia, serif;
+        font-size: clamp(45px, 6.7vw, 78px);
+        font-weight: 400;
+        letter-spacing: -.065em;
+        line-height: .96;
+    }
+
+    .home-hero-title em { color: var(--home-coral); font-style: italic; }
+
+    .home-hero-description {
+        max-width: 455px;
+        margin: 24px 0 28px;
+        color: var(--home-muted);
+        font-size: 15px;
+        line-height: 1.75;
+    }
+
+    .home-hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 11px; }
+    .home-hero-actions .btn { min-height: 44px; padding-inline: 19px; }
+    .home-hero-actions .btn i { font-size: 11px; }
+
+    .home-hero-note {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 26px;
+        color: var(--home-muted);
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .home-hero-note-icon {
+        width: 25px;
+        height: 25px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--home-leaf-soft);
+        color: var(--home-leaf);
+        font-size: 10px;
+    }
+
+    .home-hero-visual { position: relative; min-height: 430px; }
+
+    .home-hero-image-wrap {
+        position: absolute;
+        inset: 12px 0 0 52px;
+        overflow: hidden;
+        border-radius: 138px 20px 20px 20px;
+        background: var(--home-ink);
+        box-shadow: 20px 24px 0 rgba(228, 109, 77, .12), 0 26px 55px rgba(23, 35, 31, .17);
+        transform: rotate(1.5deg);
+    }
+
+    .home-hero-image-wrap::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(23,35,31,.03) 15%, rgba(23,35,31,.5) 100%);
+        pointer-events: none;
+    }
+
+    .home-hero-image {
+        width: 100%;
+        height: 100%;
+        min-height: 430px;
+        object-fit: cover;
+        opacity: .86;
+        filter: saturate(.78) sepia(.08);
+    }
+
+    .home-hero-caption {
+        position: absolute;
+        right: 24px;
+        bottom: 22px;
+        z-index: 1;
+        max-width: 190px;
+        padding: 15px 16px;
+        border: 1px solid rgba(255,255,255,.22);
+        border-radius: 13px;
+        background: rgba(23,35,31,.72);
+        color: #fff;
+        backdrop-filter: blur(12px);
+    }
+
+    .home-hero-caption strong { display: block; margin-bottom: 4px; font-size: 12px; }
+    .home-hero-caption span { display: block; color: rgba(255,255,255,.68); font-size: 10px; line-height: 1.5; }
+
+    .home-floating-card {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 2;
+        width: 166px;
+        padding: 14px;
+        border: 1px solid var(--home-line);
+        border-radius: 15px;
+        background: rgba(255,255,255,.92);
+        box-shadow: 0 16px 35px rgba(23,35,31,.12);
+        transform: rotate(-4deg);
+    }
+
+    .home-floating-card-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        color: var(--home-muted);
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+    }
+
+    .home-floating-card-label i { color: var(--home-coral); font-size: 12px; }
+    .home-floating-card-number { display: block; color: var(--home-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 32px; line-height: 1; }
+    .home-floating-card-copy { display: block; margin-top: 4px; color: var(--home-muted); font-size: 10px; line-height: 1.4; }
+
+    .home-stat-strip {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1px;
+        margin-top: 45px;
+        border-top: 1px solid var(--home-line);
+        border-bottom: 1px solid var(--home-line);
+    }
+
+    .home-stat { padding: 17px 20px 17px 0; }
+    .home-stat:not(:first-child) { padding-left: 24px; border-left: 1px solid var(--home-line); }
+    .home-stat strong { display: block; color: var(--home-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 24px; font-weight: 400; line-height: 1; }
+    .home-stat span { display: block; margin-top: 5px; color: var(--home-muted); font-size: 10px; font-weight: 700; }
+
+    /* How it works */
+    .home-features-section { padding: 30px 0 58px; }
+
+    .home-features-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        padding: 7px;
+        border: 1px solid var(--home-line);
+        border-radius: 18px;
+        background: rgba(255,255,255,.52);
+    }
+
+    .home-feature {
+        position: relative;
+        min-height: 164px;
+        padding: 22px 22px 19px;
+        border-radius: 13px;
+        transition: background .2s ease, transform .2s var(--ease);
+    }
+
+    .home-feature:hover { background: #fff; transform: translateY(-2px); }
+    .home-feature::before { content: ''; display: block; width: 30px; height: 3px; margin-bottom: 19px; border-radius: 999px; background: var(--home-coral); }
+    .home-feature:nth-child(2)::before { background: var(--home-leaf); }
+    .home-feature:nth-child(3)::before { background: var(--gold, #d6a84f); }
+    .home-feature-number { position: absolute; top: 18px; right: 20px; color: var(--home-line); font-family: 'DM Serif Display', Georgia, serif; font-size: 22px; }
+    .home-feature h2 { margin: 0 0 7px; color: var(--home-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 22px; font-weight: 400; letter-spacing: -.03em; }
+    .home-feature p { max-width: 260px; margin: 0; color: var(--home-muted); font-size: 11px; line-height: 1.65; }
+
+    /* Featured books */
+    .home-books-section { padding: 26px 0 76px; }
+    .home-books-heading-copy { margin-top: 9px; color: var(--home-muted); font-size: 12px; }
+
+    .home-books-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 17px;
+    }
+
+    .home-book-card {
+        position: relative;
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        overflow: hidden;
+        border: 1px solid var(--home-line);
+        border-radius: 15px;
+        background: #fff;
+        box-shadow: 0 4px 14px rgba(23,35,31,.035);
+        transition: transform .28s var(--ease), box-shadow .28s ease, border-color .28s ease;
+    }
+
+    .home-book-card:hover { border-color: rgba(47,107,79,.42); box-shadow: 0 19px 35px rgba(23,35,31,.13); transform: translateY(-7px); }
+    .home-book-cover { position: relative; aspect-ratio: 3 / 4.15; overflow: hidden; background: var(--home-ink); }
+    .home-book-cover::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 54%, rgba(0,0,0,.38)); pointer-events: none; }
+    .home-book-cover img { width: 100%; height: 100%; object-fit: cover; transition: transform .45s var(--ease), filter .35s ease; }
+    .home-book-card:hover .home-book-cover img { filter: saturate(1.06); transform: scale(1.06); }
+    .home-book-cover-badge { position: absolute; top: 11px; left: 11px; z-index: 1; padding: 5px 8px; border-radius: 999px; background: rgba(255,255,255,.9); color: var(--home-ink); font-size: 9px; font-weight: 800; }
+    .home-book-view { position: absolute; right: 11px; bottom: 11px; z-index: 2; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: var(--home-coral); color: #fff; font-size: 10px; opacity: 0; transform: translateY(6px); transition: opacity .25s ease, transform .25s var(--ease); }
+    .home-book-card:hover .home-book-view { opacity: 1; transform: translateY(0); }
+    .home-fallback-cover { width: 100%; height: 100%; min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 13px; padding: 22px; background: radial-gradient(circle at 20% 10%, rgba(228,109,77,.35), transparent 34%), linear-gradient(135deg, var(--home-ink), #2c4b3c); color: #fff; text-align: center; }
+    .home-fallback-cover i { color: #f3c889; font-size: 27px; }
+    .home-fallback-title { display: -webkit-box; overflow: hidden; font-family: 'DM Serif Display', Georgia, serif; font-size: 17px; line-height: 1.16; -webkit-box-orient: vertical; -webkit-line-clamp: 4; }
+
+    .home-book-details { display: flex; min-height: 124px; flex: 1; flex-direction: column; padding: 14px 14px 13px; }
+    .home-book-title { display: -webkit-box; overflow: hidden; color: var(--home-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 18px; font-weight: 400; letter-spacing: -.025em; line-height: 1.05; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+    .home-book-author { display: block; overflow: hidden; margin-top: 6px; color: var(--home-muted); font-size: 10px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+    .home-book-meta { display: flex; align-items: center; justify-content: space-between; gap: 7px; margin-top: auto; padding-top: 13px; }
+    .home-book-grade { max-width: 48%; overflow: hidden; padding: 4px 7px; border: 1px solid var(--home-line); border-radius: 999px; color: var(--home-muted); font-size: 9px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+    .home-status { display: inline-flex; align-items: center; gap: 5px; padding: 4px 7px; border-radius: 999px; font-size: 9px; font-weight: 800; white-space: nowrap; }
+    .home-status::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+    .home-status-available { background: #e8f4eb; color: #2d744b; }
+    .home-status-activate { background: var(--coral-soft, #fbe9e2); color: #b95037; }
+    .home-view-all { margin-top: 29px; text-align: center; }
+    .home-view-all .btn { min-height: 43px; padding-inline: 21px; }
+
+    .home-empty-state { padding: 47px 20px; border: 1px dashed var(--home-line); border-radius: 16px; background: rgba(255,255,255,.45); text-align: center; }
+    .home-empty-icon { width: 50px; height: 50px; display: grid; place-items: center; margin: 0 auto 15px; border-radius: 50%; background: var(--home-leaf-soft); color: var(--home-leaf); }
+    .home-empty-state h3 { margin: 0 0 5px; color: var(--home-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 25px; font-weight: 400; }
+    .home-empty-state p { margin: 0; color: var(--home-muted); font-size: 12px; }
+
+    /* Membership call-to-action */
+    .home-membership-section { padding: 6px 0 50px; }
+    .home-membership-panel { position: relative; display: grid; grid-template-columns: 1.08fr .92fr; gap: 36px; align-items: center; overflow: hidden; padding: clamp(29px, 5vw, 54px); border-radius: 22px; background: var(--home-ink); color: #fff; }
+    .home-membership-panel::before { content: ''; position: absolute; right: -70px; bottom: -150px; width: 390px; height: 390px; border: 1px solid rgba(255,255,255,.12); border-radius: 50%; box-shadow: 0 0 0 32px rgba(255,255,255,.03), 0 0 0 65px rgba(255,255,255,.025); }
+    .home-membership-copy, .home-membership-action { position: relative; z-index: 1; }
+    .home-membership-copy .home-eyebrow { color: #9bc4a6; }
+    .home-membership-copy h2 { max-width: 520px; margin: 0; color: #fff; font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(32px, 4.5vw, 52px); font-weight: 400; letter-spacing: -.05em; line-height: .98; }
+    .home-membership-copy p { max-width: 470px; margin: 16px 0 0; color: rgba(255,255,255,.65); font-size: 12px; line-height: 1.7; }
+    .home-membership-action { justify-self: end; max-width: 290px; padding: 20px; border: 1px solid rgba(255,255,255,.15); border-radius: 14px; background: rgba(255,255,255,.06); }
+    .home-membership-action-label { display: block; margin-bottom: 13px; color: rgba(255,255,255,.56); font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .home-membership-action p { margin: 0 0 16px; color: #fff; font-family: 'DM Serif Display', Georgia, serif; font-size: 22px; line-height: 1.08; }
+    .home-membership-action .btn { width: 100%; background: var(--home-coral); color: #fff; }
+    .home-membership-action .btn:hover { background: #cf593d; }
+
+    @media (max-width: 1000px) {
+        .home-hero-grid { grid-template-columns: minmax(0, .9fr) minmax(330px, 1.1fr); gap: 38px; }
+        .home-hero-title { font-size: clamp(42px, 6vw, 65px); }
+        .home-books-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .home-books-grid .home-book-card:nth-child(4) { display: none; }
+    }
+
+    @media (max-width: 760px) {
+        .home-container { width: min(100% - 36px, 1160px); }
+        .home-hero { padding-top: 38px; }
+        .home-hero-grid { grid-template-columns: 1fr; gap: 35px; }
+        .home-hero-copy { max-width: 650px; }
+        .home-hero-title { max-width: 600px; font-size: clamp(44px, 11vw, 70px); }
+        .home-hero-visual { min-height: 370px; max-width: 570px; }
+        .home-hero-image-wrap { inset: 10px 0 0 42px; min-height: 370px; }
+        .home-hero-image { min-height: 370px; }
+        .home-features-grid { grid-template-columns: 1fr; }
+        .home-feature { min-height: auto; padding-block: 19px; }
+        .home-feature p { max-width: 500px; }
+        .home-membership-panel { grid-template-columns: 1fr; }
+        .home-membership-action { justify-self: stretch; max-width: 430px; }
+    }
+
+    @media (max-width: 520px) {
+        .home-container { width: min(100% - 28px, 1160px); }
+        .home-hero { padding-top: 30px; }
+        .home-hero-title { font-size: clamp(42px, 13vw, 62px); }
+        .home-hero-description { margin-top: 18px; font-size: 13px; }
+        .home-hero-actions { align-items: stretch; flex-direction: column; }
+        .home-hero-actions .btn { width: 100%; }
+        .home-hero-note { margin-top: 19px; }
+        .home-hero-visual { min-height: 300px; }
+        .home-hero-image-wrap { inset: 10px 0 0 34px; min-height: 300px; border-radius: 96px 16px 16px 16px; }
+        .home-hero-image { min-height: 300px; }
+        .home-floating-card { width: 135px; padding: 11px; }
+        .home-floating-card-number { font-size: 27px; }
+        .home-hero-caption { right: 13px; bottom: 13px; max-width: 155px; padding: 11px 12px; }
+        .home-hero-caption span { font-size: 9px; }
+        .home-stat-strip { grid-template-columns: 1fr; margin-top: 29px; }
+        .home-stat, .home-stat:not(:first-child) { padding: 13px 0; border-left: 0; }
+        .home-stat + .home-stat { border-top: 1px solid var(--home-line); }
+        .home-stat strong { font-size: 21px; }
+        .home-section-heading { align-items: start; flex-direction: column; gap: 14px; }
+        .home-section-heading h2 { font-size: 34px; }
+        .home-books-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
+        .home-books-grid .home-book-card:nth-child(4) { display: flex; }
+        .home-book-details { min-height: 113px; padding: 11px; }
+        .home-book-title { font-size: 16px; }
+        .home-book-author { font-size: 9px; }
+        .home-book-meta { align-items: flex-start; flex-direction: column; gap: 6px; }
+        .home-book-grade { max-width: 100%; }
+        .home-status { font-size: 8px; }
+        .home-membership-panel { padding: 28px 20px; }
+        .home-membership-copy h2 { font-size: 38px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .home-book-card, .home-book-cover img, .home-feature, .home-text-link { transition: none; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="home-page">
+    <section class="home-hero" aria-labelledby="home-hero-title">
+        <div class="home-container home-hero-grid">
+            <div class="home-hero-copy">
+                <p class="home-eyebrow"><a href="https://tunupublishers.com" target="_blank">By Tunu Publishers</a></p>
+                <h1 id="home-hero-title" class="home-hero-title">Find a book that stays <em>with you.</em></h1>
+                <p class="home-hero-description">Browse a growing collection of stories, ideas and learning resources. Reserve your next read in a few clicks and make more room for discovery.</p>
+                <div class="home-hero-actions">
+                    <a href="{{ url_for('books') }}" class="btn btn-brand">Browse the shelves <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                    {% if current_user %}
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline">Open my dashboard</a>
+                    {% else %}
+                        <a href="{{ url_for('register') }}" class="btn btn-outline">Become a member</a>
+                    {% endif %}
+                </div>
+                <div class="home-hero-note"><span class="home-hero-note-icon"><i class="fas fa-check-circle" aria-hidden="true"></i></span><span>Simple reservations. Thoughtful reading.</span></div>
+            </div>
+
+            <div class="home-hero-visual" aria-label="A welcoming view of the Tunu Library">
+                <div class="home-floating-card">
+                    <div class="home-floating-card-label"><span>Good to know</span><i class="fas fa-bookmark" aria-hidden="true"></i></div>
+                    <strong class="home-floating-card-number">90</strong>
+                    <span class="home-floating-card-copy">days to enjoy your borrowed books</span>
+                </div>
+                <div class="home-hero-image-wrap">
+                    <img class="home-hero-image" src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1200&q=85" alt="Warmly lit library shelves filled with books" fetchpriority="high">
+                    <div class="home-hero-caption"><strong>Your next chapter starts here.</strong><span>Explore the collection, at your own pace.</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="home-container home-stat-strip" aria-label="Library highlights">
+            <div class="home-stat"><strong>01</strong><span>Browse by genre, grade or title</span></div>
+            <div class="home-stat"><strong>90 days</strong><span>To enjoy every borrowed book</span></div>
+            <div class="home-stat"><strong>Always growing</strong><span>New stories and resources added regularly</span></div>
+        </div>
+    </section>
+
+    <section class="home-features-section" aria-labelledby="home-features-title">
+        <div class="home-container">
+            <div class="home-section-heading">
+                <div><p class="home-eyebrow">How Tunu works</p><h2 id="home-features-title">A better way to meet your next read.</h2></div>
+            </div>
+            <div class="home-features-grid">
+                <article class="home-feature"><span class="home-feature-number">01</span><h2>Discover</h2><p>Find books across genres and CBC curricula without getting lost in the catalog.</p></article>
+                <article class="home-feature"><span class="home-feature-number">02</span><h2>Reserve</h2><p>Save the books you want and reserve them online in just a few simple steps.</p></article>
+                <article class="home-feature"><span class="home-feature-number">03</span><h2>Belong</h2><p>Keep your reading life organized, follow your borrowings and stay connected.</p></article>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-books-section" aria-labelledby="featured-books-title">
+        <div class="home-container">
+            <div class="home-section-heading">
+                <div><p class="home-eyebrow">From the shelves</p><h2 id="featured-books-title">A few good places to begin.</h2><p class="home-books-heading-copy">Handpicked from the Tunu collection for your next quiet hour.</p></div>
+                <a href="{{ url_for('books') }}" class="home-text-link">See the full catalog <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+
+            {% if books %}
+                <div class="home-books-grid">
+                    {% for book in books[:4] %}
+                        <a href="{{ url_for('book', book_id=book.id) }}" class="home-book-card" aria-label="View {{ book.title }} by {{ book.authors or 'Tunu Publishers' }}">
+                            <div class="home-book-cover">
+                                <span class="home-book-cover-badge">{{ book.grade or "General" }}</span>
+                                {% if book.cover %}
+                                    <img src="{{ book.cover }}" alt="Cover of {{ book.title }}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div class="home-fallback-cover" style="display: none;" aria-hidden="true"><i class="fa-solid fa-book"></i><span class="home-fallback-title">{{ book.title }}</span></div>
+                                {% else %}
+                                    <div class="home-fallback-cover" aria-hidden="true"><i class="fa-solid fa-book"></i><span class="home-fallback-title">{{ book.title }}</span></div>
+                                {% endif %}
+                                <span class="home-book-view" aria-hidden="true"><i class="fas fa-arrow-up-right-from-square"></i></span>
+                            </div>
+                            <div class="home-book-details">
+                                <span class="home-book-title" title="{{ book.title }}">{{ book.title }}</span>
+                                <span class="home-book-author">By {{ book.authors or "Tunu Publishers" }}</span>
+                                <div class="home-book-meta">
+                                    <span class="home-book-grade">{{ book.grade or "General" }}</span>
+                                    {% if book.is_paid is defined and not book.is_paid %}
+                                        <span class="home-status home-status-activate">Activate</span>
+                                    {% elif book.available_copies and book.available_copies > 0 %}
+                                        <span class="home-status home-status-available">Available</span>
+                                    {% else %}
+                                        <span class="home-status home-status-activate">Activate</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="home-empty-state"><div class="home-empty-icon"><i class="fa-solid fa-book-open" aria-hidden="true"></i></div><h3>The shelves are being refreshed.</h3><p>We are adding new books to the library. Check back soon for fresh discoveries.</p></div>
+            {% endif %}
+
+            <div class="home-view-all"><a href="{{ url_for('books') }}" class="btn btn-brand">View all books <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div>
+        </div>
+    </section>
+
+    <section class="home-membership-section" aria-labelledby="membership-title">
+        <div class="home-container">
+            <div class="home-membership-panel">
+                <div class="home-membership-copy">
+                    <p class="home-eyebrow">Make it yours</p>
+                    <h2 id="membership-title">Your reading life deserves a home.</h2>
+                    <p>Join Tunu to reserve books, manage your boorrowings and keep every new discovery within reach.</p>
+                </div>
+                <div class="home-membership-action">
+                    <span class="home-membership-action-label">One small step</span>
+                    {% if current_user %}
+                        <p>Keep exploring your next chapter.</p>
+                        <a href="{{ url_for('dashboard') }}" class="btn">Go to my dashboard <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                    {% else %}
+                        <p>Start with a library account.</p>
+                        <a href="{{ url_for('register') }}" class="btn">Register now <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

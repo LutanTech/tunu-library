@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}My Dashboard — Tunu Library{% endblock %}
+
+{% block head %}
+<style>
+    .dashboard-page {
+        --dash-ink: var(--ink, #17231f);
+        --dash-muted: var(--muted, #718078);
+        --dash-paper: var(--paper, #f7f5ef);
+        --dash-line: var(--line, #dfe3da);
+        --dash-leaf: var(--leaf, #2f6b4f);
+        --dash-leaf-soft: var(--leaf-soft, #e6f0e8);
+        --dash-coral: var(--coral, #e46d4d);
+    }
+
+    .dashboard-container { width: min(100% - 48px, 1160px); margin-inline: auto; }
+    .dashboard-hero { position: relative; overflow: hidden; padding: clamp(34px, 5vw, 58px) 0 64px; background: var(--dash-ink); color: #fff; }
+    .dashboard-hero::before { content: ''; position: absolute; right: -100px; top: -205px; width: 470px; height: 470px; border: 1px solid rgba(255,255,255,.12); border-radius: 50%; box-shadow: 0 0 0 34px rgba(255,255,255,.03), 0 0 0 70px rgba(255,255,255,.02); pointer-events: none; }
+    .dashboard-hero-inner { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 28px; }
+    .dashboard-identity { display: flex; align-items: center; gap: 16px; }
+    .dashboard-avatar { width: 62px; height: 62px; display: grid; place-items: center; flex: 0 0 auto; border: 4px solid rgba(255,255,255,.14); border-radius: 50%; background: var(--dash-coral); color: #fff; font-family: 'DM Serif Display', Georgia, serif; font-size: 28px; font-weight: 400; box-shadow: 0 9px 20px rgba(0,0,0,.16); }
+    .dashboard-kicker { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 9px; color: #9fc7aa; font-size: 10px; font-weight: 800; letter-spacing: .18em; line-height: 1; text-transform: uppercase; }
+    .dashboard-kicker::before { content: ''; width: 22px; height: 2px; border-radius: 999px; background: var(--dash-coral); }
+    .dashboard-title { margin: 0; color: #fff; font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(36px, 5vw, 58px); font-weight: 400; letter-spacing: -.055em; line-height: .98; }
+    .dashboard-subtitle { margin: 8px 0 0; color: rgba(255,255,255,.62); font-size: 11px; line-height: 1.55; }
+    .dashboard-hero .btn { flex: 0 0 auto; background: var(--dash-coral); color: #fff; box-shadow: 0 9px 20px rgba(228,109,77,.2); }
+    .dashboard-hero .btn:hover { background: #cf593d; }
+
+    .dashboard-content { position: relative; z-index: 2; margin-top: -30px; padding-bottom: 70px; }
+    .dashboard-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .dashboard-stat { display: flex; align-items: center; gap: 13px; min-height: 91px; padding: 15px 17px; border: 1px solid var(--dash-line); border-radius: 15px; background: rgba(255,255,255,.95); box-shadow: 0 13px 30px rgba(23,35,31,.1); }
+    .dashboard-stat-icon { width: 38px; height: 38px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 12px; background: var(--dash-leaf-soft); color: var(--dash-leaf); font-size: 14px; }
+    .dashboard-stat:nth-child(2) .dashboard-stat-icon { background: #fbe9e2; color: var(--dash-coral); }
+    .dashboard-stat:nth-child(3) .dashboard-stat-icon { background: #f8efd9; color: #ad7d28; }
+    .dashboard-stat-number { display: block; color: var(--dash-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 27px; font-weight: 400; line-height: 1; }
+    .dashboard-stat-label { display: block; margin-top: 5px; color: var(--dash-muted); font-size: 9px; font-weight: 800; letter-spacing: .04em; }
+
+    .dashboard-main { display: grid; grid-template-columns: minmax(0, 1fr) 250px; align-items: start; gap: 20px; margin-top: 36px; }
+    .dashboard-section { min-width: 0; }
+    .dashboard-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-bottom: 17px; }
+    .dashboard-section-heading h2 { margin: 0; color: var(--dash-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 32px; font-weight: 400; letter-spacing: -.04em; line-height: 1; }
+    .dashboard-section-heading p { margin: 7px 0 0; color: var(--dash-muted); font-size: 11px; }
+    .dashboard-section-tag { display: inline-flex; align-items: center; gap: 6px; padding-bottom: 5px; border-bottom: 1px solid var(--dash-line); color: var(--dash-muted); font-size: 9px; font-weight: 800; white-space: nowrap; }
+    .dashboard-section-tag i { color: var(--dash-coral); }
+
+    .dashboard-table-card { overflow: hidden; border: 1px solid var(--dash-line); border-radius: 17px; background: #fff; box-shadow: 0 7px 22px rgba(23,35,31,.05); }
+    .dashboard-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .dashboard-table th { padding: 13px 16px; border-bottom: 1px solid var(--dash-line); background: var(--dash-paper); color: var(--dash-muted); font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .dashboard-table td { padding: 17px 16px; border-bottom: 1px solid var(--dash-line); color: var(--dash-muted); font-size: 11px; vertical-align: middle; }
+    .dashboard-table tr:last-child td { border-bottom: 0; }
+    .dashboard-book-cell { display: flex; align-items: center; gap: 10px; min-width: 180px; color: var(--dash-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 16px; line-height: 1.1; }
+    .dashboard-book-icon { width: 31px; height: 38px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 8px 8px 8px 2px; background: linear-gradient(135deg, var(--dash-ink), #2c4b3c); color: #f3c889; font-size: 12px; box-shadow: 3px 3px 0 rgba(228,109,77,.2); }
+    .dashboard-date { white-space: nowrap; }
+    .dashboard-status { display: inline-flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 999px; background: #fff5dc; color: #956f21; font-size: 9px; font-weight: 800; white-space: nowrap; }
+    .dashboard-status::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+    .dashboard-cancel { min-height: 29px; padding: 7px 11px; border-color: #edc0b8; color: #a54b3d; font-size: 9px; }
+    .dashboard-cancel:hover { border-color: #c96c5e; background: #fff0ed; color: #963f34; }
+
+    .dashboard-empty { padding: 53px 24px; text-align: center; }
+    .dashboard-empty-icon { width: 50px; height: 50px; display: grid; place-items: center; margin: 0 auto 14px; border-radius: 50%; background: var(--dash-leaf-soft); color: var(--dash-leaf); }
+    .dashboard-empty h3 { margin: 0 0 6px; color: var(--dash-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 25px; font-weight: 400; }
+    .dashboard-empty p { max-width: 300px; margin: 0 auto 18px; color: var(--dash-muted); font-size: 11px; line-height: 1.6; }
+
+    .dashboard-side { display: flex; flex-direction: column; gap: 12px; }
+    .dashboard-side-card { padding: 18px; border: 1px solid var(--dash-line); border-radius: 15px; background: rgba(255,255,255,.65); }
+    .dashboard-side-card.dark { border-color: var(--dash-ink); background: var(--dash-ink); color: #fff; }
+    .dashboard-side-card h3 { margin: 0 0 8px; color: var(--dash-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 22px; font-weight: 400; line-height: 1; }
+    .dashboard-side-card.dark h3 { color: #fff; }
+    .dashboard-side-card p { margin: 0; color: var(--dash-muted); font-size: 10px; line-height: 1.65; }
+    .dashboard-side-card.dark p { color: rgba(255,255,255,.62); }
+    .dashboard-side-card .btn { width: 100%; margin-top: 15px; }
+    .dashboard-side-card.dark .btn { background: var(--dash-coral); color: #fff; }
+    .dashboard-side-card.dark .btn:hover { background: #cf593d; }
+    .dashboard-side-list { display: flex; flex-direction: column; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }
+    .dashboard-side-list li { display: flex; align-items: flex-start; gap: 8px; color: var(--dash-muted); font-size: 10px; line-height: 1.45; }
+    .dashboard-side-list i { margin-top: 2px; color: var(--dash-leaf); font-size: 9px; }
+
+    @media (max-width: 900px) {
+        .dashboard-main { grid-template-columns: 1fr; }
+        .dashboard-side { display: grid; grid-template-columns: repeat(2, 1fr); }
+        .dashboard-side-card.dark { grid-column: 1 / -1; }
+    }
+
+    @media (max-width: 650px) {
+        .dashboard-container { width: min(100% - 36px, 1160px); }
+        .dashboard-hero-inner { align-items: flex-start; flex-direction: column; }
+        .dashboard-hero .btn { width: 100%; }
+        .dashboard-stats { grid-template-columns: 1fr; gap: 8px; }
+        .dashboard-stat { min-height: 70px; }
+        .dashboard-main { margin-top: 30px; }
+        .dashboard-section-heading { align-items: flex-start; flex-direction: column; gap: 11px; }
+        .dashboard-table-card { border: 0; background: transparent; box-shadow: none; }
+        .dashboard-table, .dashboard-table thead, .dashboard-table tbody, .dashboard-table tr, .dashboard-table td { display: block; width: 100%; }
+        .dashboard-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+        .dashboard-table tr { margin-bottom: 10px; padding: 13px; border: 1px solid var(--dash-line); border-radius: 15px; background: #fff; box-shadow: 0 5px 15px rgba(23,35,31,.04); }
+        .dashboard-table td { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 8px 0; border-bottom: 1px solid var(--dash-line); font-size: 10px; }
+        .dashboard-table td::before { content: attr(data-label); flex: 0 0 auto; color: var(--dash-muted); font-size: 8px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+        .dashboard-table td:last-child { border-bottom: 0; padding-bottom: 0; }
+        .dashboard-table td:first-child { padding-top: 0; }
+        .dashboard-book-cell { min-width: 0; justify-content: flex-end; font-size: 15px; text-align: right; }
+        .dashboard-date { white-space: normal; text-align: right; }
+        .dashboard-side { grid-template-columns: 1fr; }
+        .dashboard-side-card.dark { grid-column: auto; }
+    }
+
+    @media (max-width: 420px) {
+        .dashboard-container { width: min(100% - 28px, 1160px); }
+        .dashboard-hero { padding-top: 29px; }
+        .dashboard-identity { align-items: flex-start; }
+        .dashboard-avatar { width: 51px; height: 51px; font-size: 23px; }
+        .dashboard-title { font-size: 41px; }
+        .dashboard-subtitle { max-width: 250px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .dashboard-cancel { transition: none; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+    <section class="dashboard-hero" aria-labelledby="dashboard-title">
+        <div class="dashboard-container dashboard-hero-inner">
+            <div class="dashboard-identity">
+                <div class="dashboard-avatar" aria-hidden="true">{{ (current_user.username or "U")[0]|upper }}</div>
+                <div>
+                    <p class="dashboard-kicker">Your reading space</p>
+                    <h1 id="dashboard-title" class="dashboard-title">Welcome, {{ current_user.username }}</h1>
+                    <p class="dashboard-subtitle">Member account &nbsp;·&nbsp; {{ current_user.email }}</p>
+                </div>
+            </div>
+            {% if active_member %}
+            <a href="{{ url_for('membership') }}" class="btn"><i class="fa-solid fa-plus" aria-hidden="true"></i> {{ m_type }} your membership</a>
+            {% else %}
+            <a href="{{ url_for('books') }}" class="btn"><i class="fa-solid fa-plus" aria-hidden="true"></i> Reserve a new book</a>
+            {% endif %}
+        </div>
+    </section>
+
+    <div class="dashboard-content">
+        <div class="dashboard-container">
+            <section class="dashboard-stats" aria-label="Account overview">
+                <div class="dashboard-stat"><span class="dashboard-stat-icon"><i class="fas fa-bookmark" aria-hidden="true"></i></span><span><strong class="dashboard-stat-number">{{ reservations|length if reservations else 0 }}</strong><span class="dashboard-stat-label">Active reservations</span></span></div>
+                <div class="dashboard-stat"><span class="dashboard-stat-icon"><i class="fas fa-book-open" aria-hidden="true"></i></span><span><strong class="dashboard-stat-number">{{ borrowings|length if borrowings else 0 }}</strong><span class="dashboard-stat-label">Current borrowings</span></span></div>
+                {% if expires %} 
+                <div class="dashboard-stat"><span class="dashboard-stat-icon"><i class="fas fa-calendar-days" aria-hidden="true"></i></span><span><strong class="dashboard-stat-number"><span style="font-size:large" id="calculated_days"><span></strong><span class="dashboard-stat-label">Your membership expires </span></span></div>
+                {% else %}
+                <div class="dashboard-stat"><span class="dashboard-stat-icon"><i class="fas fa-calendar-days" aria-hidden="true"></i></span><span><strong class="dashboard-stat-number">90</strong><span class="dashboard-stat-label">Days per borrowing window</span></span></div>
+                {% endif %}
+            </section>
+
+            <div class="dashboard-main">
+                <section class="dashboard-section" aria-labelledby="borrowings-title">
+                    <div class="dashboard-section-heading">
+                        <div><h2 id="borrowings-title">Your borrowings</h2><p>Keep track of books waiting for your next visit.</p></div>
+                        <a href="{{ url_for('my_borrowings') }}" class="dashboard-section-tag"><i class="fas fa-book-open" aria-hidden="true"></i> View my borrowings</a>
+                    </div>
+
+                    <div class="dashboard-table-card">
+                        {% if borrowings %}
+                            <table class="dashboard-table">
+                                <thead><tr><th>Book</th><th>Borrowed date</th><th>Status</th><th>Action</th></tr></thead>
+                                <tbody>
+                                    {% for bor in borrowings %}
+                                        <tr>
+                                            <td data-label="Book"><span class="dashboard-book-cell"><span class="dashboard-book-icon" aria-hidden="true"><i class="fas fa-book-open"></i></span>{{ bor.book.title if bor.book else (bor.book_title or "Book title") }}</span></td>
+                                            <td data-label="borrowed date"><span class="dashboard-date">{{ (bor.created_at or bor.borrowed_at).strftime('%b %d, %Y') if (bor.created_at or bor.borrowed_at) else "Recently" }}</span></td>
+                                            <td data-label="Status"><span class="dashboard-status">{{ bor.status.replace('_', ' ')|title if bor.status else "Pending pickup" }}</span></td>
+                                           {% if bor.rating  and bor.rated%} 
+                                           <td data-label="status-toggle"><span class="dashboard-status-toggle">{{ bor.rating }}</span></td>
+                                           {% endif %}
+                                           
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <div class="dashboard-empty" role="status"><div class="dashboard-empty-icon"><i class="fas fa-book-open" aria-hidden="true"></i></div><h3>Your shelf is ready.</h3><p>You currently have no borrowed books. Find something good to take home.</p><a href="{{ url_for('books') }}" class="btn btn-brand">Browse the catalog <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div>
+                        {% endif %}
+                    </div>
+                </section>
+
+                <aside class="dashboard-side" aria-label="Member shortcuts">
+                    <div class="dashboard-side-card dark"><h3>Keep exploring.</h3><p>There is always another story, idea or lesson waiting on the shelves.</p><a href="{{ url_for('books') }}" class="btn">Browse books <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div>
+                    <div class="dashboard-side-card"><h3>Remember</h3><ul class="dashboard-side-list"><li><i class="fas fa-check" aria-hidden="true"></i><span>Reservations are collected at Tunu Publishers office, Harambee SACCO Shopping Centre, DOnholm.</span></li><li><i class="fas fa-check" aria-hidden="true"></i><span>Each book comes with a 90-day reading window.</span></li></ul></div>
+                </aside>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const options = {
+        month:'2-digit',
+        weekday:'short',
+        year :'2-digit',
+        date:'short',
+        day:'2-digit'
+    }
+    const date =  new Date('{{ expires }}').toLocaleTimeString(undefined, options)
+    console.log(date)
+
+    const elem = document.getElementById('calculated_days').innerHTML = date
+
+
+</script>
+{% endblock %}

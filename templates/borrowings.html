@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}My Borrowings — Tunu Library{% endblock %}
+
+{% block head %}
+<style>
+    .borrowings-page { --borrow-ink: var(--ink, #17231f); --borrow-muted: var(--muted, #718078); --borrow-paper: var(--paper, #f7f5ef); --borrow-line: var(--line, #dfe3da); --borrow-leaf: var(--leaf, #2f6b4f); --borrow-leaf-soft: var(--leaf-soft, #e6f0e8); --borrow-coral: var(--coral, #e46d4d); }
+    .borrowings-container { width: min(100% - 48px, 1160px); margin-inline: auto; }
+    .borrowings-hero { position: relative; overflow: hidden; padding: clamp(38px, 6vw, 62px) 0 67px; background: var(--borrow-ink); color: #fff; }
+    .borrowings-hero::before { content: ''; position: absolute; right: -100px; top: -190px; width: 430px; height: 430px; border: 1px solid rgba(255,255,255,.12); border-radius: 50%; box-shadow: 0 0 0 35px rgba(255,255,255,.03), 0 0 0 70px rgba(255,255,255,.02); pointer-events: none; }
+    .borrowings-hero-inner { position: relative; z-index: 1; display: flex; align-items: end; justify-content: space-between; gap: 28px; }
+    .borrowings-eyebrow { display: inline-flex; align-items: center; gap: 9px; margin: 0 0 15px; color: #9fc7aa; font-size: 10px; font-weight: 800; letter-spacing: .18em; line-height: 1; text-transform: uppercase; }
+    .borrowings-eyebrow::before { content: ''; width: 25px; height: 2px; border-radius: 999px; background: var(--borrow-coral); }
+    .borrowings-title { margin: 0; color: #fff; font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(43px, 6vw, 70px); font-weight: 400; letter-spacing: -.06em; line-height: .96; }
+    .borrowings-hero-copy { max-width: 560px; margin: 16px 0 0; color: rgba(255,255,255,.64); font-size: 12px; line-height: 1.7; }
+    .borrowings-hero-aside { max-width: 225px; padding: 16px 17px; border: 1px solid rgba(255,255,255,.15); border-radius: 14px; background: rgba(255,255,255,.06); }
+    .borrowings-hero-aside strong { display: block; color: #fff; font-family: 'DM Serif Display', Georgia, serif; font-size: 25px; font-weight: 400; line-height: 1; }
+    .borrowings-hero-aside span { display: block; margin-top: 6px; color: rgba(255,255,255,.57); font-size: 10px; line-height: 1.5; }
+    .borrowings-content { position: relative; z-index: 2; margin-top: -31px; padding-bottom: 70px; }
+    .borrowings-fee-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; border: 1px solid var(--borrow-line); border-radius: 15px; background: #fff; box-shadow: 0 14px 32px rgba(23,35,31,.1); overflow: hidden; }
+    .borrowings-fee-item { padding: 16px 18px; background: rgba(255,255,255,.95); }
+    .borrowings-fee-item + .borrowings-fee-item { border-left: 1px solid var(--borrow-line); }
+    .borrowings-fee-item strong { display: block; color: var(--borrow-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 23px; font-weight: 400; line-height: 1; }
+    .borrowings-fee-item span { display: block; margin-top: 6px; color: var(--borrow-muted); font-size: 9px; font-weight: 800; }
+    .borrowings-heading { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin: 43px 0 18px; }
+    .borrowings-heading h2 { margin: 0; color: var(--borrow-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 34px; font-weight: 400; letter-spacing: -.045em; line-height: 1; }
+    .borrowings-heading p { margin: 7px 0 0; color: var(--borrow-muted); font-size: 11px; }
+    .borrowings-heading .btn { flex: 0 0 auto; }
+    .borrowings-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+    .borrowing-card { display: flex; flex-direction: column; min-width: 0; padding: 17px; border: 1px solid var(--borrow-line); border-radius: 15px; background: #fff; box-shadow: 0 5px 17px rgba(23,35,31,.045); }
+    .borrowing-card-top { display: flex; align-items: start; justify-content: space-between; gap: 14px; }
+    .borrowing-book { display: flex; align-items: center; gap: 11px; min-width: 0; }
+    .borrowing-book-icon { width: 38px; height: 47px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 9px 9px 9px 2px; background: linear-gradient(135deg, var(--borrow-ink), #2c4b3c); color: #f3c889; box-shadow: 4px 4px 0 rgba(228,109,77,.16); }
+    .borrowing-book-title { display: -webkit-box; overflow: hidden; color: var(--borrow-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 20px; line-height: 1.04; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+    .borrowing-status { display: inline-flex; align-items: center; gap: 5px; flex: 0 0 auto; padding: 5px 8px; border-radius: 999px; background: var(--borrow-leaf-soft); color: var(--borrow-leaf); font-size: 9px; font-weight: 800; white-space: nowrap; }
+    .borrowing-status::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+    .borrowing-card-meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 20px 0 17px; padding-top: 15px; border-top: 1px solid var(--borrow-line); }
+    .borrowing-meta-label { display: block; margin-bottom: 5px; color: var(--borrow-muted); font-size: 8px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .borrowing-meta-value { display: block; color: var(--borrow-ink); font-size: 11px; font-weight: 800; }
+    .borrowing-fee-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--borrow-line); }
+    .borrowing-fee-copy strong { display: block; color: var(--borrow-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 20px; font-weight: 400; line-height: 1; }
+    .borrowing-fee-copy span { display: block; margin-top: 5px; color: var(--borrow-muted); font-size: 9px; }
+    .borrowing-pay-btn { min-height: 37px; padding-inline: 14px; background: var(--borrow-coral); color: #fff; }
+    .borrowing-pay-btn:hover { background: #cf593d; }
+    .borrowing-paid { display: inline-flex; align-items: center; gap: 6px; color: var(--borrow-leaf); font-size: 10px; font-weight: 800; }
+    .borrowing-empty { padding: 58px 22px; border: 1px dashed var(--borrow-line); border-radius: 16px; background: rgba(255,255,255,.48); text-align: center; }
+    .borrowing-empty-icon { width: 51px; height: 51px; display: grid; place-items: center; margin: 0 auto 14px; border-radius: 50%; background: var(--borrow-leaf-soft); color: var(--borrow-leaf); }
+    .borrowing-empty h3 { margin: 0 0 7px; color: var(--borrow-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 27px; font-weight: 400; }
+    .borrowing-empty p { max-width: 320px; margin: 0 auto 18px; color: var(--borrow-muted); font-size: 11px; line-height: 1.6; }
+    @media (max-width: 800px) { .borrowings-container { width: min(100% - 36px, 1160px); } .borrowings-hero-inner { align-items: start; flex-direction: column; } .borrowings-fee-strip { grid-template-columns: 1fr; } .borrowings-fee-item + .borrowings-fee-item { border-top: 1px solid var(--borrow-line); border-left: 0; } .borrowings-list { grid-template-columns: 1fr; } }
+    @media (max-width: 480px) { .borrowings-container { width: min(100% - 28px, 1160px); } .borrowings-hero { padding-top: 32px; } .borrowings-title { font-size: 45px; } .borrowings-heading { align-items: start; flex-direction: column; gap: 12px; } .borrowings-heading .btn { width: 100%; } .borrowing-card { padding: 13px; } .borrowing-card-top { gap: 9px; } .borrowing-book-title { font-size: 17px; } .borrowing-status { font-size: 8px; } .borrowing-fee-row { align-items: stretch; flex-direction: column; gap: 12px; } .borrowing-pay-btn { width: 100%; } }
+    @media (prefers-reduced-motion: reduce) { .borrowing-pay-btn { transition: none; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="borrowings-page">
+    <section class="borrowings-hero" aria-labelledby="borrowings-title">
+        <div class="borrowings-container borrowings-hero-inner">
+            <div>
+                <p class="borrowings-eyebrow">Your reading activity</p>
+                <h1 id="borrowings-title" class="borrowings-title">My borrowings.</h1>
+                <p class="borrowings-hero-copy">Borrow first, pay when you are ready. Every book has a 100 BOB borrowing fee and a 90-day borrowing window.</p>
+            </div>
+            <div class="borrowings-hero-aside"><strong>Pay later.</strong><span>Your borrowing is recorded here so you can return to it and complete payment when ready.</span></div>
+        </div>
+    </section>
+
+    <div class="borrowings-content">
+        <div class="borrowings-container">
+            <section class="borrowings-fee-strip" aria-label="Tunu Library fee information">
+                <div class="borrowings-fee-item"><strong>100 BOB</strong><span>Annual membership · 12 months</span></div>
+                <div class="borrowings-fee-item"><strong>100 BOB</strong><span>Each book borrowed</span></div>
+                <div class="borrowings-fee-item"><strong>90 days</strong><span>Borrowing window per book</span></div>
+            </section>
+
+            <div class="borrowings-heading">
+                <div><h2>Books you are borrowing</h2><p>Your active books and outstanding borrowing payments.</p></div>
+                <a href="{{ url_for('books') }}" class="btn btn-brand">Borrow another book <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+
+            {% if borrowings %}
+                <div class="borrowings-list">
+                    {% for b in borrowings %}
+                        <article class="borrowing-card">
+                            <div class="borrowing-card-top">
+                                <div class="borrowing-book"><span class="borrowing-book-icon" aria-hidden="true"><i class="fas fa-book-open"></i></span><span class="borrowing-book-title">{{ b.book_title or "Book title" }}</span></div>
+                                <span class="borrowing-status">{{ b.status.replace('_', ' ')|title if b.status else "Borrowing" }}</span>
+                            </div>
+                            <div class="borrowing-card-meta">
+                                <div><span class="borrowing-meta-label">Borrowed</span><span class="borrowing-meta-value">{{ b.borrowed_at.strftime('%b %d, %Y') if b.borrowed_at else "Recently" }}</span></div>
+                                <div><span class="borrowing-meta-label">Due date</span><span class="borrowing-meta-value">{{ b.due_date.strftime('%b %d, %Y') if b.due_date and b.due_date.strftime is defined else (b.due_date or "90-day window") }}</span></div>
+                            </div>
+                            <div class="borrowing-fee-row">
+                                <div class="borrowing-fee-copy"><strong>100 BOB</strong><span>Borrowing fee · 90-day window</span></div>
+                                {% if b.fee_paid %}
+                                    <span class="borrowing-paid"><i class="fas fa-circle-check" aria-hidden="true"></i> Paid</span>
+                                {% else %}
+                                    <a href="{{ url_for('pay_borrowing', borrowing_id=b.id) }}" class="btn borrowing-pay-btn">Pay 100 BOB <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                                {% endif %}
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="borrowing-empty" role="status"><div class="borrowing-empty-icon"><i class="fas fa-book-open" aria-hidden="true"></i></div><h3>Your borrowing list is empty.</h3><p>Borrow a book and it will appear here with its 100 BOB payment action and 90-day borrowing window.</p><a href="{{ url_for('books') }}" class="btn btn-brand">Browse the catalog <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

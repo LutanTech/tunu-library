@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}Book Catalogue — Tunu Library{% endblock %}
+
+{% block head %}
+<style>
+    .catalog-page {
+        --catalog-ink: var(--ink, #17231f);
+        --catalog-muted: var(--muted, #718078);
+        --catalog-paper: var(--paper, #f7f5ef);
+        --catalog-line: var(--line, #dfe3da);
+        --catalog-leaf: var(--leaf, #2f6b4f);
+        --catalog-leaf-soft: var(--leaf-soft, #e6f0e8);
+        --catalog-coral: var(--coral, #e46d4d);
+    }
+
+    .catalog-container { width: min(100% - 48px, 1160px); margin-inline: auto; }
+    .catalog-eyebrow { display: inline-flex; align-items: center; gap: 9px; margin: 0 0 16px; color: #9fc7aa; font-size: 10px; font-weight: 800; letter-spacing: .18em; line-height: 1; text-transform: uppercase; }
+    .catalog-eyebrow::before { content: ''; width: 25px; height: 2px; border-radius: 999px; background: var(--catalog-coral); }
+
+    .catalog-hero { position: relative; overflow: hidden; padding: clamp(40px, 6vw, 62px) 0 clamp(62px, 8vw, 88px); background: var(--catalog-ink); color: #fff; }
+    .catalog-hero::before { content: ''; position: absolute; top: -160px; right: -80px; width: 430px; height: 430px; border: 1px solid rgba(255,255,255,.12); border-radius: 50%; box-shadow: 0 0 0 32px rgba(255,255,255,.03), 0 0 0 65px rgba(255,255,255,.02); pointer-events: none; }
+    .catalog-hero::after { content: ''; position: absolute; right: 15%; bottom: 0; width: 120px; height: 8px; border-radius: 999px 999px 0 0; background: var(--catalog-coral); opacity: .9; }
+    .catalog-hero-inner { position: relative; z-index: 1; display: flex; align-items: end; justify-content: space-between; gap: 30px; }
+    .catalog-hero-copy { max-width: 630px; }
+    .catalog-hero h1 { margin: 0; color: #fff; font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(43px, 6vw, 70px); font-weight: 400; letter-spacing: -.06em; line-height: .96; }
+    .catalog-hero h1 em { color: #eeb99e; font-style: italic; }
+    .catalog-hero p { max-width: 520px; margin: 18px 0 0; color: rgba(255,255,255,.66); font-size: 13px; line-height: 1.7; }
+    .catalog-hero-aside { min-width: 180px; padding: 15px 17px; border: 1px solid rgba(255,255,255,.15); border-radius: 14px; background: rgba(255,255,255,.06); }
+    .catalog-hero-aside strong { display: block; color: #fff; font-family: 'DM Serif Display', Georgia, serif; font-size: 24px; font-weight: 400; line-height: 1; }
+    .catalog-hero-aside span { display: block; margin-top: 5px; color: rgba(255,255,255,.58); font-size: 10px; font-weight: 700; line-height: 1.45; }
+
+    .catalog-content { position: relative; z-index: 2; margin-top: -32px; padding-bottom: 70px; }
+    .catalog-filter-bar { display: grid; grid-template-columns: minmax(220px, 1fr) auto auto auto; align-items: center; gap: 10px; padding: 10px; border: 1px solid var(--catalog-line); border-radius: 17px; background: rgba(255,255,255,.94); box-shadow: 0 16px 38px rgba(23,35,31,.12); }
+    .catalog-search-box { position: relative; min-width: 0; }
+    .catalog-search-box i { position: absolute; top: 50%; left: 15px; color: var(--catalog-muted); font-size: 12px; pointer-events: none; transform: translateY(-50%); }
+    .catalog-search-box input, .catalog-filter-select { width: 100%; height: 42px; border: 1px solid var(--catalog-line); border-radius: 11px; outline: none; background: var(--catalog-paper); color: var(--catalog-ink); font-size: 11px; font-weight: 700; transition: border .2s ease, box-shadow .2s ease, background .2s ease; }
+    .catalog-search-box input { padding: 0 13px 0 38px; }
+    .catalog-filter-select { min-width: 145px; padding: 0 30px 0 12px; cursor: pointer; }
+    .catalog-search-box input::placeholder { color: #98a39c; }
+    .catalog-search-box input:focus, .catalog-filter-select:focus { border-color: var(--catalog-leaf); background: #fff; box-shadow: 0 0 0 4px rgba(47,107,79,.1); }
+    .catalog-filter-btn { height: 42px; padding-inline: 17px; }
+
+    .catalog-results-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin: 47px 0 21px; }
+    .catalog-results-heading h2 { margin: 0; color: var(--catalog-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(29px, 4vw, 42px); font-weight: 400; letter-spacing: -.045em; line-height: 1; }
+    .catalog-results-heading p { margin: 8px 0 0; color: var(--catalog-muted); font-size: 11px; }
+    .catalog-results-label { display: inline-flex; align-items: center; gap: 8px; padding-bottom: 5px; border-bottom: 1px solid var(--catalog-line); color: var(--catalog-muted); font-size: 10px; font-weight: 800; }
+    .catalog-results-label i { color: var(--catalog-coral); }
+
+    .catalog-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 17px; }
+    .catalog-card { display: flex; min-width: 0; flex-direction: column; overflow: hidden; border: 1px solid var(--catalog-line); border-radius: 15px; background: #fff; box-shadow: 0 4px 14px rgba(23,35,31,.035); transition: transform .28s cubic-bezier(.22,1,.36,1), box-shadow .28s ease, border-color .28s ease; }
+    .catalog-card:hover { border-color: rgba(47,107,79,.42); box-shadow: 0 18px 34px rgba(23,35,31,.13); transform: translateY(-6px); }
+    .catalog-cover { position: relative; aspect-ratio: 3 / 4; overflow: hidden; background: var(--catalog-ink); }
+    .catalog-cover::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba(0,0,0,.32)); pointer-events: none; }
+    .catalog-cover img { width: 100%; height: 100%; object-fit: cover; transition: transform .45s cubic-bezier(.22,1,.36,1), filter .3s ease; }
+    .catalog-card:hover .catalog-cover img { filter: saturate(1.06); transform: scale(1.05); }
+    .catalog-cover-label { position: absolute; top: 10px; left: 10px; z-index: 1; max-width: calc(100% - 20px); overflow: hidden; padding: 5px 8px; border-radius: 999px; background: rgba(255,255,255,.9); color: var(--catalog-ink); font-size: 9px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+    .catalog-fallback-cover { width: 100%; height: 100%; min-height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 11px; padding: 17px; background: radial-gradient(circle at 15% 10%, rgba(228,109,77,.35), transparent 34%), linear-gradient(135deg, var(--catalog-ink), #2c4b3c); color: #fff; text-align: center; }
+    .catalog-fallback-cover i { color: #f3c889; font-size: 26px; }
+    .catalog-fallback-title { display: -webkit-box; overflow: hidden; font-family: 'DM Serif Display', Georgia, serif; font-size: 15px; line-height: 1.15; -webkit-box-orient: vertical; -webkit-line-clamp: 4; }
+    .catalog-cover-action { position: absolute; right: 10px; bottom: 10px; z-index: 2; width: 29px; height: 29px; display: grid; place-items: center; border-radius: 50%; background: var(--catalog-coral); color: #fff; font-size: 10px; opacity: 0; transform: translateY(5px); transition: opacity .25s ease, transform .25s ease; }
+    .catalog-card:hover .catalog-cover-action { opacity: 1; transform: translateY(0); }
+
+    .catalog-book-info { display: flex; min-height: 139px; flex: 1; flex-direction: column; padding: 14px; }
+    .catalog-book-title { display: -webkit-box; overflow: hidden; color: var(--catalog-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 18px; font-weight: 400; letter-spacing: -.025em; line-height: 1.08; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+    .catalog-book-author { display: block; overflow: hidden; margin-top: 6px; color: var(--catalog-muted); font-size: 10px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+    .catalog-book-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; padding-top: 13px; border-top: 1px solid var(--catalog-line); }
+    .catalog-status { display: inline-flex; align-items: center; gap: 5px; padding: 5px 7px; border-radius: 999px; font-size: 9px; font-weight: 800; white-space: nowrap; }
+    .catalog-status::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+    .catalog-status-available { background: #e8f4eb; color: #2d744b; }
+    .catalog-status-availability { background: #fff0ed; color: #a54b3d; }
+    .catalog-reserve-btn { min-height: 30px; padding: 7px 10px; border: 1px solid var(--catalog-line-dark, #c8d0c7); border-radius: 999px; color: var(--catalog-ink); font-size: 9px; font-weight: 800; transition: border .2s ease, background .2s ease, color .2s ease; }
+    .catalog-reserve-btn:hover { border-color: var(--catalog-leaf); background: var(--catalog-leaf-soft); color: var(--catalog-leaf); }
+
+    .catalog-empty { padding: 56px 20px; border: 1px dashed var(--catalog-line); border-radius: 16px; background: rgba(255,255,255,.5); text-align: center; }
+    .catalog-empty-icon { width: 52px; height: 52px; display: grid; place-items: center; margin: 0 auto 15px; border-radius: 50%; background: var(--catalog-leaf-soft); color: var(--catalog-leaf); }
+    .catalog-empty h3 { margin: 0 0 6px; color: var(--catalog-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 26px; font-weight: 400; }
+    .catalog-empty p { margin: 0; color: var(--catalog-muted); font-size: 12px; }
+
+    .catalog-pagination { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 38px; }
+    .catalog-page-link { min-width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; border: 1px solid var(--catalog-line); border-radius: 999px; background: rgba(255,255,255,.68); color: var(--catalog-ink); font-size: 10px; font-weight: 800; transition: border .2s ease, background .2s ease, color .2s ease, transform .2s ease; }
+    .catalog-page-link:hover { border-color: var(--catalog-leaf); background: var(--catalog-leaf-soft); color: var(--catalog-leaf); transform: translateY(-1px); }
+    .catalog-page-link.active { border-color: var(--catalog-ink); background: var(--catalog-ink); color: #fff; }
+    .catalog-page-link.disabled { color: #aab3ad; cursor: not-allowed; opacity: .62; }
+    .catalog-page-link.disabled:hover { border-color: var(--catalog-line); background: rgba(255,255,255,.68); color: #aab3ad; transform: none; }
+    .catalog-pagination-summary { margin: 0 8px; color: var(--catalog-muted); font-size: 10px; font-weight: 700; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+    @media (max-width: 1020px) {
+        .catalog-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .catalog-filter-bar { grid-template-columns: minmax(200px, 1fr) auto auto auto; }
+    }
+
+    @media (max-width: 760px) {
+        .catalog-container { width: min(100% - 36px, 1160px); }
+        .catalog-hero-inner { align-items: start; flex-direction: column; }
+        .catalog-hero-aside { min-width: 0; }
+        .catalog-filter-bar { grid-template-columns: 1fr 1fr; }
+        .catalog-search-box { grid-column: 1 / -1; }
+        .catalog-filter-btn { width: 100%; }
+        .catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+        .catalog-card:hover { transform: translateY(-3px); }
+        .catalog-book-info { min-height: 120px; padding: 11px; }
+        .catalog-book-title { font-size: 16px; }
+        .catalog-book-author { font-size: 9px; }
+        .catalog-book-actions { align-items: flex-start; flex-direction: column; gap: 8px; }
+        .catalog-status, .catalog-reserve-btn { font-size: 8px; }
+        .catalog-reserve-btn { width: 100%; text-align: center; }
+    }
+
+    /* Deliberately compact covers on phones: two-column cards remain scannable. */
+    @media (max-width: 520px) {
+        .catalog-container { width: min(100% - 28px, 1160px); }
+        .catalog-hero { padding: 34px 0 63px; }
+        .catalog-hero h1 { font-size: clamp(39px, 12vw, 54px); }
+        .catalog-hero p { margin-top: 14px; font-size: 12px; }
+        .catalog-content { margin-top: -27px; }
+        .catalog-filter-bar { grid-template-columns: 1fr; gap: 8px; padding: 9px; }
+        .catalog-search-box { grid-column: auto; }
+        .catalog-filter-select, .catalog-filter-btn { width: 100%; }
+        .catalog-results-heading { align-items: start; flex-direction: column; gap: 11px; margin-top: 34px; }
+        .catalog-results-heading h2 { font-size: 34px; }
+        .catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+        .catalog-cover { aspect-ratio: 4 / 4.75; max-height: 172px; }
+        .catalog-cover img { object-fit: cover; }
+        .catalog-fallback-cover { min-height: 130px; padding: 12px; }
+        .catalog-fallback-cover i { font-size: 21px; }
+        .catalog-fallback-title { font-size: 13px; }
+        .catalog-cover-label { top: 7px; left: 7px; max-width: calc(100% - 14px); padding: 4px 6px; font-size: 8px; }
+        .catalog-cover-action { right: 7px; bottom: 7px; width: 25px; height: 25px; font-size: 9px; }
+        .catalog-book-info { min-height: 113px; padding: 10px; }
+        .catalog-book-title { font-size: 15px; }
+        .catalog-book-author { margin-top: 4px; }
+        .catalog-book-actions { padding-top: 9px; }
+    }
+
+    @media (max-width: 380px) {
+        .catalog-cover { max-height: 145px; }
+        .catalog-book-info { min-height: 106px; padding: 9px; }
+        .catalog-book-title { font-size: 14px; }
+        .catalog-book-actions { gap: 6px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .catalog-card, .catalog-cover img, .catalog-cover-action { transition: none; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="catalog-page">
+    <section class="catalog-hero" aria-labelledby="catalog-title">
+        <div class="catalog-container catalog-hero-inner">
+            <div class="catalog-hero-copy">
+                <p class="catalog-eyebrow">The Tunu collection</p>
+                <h1 id="catalog-title">Find your next <em>good read.</em></h1>
+                <p>Search the shelves by title, author, grade or availability, then reserve a physical copy for pickup.</p>
+            </div>
+            <div class="catalog-hero-aside"><strong>Browse freely.</strong><span>Filter by what you need or wander until something catches your eye.</span></div>
+        </div>
+    </section>
+
+    <div class="catalog-content">
+        <div class="catalog-container">
+            <form method="GET" action="{{ url_for('books') }}" class="catalog-filter-bar" aria-label="Filter the book catalog">
+                <div class="catalog-search-box">
+                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                    <input type="search" name="q" value="{{ search or request.args.get('q', '') }}" placeholder="Search title, author or ISBN" aria-label="Search by title, author or ISBN">
+                </div>
+                <select name="grade" class="catalog-filter-select" aria-label="Filter by category or grade" onchange="this.form.submit()">
+                    <option value="">All categories / grades</option>
+                    <option value="Primary" {% if request.args.get('grade') == 'Primary' %}selected{% endif %}>Primary education</option>
+                    <option value="Secondary" {% if request.args.get('grade') == 'Secondary' %}selected{% endif %}>Secondary education</option>
+                    <option value="General" {% if request.args.get('grade') == 'General' %}selected{% endif %}>General literature</option>
+                </select>
+                <select name="status" class="catalog-filter-select" aria-label="Filter by availability" onchange="this.form.submit()">
+                    <option value="">All availability</option>
+                    <option value="available" {% if request.args.get('status') == 'available' %}selected{% endif %}>Available to reserve</option>
+                    <option value="reserved" {% if request.args.get('status') == 'reserved' %}selected{% endif %}>Currently reserved</option>
+                </select>
+                <button type="submit" class="btn btn-brand catalog-filter-btn">Apply filters</button>
+            </form>
+
+            <div class="catalog-results-heading">
+                <div><h2>Browse the shelves</h2><p>Take your time. The right book usually knows how to find you.</p></div>
+                <span class="catalog-results-label"><i class="fas fa-layer-group" aria-hidden="true"></i> Curated collection</span>
+            </div>
+
+            {% if books %}
+                <div class="catalog-grid">
+                    {% for book in books %}
+                        <article class="catalog-card" onclick="window.location.href='{{ url_for('book', book_id=book.id) }}'" style="cursor:pointer">
+                            <div class="catalog-cover">
+                                <span class="catalog-cover-label">{{ book.grade or "General" }}</span>
+                                {% if book.cover %}
+                                    <img src="{{ book.cover }}" alt="Cover of {{ book.title }}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div class="catalog-fallback-cover" style="display: none;" aria-hidden="true"><i class="fa-solid fa-book"></i><span class="catalog-fallback-title">{{ book.title }}</span></div>
+                                {% else %}
+                                    <div class="catalog-fallback-cover" aria-hidden="true"><i class="fa-solid fa-book"></i><span class="catalog-fallback-title">{{ book.title }}</span></div>
+                                {% endif %}
+                                <span class="catalog-cover-action" aria-hidden="true"><i class="fas fa-arrow-up-right-from-square"></i></span>
+                            </div>
+                            <div class="catalog-book-info">
+                                <span class="catalog-book-title" title="{{ book.title }}">{{ book.title }}</span>
+                                <span class="catalog-book-author">By {{ book.authors or "Unknown Author" }}</span>
+                                <div class="catalog-book-actions">
+                                    {% if book.available_copies and book.available_copies > 0 %}
+                                        <span class="catalog-status catalog-status-available"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>Available</span>
+                                    {% else %}
+                                        <span class="catalog-status catalog-status-availability"><i class="fa-solid fa-clock" aria-hidden="true"></i>Unavailable</span>
+                                    {% endif %}
+                                    <a href="{{ url_for('book', book_id=book.id) }}" class="catalog-reserve-btn">View book <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+                                </div>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="catalog-empty" role="status"><div class="catalog-empty-icon"><i class="fa-solid fa-book-open" aria-hidden="true"></i></div><h3>No books match those filters.</h3><p>Try a broader search or choose a different category and availability filter.</p></div>
+            {% endif %}
+
+            {% if pagination and pagination.pages and pagination.pages > 1 %}
+                <nav class="catalog-pagination" aria-label="Catalog pagination">
+                    {% if pagination.has_prev %}
+                        <a class="catalog-page-link" href="{{ url_for('books', page=pagination.prev_num, q=search or request.args.get('q', ''), grade=request.args.get('grade', ''), status=request.args.get('status', '')) }}" aria-label="Previous page"><i class="fas fa-arrow-left" aria-hidden="true"></i><span class="sr-only">Previous</span></a>
+                    {% else %}
+                        <span class="catalog-page-link disabled" aria-disabled="true"><i class="fas fa-arrow-left" aria-hidden="true"></i><span class="sr-only">Previous</span></span>
+                    {% endif %}
+
+                    <span class="catalog-pagination-summary">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+
+                    {% for page_num in range(1, pagination.pages + 1) %}
+                        <a class="catalog-page-link{% if page_num == pagination.page %} active{% endif %}" href="{{ url_for('books', page=page_num, q=search or request.args.get('q', ''), grade=request.args.get('grade', ''), status=request.args.get('status', '')) }}"{% if page_num == pagination.page %} aria-current="page"{% endif %}>{{ page_num }}</a>
+                    {% endfor %}
+
+                    {% if pagination.has_next %}
+                        <a class="catalog-page-link" href="{{ url_for('books', page=pagination.next_num, q=search or request.args.get('q', ''), grade=request.args.get('grade', ''), status=request.args.get('status', '')) }}" aria-label="Next page"><i class="fas fa-arrow-right" aria-hidden="true"></i><span class="sr-only">Next</span></a>
+                    {% else %}
+                        <span class="catalog-page-link disabled" aria-disabled="true"><i class="fas fa-arrow-right" aria-hidden="true"></i><span class="sr-only">Next</span></span>
+                    {% endif %}
+                </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

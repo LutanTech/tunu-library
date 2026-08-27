@@ -1,0 +1,43 @@
+{
+  "name": "Tunu Library",
+  "short_name": "Tunu Library",
+  "description": "Browse, borrow, reserve, and keep track of your reading life with Tunu Library.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#f7f5ef",
+  "theme_color": "#17231f",
+  "categories": ["books", "education", "lifestyle"],
+  "icons": [
+    {
+      "src": "/static/logo/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/logo/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Browse the catalog",
+      "short_name": "Catalog",
+      "url": "/books?source=pwa",
+      "icons": [{ "src": "/static/logo/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "My borrowings",
+      "short_name": "Borrowings",
+      "url": "/my-borrowings?source=pwa",
+      "icons": [{ "src": "/static/logo/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
+}

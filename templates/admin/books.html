@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Books — Admin{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 40px 0;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2>Book Inventory Management</h2>
+        <button class="btn btn-brand" onclick="alert('Open Add Book Modal')"><i class="fa-solid fa-plus"></i> Add New Book</button>
+    </div>
+
+    <div class="table-card" style="background: white; border: 1px solid var(--border); border-radius: var(--radius-lg);">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <tr style="background: var(--bg-body); border-bottom: 1px solid var(--border);">
+                <th style="padding: 14px 20px;">Title</th>
+                <th style="padding: 14px 20px;">Authors</th>
+                <th style="padding: 14px 20px;">Copies</th>
+                <th style="padding: 14px 20px;">Actions</th>
+            </tr>
+            {% for book in books %}
+            <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 14px 20px;"><strong>{{ book.title }}</strong></td>
+                <td style="padding: 14px 20px;">{{ book.authors }}</td>
+                <td style="padding: 14px 20px;">{{ book.available_copies }} / {{ book.total_copies or 1 }}</td>
+                <td style="padding: 14px 20px;">
+                    <a href="#" class="btn btn-outline" style="padding: 4px 8px; font-size: 12px;">Edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}

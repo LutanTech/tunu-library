@@ -1,0 +1,6 @@
+Flask
+Flask SQLAlchemy
+Flask Mail
+Authlib
+Requests
+Werkzeug

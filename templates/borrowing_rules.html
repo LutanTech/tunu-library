@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}Borrowing Rules — Tunu Library{% endblock %}
+
+{% block head %}
+<style>
+    .rules-page { --rules-ink: var(--ink, #17231f); --rules-muted: var(--muted, #718078); --rules-paper: var(--paper, #f7f5ef); --rules-line: var(--line, #dfe3da); --rules-leaf: var(--leaf, #2f6b4f); --rules-leaf-dark: var(--leaf-dark, #22543e); --rules-soft: var(--leaf-soft, #e6f0e8); --rules-coral: var(--coral, #e46d4d); --rules-gold: var(--gold, #d6a84f); }
+    .rules-hero { position: relative; overflow: hidden; padding: clamp(45px, 8vw, 88px) 0 86px; background: var(--rules-ink); color: #fff; }
+    .rules-hero::before { content: ''; position: absolute; top: -240px; right: -110px; width: 500px; height: 500px; border: 1px solid rgba(255,255,255,.13); border-radius: 50%; box-shadow: 0 0 0 32px rgba(255,255,255,.035), 0 0 0 70px rgba(255,255,255,.02); pointer-events: none; }
+    .rules-hero::after { content: ''; position: absolute; bottom: -140px; left: 6%; width: 265px; height: 265px; border: 1px solid rgba(228,109,77,.25); border-radius: 50%; pointer-events: none; }
+    .rules-hero-inner { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(300px, .9fr); align-items: end; gap: 56px; }
+    .rules-eyebrow { display: inline-flex; align-items: center; gap: 9px; margin: 0 0 16px; color: #9fc7aa; font-size: 10px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+    .rules-eyebrow::before { content: ''; width: 26px; height: 2px; border-radius: 999px; background: var(--rules-coral); }
+    .rules-title { max-width: 620px; margin: 0; color: #fff; font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(47px, 7vw, 82px); font-weight: 400; letter-spacing: -.07em; line-height: .9; }
+    .rules-intro { max-width: 560px; margin: 19px 0 0; color: rgba(255,255,255,.66); font-size: 13px; line-height: 1.75; }
+    .rules-hero-aside { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .rules-hero-stat { padding: 17px; border: 1px solid rgba(255,255,255,.14); border-radius: 15px; background: rgba(255,255,255,.07); }
+    .rules-hero-stat strong { display: block; color: #fff; font-family: 'DM Serif Display', Georgia, serif; font-size: 31px; font-weight: 400; line-height: 1; }
+    .rules-hero-stat span { display: block; margin-top: 8px; color: rgba(255,255,255,.58); font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .rules-content { position: relative; z-index: 2; margin-top: -32px; padding-bottom: 76px; }
+    .rules-container { width: min(100% - 48px, 1160px); margin-inline: auto; }
+    .rules-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 13px; border: 1px solid var(--rules-line); border-radius: 17px; background: #fff; box-shadow: 0 15px 35px rgba(23,35,31,.11); }
+    .rules-summary-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-right: 1px solid var(--rules-line); }
+    .rules-summary-item:last-child { border-right: 0; }
+    .rules-summary-icon { width: 35px; height: 35px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 10px; background: var(--rules-soft); color: var(--rules-leaf); font-size: 13px; }
+    .rules-summary-item:nth-child(2) .rules-summary-icon { background: #fbe9e2; color: var(--rules-coral); }
+    .rules-summary-item:nth-child(3) .rules-summary-icon { background: #f8efd9; color: #a87a29; }
+    .rules-summary-item strong { display: block; color: var(--rules-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 22px; font-weight: 400; line-height: 1; }
+    .rules-summary-item span { display: block; margin-top: 4px; color: var(--rules-muted); font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+    .rules-layout { display: grid; grid-template-columns: minmax(0, 1fr) 285px; align-items: start; gap: 23px; margin-top: 48px; }
+    .rules-main { min-width: 0; }
+    .rules-section { scroll-margin-top: 100px; }
+    .rules-section + .rules-section { margin-top: 38px; }
+    .rules-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 17px; margin-bottom: 13px; }
+    .rules-section-heading h2 { margin: 0; color: var(--rules-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 32px; font-weight: 400; letter-spacing: -.045em; line-height: 1; }
+    .rules-section-heading p { max-width: 500px; margin: 7px 0 0; color: var(--rules-muted); font-size: 11px; line-height: 1.55; }
+    .rules-label { display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto; padding: 6px 9px; border-radius: 999px; background: var(--rules-soft); color: var(--rules-leaf); font-size: 9px; font-weight: 800; white-space: nowrap; }
+    .rules-card { padding: 22px; border: 1px solid var(--rules-line); border-radius: 16px; background: #fff; box-shadow: 0 6px 20px rgba(23,35,31,.045); }
+    .rules-card + .rules-card { margin-top: 10px; }
+    .rules-card h3 { margin: 0; color: var(--rules-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 23px; font-weight: 400; line-height: 1.05; }
+    .rules-card p { margin: 10px 0 0; color: var(--rules-muted); font-size: 11px; line-height: 1.75; }
+    .rules-card strong { color: var(--rules-ink); }
+    .rules-list { display: grid; gap: 10px; margin: 14px 0 0; padding: 0; list-style: none; }
+    .rules-list li { display: grid; grid-template-columns: 25px minmax(0, 1fr); gap: 9px; align-items: start; color: var(--rules-muted); font-size: 11px; line-height: 1.65; }
+    .rules-list li::before { content: '\f00c'; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; background: var(--rules-soft); color: var(--rules-leaf); font-family: 'Font Awesome 7 Free'; font-size: 9px; font-weight: 900; }
+    .rules-fee-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 14px; }
+    .rules-fee { padding: 16px; border: 1px solid var(--rules-line); border-radius: 12px; background: var(--rules-paper); }
+    .rules-fee:first-child { border-color: rgba(228,109,77,.35); background: #fff7f3; }
+    .rules-fee strong { display: block; color: var(--rules-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 28px; font-weight: 400; line-height: 1; }
+    .rules-fee span { display: block; margin-top: 7px; color: var(--rules-muted); font-size: 9px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+    .rules-timeline { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+    .rules-step { position: relative; padding: 17px 15px 16px; border: 1px solid var(--rules-line); border-radius: 13px; background: var(--rules-paper); }
+    .rules-step-number { width: 25px; height: 25px; display: grid; place-items: center; border-radius: 50%; background: var(--rules-ink); color: #fff; font-size: 10px; font-weight: 800; }
+    .rules-step h4 { margin: 13px 0 0; color: var(--rules-ink); font-size: 11px; font-weight: 800; }
+    .rules-step p { margin-top: 5px; font-size: 10px; line-height: 1.55; }
+    .rules-callout { display: flex; align-items: flex-start; gap: 10px; margin-top: 13px; padding: 13px 14px; border: 1px solid #ead59b; border-radius: 11px; background: #fff9e8; color: #80621b; font-size: 10px; line-height: 1.6; }
+    .rules-callout i { margin-top: 2px; color: #b2832b; }
+    .rules-sidebar { position: sticky; top: calc(var(--nav-height, 78px) + 22px); display: grid; gap: 11px; }
+    .rules-side-card { padding: 19px; border: 1px solid var(--rules-line); border-radius: 15px; background: rgba(255,255,255,.68); }
+    .rules-side-card.dark { border-color: var(--rules-ink); background: var(--rules-ink); color: #fff; }
+    .rules-side-card h2 { margin: 0 0 12px; color: var(--rules-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 25px; font-weight: 400; line-height: 1; }
+    .rules-side-card.dark h2 { color: #fff; }
+    .rules-side-card p { margin: 0; color: var(--rules-muted); font-size: 10px; line-height: 1.7; }
+    .rules-side-card.dark p { color: rgba(255,255,255,.62); }
+    .rules-side-links { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+    .rules-side-links a { display: flex; align-items: center; gap: 8px; padding: 8px 0; color: var(--rules-muted); font-size: 10px; font-weight: 800; }
+    .rules-side-links a:hover { color: var(--rules-leaf); }
+    .rules-side-links i { width: 16px; color: var(--rules-coral); text-align: center; }
+    .rules-side-card .btn { width: 100%; margin-top: 14px; }
+    .rules-side-card.dark .btn { background: var(--rules-coral); color: #fff; }
+    .rules-side-card.dark .btn:hover { background: #cf593d; }
+    .rules-footnote { margin-top: 14px; color: var(--rules-muted); font-size: 10px; line-height: 1.65; }
+    .rules-footnote a { color: var(--rules-leaf); font-weight: 800; text-decoration: underline; text-underline-offset: 2px; }
+    @media (max-width: 900px) { .rules-hero-inner { grid-template-columns: 1fr; gap: 30px; } .rules-hero-aside { max-width: 500px; } .rules-layout { grid-template-columns: 1fr; } .rules-sidebar { position: static; grid-template-columns: repeat(2, 1fr); } .rules-side-card.dark { grid-column: 1 / -1; } }
+    @media (max-width: 680px) { .rules-container { width: min(100% - 36px, 1160px); } .rules-summary { grid-template-columns: 1fr; gap: 0; } .rules-summary-item { border-right: 0; border-bottom: 1px solid var(--rules-line); } .rules-summary-item:last-child { border-bottom: 0; } .rules-section-heading { align-items: flex-start; flex-direction: column; } .rules-fee-grid, .rules-timeline { grid-template-columns: 1fr; } }
+    @media (max-width: 480px) { .rules-container { width: min(100% - 28px, 1160px); } .rules-hero { padding-top: 35px; } .rules-title { font-size: 50px; } .rules-intro { font-size: 12px; } .rules-hero-aside { grid-template-columns: 1fr 1fr; } .rules-hero-stat { padding: 13px; } .rules-hero-stat strong { font-size: 25px; } .rules-hero-stat span { font-size: 8px; } .rules-content { padding-bottom: 55px; } .rules-layout { margin-top: 35px; } .rules-card { padding: 17px; } .rules-card h3 { font-size: 21px; } .rules-sidebar { grid-template-columns: 1fr; } .rules-side-card.dark { grid-column: auto; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="rules-page">
+    <section class="rules-hero" aria-labelledby="rules-title">
+        <div class="rules-container rules-hero-inner">
+            <div>
+                <p class="rules-eyebrow">Read with confidence</p>
+                <h1 id="rules-title" class="rules-title">Borrowing rules, made clear.</h1>
+                <p class="rules-intro">A simple guide to membership, borrowing, payments, reservations, pickup, returns, and the 90-day window that keeps every book moving through the Tunu community.</p>
+            </div>
+            <div class="rules-hero-aside" aria-label="Key borrowing rules">
+                <div class="rules-hero-stat"><strong>{{ membership_fee_bob or 100 }} BOB</strong><span>Annual membership</span></div>
+                <div class="rules-hero-stat"><strong>{{ borrowing_fee_bob or 100 }} BOB</strong><span>Per borrowing</span></div>
+                <div class="rules-hero-stat"><strong>{{ borrowing_window_days or 90 }}</strong><span>Days per borrowing</span></div>
+                <div class="rules-hero-stat"><strong>Pay later</strong><span>From My Borrowings</span></div>
+            </div>
+        </div>
+    </section>
+
+    <div class="rules-content">
+        <div class="rules-container">
+            <section class="rules-summary" aria-label="Rule summary">
+                <div class="rules-summary-item"><span class="rules-summary-icon" aria-hidden="true"><i class="fas fa-user-check"></i></span><span><strong>Active member</strong><span>Required before borrowing</span></span></div>
+                <div class="rules-summary-item"><span class="rules-summary-icon" aria-hidden="true"><i class="fas fa-book-open"></i></span><span><strong>Borrow first</strong><span>No upfront payment block</span></span></div>
+                <div class="rules-summary-item"><span class="rules-summary-icon" aria-hidden="true"><i class="fas fa-calendar-days"></i></span><span><strong>90 days</strong><span>Return by the due date</span></span></div>
+            </section>
+
+            <div class="rules-layout">
+                <main class="rules-main">
+                    <section id="eligibility" class="rules-section" aria-labelledby="eligibility-title">
+                        <div class="rules-section-heading"><div><h2 id="eligibility-title">Before you borrow</h2><p>Make sure your account is ready before choosing a book.</p></div><span class="rules-label"><i class="fas fa-check" aria-hidden="true"></i> Eligibility</span></div>
+                        <article class="rules-card">
+                            <h3>Membership comes first.</h3>
+                            <p>You need a signed-in Tunu Library account and an active membership to borrow a book. Annual membership costs <strong>{{ membership_fee_bob or 100 }} BOB</strong> and lasts for 12 months.</p>
+                            <ul class="rules-list">
+                                <li>Register or sign in before opening a borrowing action.</li>
+                                <li>Check your membership expiry on the dashboard.</li>
+                                <li>If membership has expired, renew it before borrowing.</li>
+                            </ul>
+                            <div class="rules-callout"><i class="fas fa-circle-info" aria-hidden="true"></i><span>Membership and borrowing are separate charges. Paying the annual membership does not pay for a specific book.</span></div>
+                        </article>
+                    </section>
+
+                    <section id="fees" class="rules-section" aria-labelledby="fees-title">
+                        <div class="rules-section-heading"><div><h2 id="fees-title">The two charges</h2><p>Keep the annual membership fee separate from the fee for each borrowed book.</p></div><span class="rules-label"><i class="fas fa-receipt" aria-hidden="true"></i> Fees</span></div>
+                        <article class="rules-card">
+                            <h3>Simple pricing, no surprises.</h3>
+                            <p>Tunu uses two distinct charges. The membership fee keeps your account active; the borrowing fee applies to the individual book you choose.</p>
+                            <div class="rules-fee-grid">
+                                <div class="rules-fee"><strong>{{ membership_fee_bob or 100 }} BOB</strong><span>Annual membership · 12 months</span></div>
+                                <div class="rules-fee"><strong>{{ borrowing_fee_bob or 100 }} BOB</strong><span>One borrowing · 90 days</span></div>
+                            </div>
+                        </article>
+                    </section>
+
+                    <section id="process" class="rules-section" aria-labelledby="process-title">
+                        <div class="rules-section-heading"><div><h2 id="process-title">How borrowing works</h2><p>Borrow the book first, then complete the payment from your member account.</p></div><span class="rules-label"><i class="fas fa-route" aria-hidden="true"></i> Your journey</span></div>
+                        <article class="rules-card">
+                            <h3>Three steps from discovery to reading.</h3>
+                            <div class="rules-timeline">
+                                <div class="rules-step"><span class="rules-step-number">1</span><h4>Choose a book</h4><p>Browse the catalog and open an available title while signed in.</p></div>
+                                <div class="rules-step"><span class="rules-step-number">2</span><h4>Borrow now</h4><p>Submit the borrow action. The borrowing is recorded without an upfront payment block.</p></div>
+                                <div class="rules-step"><span class="rules-step-number">3</span><h4>Pay when ready</h4><p>Open My Borrowings, enter your M-Pesa number, and pay 100 BOB.</p></div>
+                            </div>
+                            <p class="rules-footnote">Go to <a href="{{ url_for('my_borrowings') }}">My Borrowings</a> to see the record, fee status, borrowed date, and due date.</p>
+                        </article>
+                    </section>
+
+                    <section id="window" class="rules-section" aria-labelledby="window-title">
+                        <div class="rules-section-heading"><div><h2 id="window-title">The 90-day window</h2><p>Every borrowing has a clear start date and due date.</p></div><span class="rules-label"><i class="fas fa-calendar-check" aria-hidden="true"></i> Timeline</span></div>
+                        <article class="rules-card">
+                            <h3>Return by the date shown in your account.</h3>
+                            <p>The borrowing window is <strong>{{ borrowing_window_days or 90 }} days</strong> from the recorded borrowing date. Your due date appears in My Borrowings and on the dashboard.</p>
+                            <ul class="rules-list">
+                                <li>Keep the book safe and accessible throughout the borrowing window.</li>
+                                <li>Plan the return before the due date rather than waiting until the last day.</li>
+                                <li>If you may be late, contact the library team as soon as possible.</li>
+                            </ul>
+                        </article>
+                    </section>
+
+                    <section id="payment" class="rules-section" aria-labelledby="payment-title">
+                        <div class="rules-section-heading"><div><h2 id="payment-title">Payment by M-Pesa</h2><p>Complete the individual borrowing fee after the borrowing has been recorded.</p></div><span class="rules-label"><i class="fas fa-mobile-screen-button" aria-hidden="true"></i> Payment</span></div>
+                        <article class="rules-card">
+                            <h3>Pay from My Borrowings.</h3>
+                            <p>Open the payment action on the relevant borrowing, enter the phone number that should receive the M-Pesa prompt, and approve the request on your phone.</p>
+                            <ul class="rules-list">
+                                <li>Confirm the displayed amount is <strong>{{ borrowing_fee_bob or 100 }} BOB</strong> for the book.</li>
+                                <li>Use a valid M-Pesa number and keep the phone nearby.</li>
+                                <li>Do not submit repeatedly after approving a prompt; refresh the borrowing status first.</li>
+                                <li>If the payment remains pending, keep the M-Pesa confirmation and contact support.</li>
+                            </ul>
+                            <a href="{{ url_for('my_borrowings') }}" class="btn btn-brand" style="margin-top: 17px;">Open My Borrowings <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                        </article>
+                    </section>
+
+                    <section id="reservations" class="rules-section" aria-labelledby="reservations-title">
+                        <div class="rules-section-heading"><div><h2 id="reservations-title">Reservations & pickup</h2><p>Reservations help you plan for a copy that is not ready to borrow immediately.</p></div><span class="rules-label"><i class="fas fa-bookmark" aria-hidden="true"></i> Pickup</span></div>
+                        <article class="rules-card">
+                            <h3>Reserve responsibly.</h3>
+                            <p>Reservations require an active membership and a signed-in account. Watch your dashboard for approval and pickup updates.</p>
+                            <ul class="rules-list">
+                                <li>An approved reservation means the library has marked the title ready for pickup.</li>
+                                <li>Use your dashboard or reservations page to follow the current status.</li>
+                                <li>Pending and approved reservations can be cancelled when the action is available.</li>
+                            </ul>
+                            <a href="{{ url_for('reservations') }}" class="btn btn-outline" style="margin-top: 17px;">View my reservations <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                        </article>
+                    </section>
+
+                    <section id="returns" class="rules-section" aria-labelledby="returns-title">
+                        <div class="help-section-heading rules-section-heading"><div><h2 id="returns-title">Returns & responsibility</h2><p>Help the next reader by returning the book in good condition and on time.</p></div><span class="rules-label"><i class="fas fa-rotate-left" aria-hidden="true"></i> Finish well</span></div>
+                        <article class="rules-card">
+                            <h3>Return the book through the library’s agreed process.</h3>
+                            <p>Return the physical book before the due date shown in your account. Staff or an administrator records the borrowing as returned. If a book is overdue, contact the library team promptly to arrange the next step.</p>
+                            <div class="rules-callout"><i class="fas fa-hand-holding-heart" aria-hidden="true"></i><span>Keep the cover, pages, and markings in good condition. If damage or loss occurs, tell the library team rather than leaving the record unresolved.</span></div>
+                        </article>
+                    </section>
+                </main>
+
+                <aside class="rules-sidebar" aria-label="Borrowing rules shortcuts">
+                    <div class="rules-side-card">
+                        <h2>On this page.</h2>
+                        <ul class="rules-side-links">
+                            <li><a href="#eligibility"><i class="fas fa-user-check" aria-hidden="true"></i>Before you borrow</a></li>
+                            <li><a href="#fees"><i class="fas fa-receipt" aria-hidden="true"></i>The two charges</a></li>
+                            <li><a href="#process"><i class="fas fa-route" aria-hidden="true"></i>How borrowing works</a></li>
+                            <li><a href="#window"><i class="fas fa-calendar-check" aria-hidden="true"></i>The 90-day window</a></li>
+                            <li><a href="#payment"><i class="fas fa-mobile-screen-button" aria-hidden="true"></i>Payment by M-Pesa</a></li>
+                            <li><a href="#reservations"><i class="fas fa-bookmark" aria-hidden="true"></i>Reservations & pickup</a></li>
+                            <li><a href="#returns"><i class="fas fa-rotate-left" aria-hidden="true"></i>Returns</a></li>
+                        </ul>
+                    </div>
+                    <div class="rules-side-card dark">
+                        <h2>Ready to read?</h2>
+                        <p>Browse the collection, choose an available book, and keep your borrowing record close at hand.</p>
+                        <a href="{{ url_for('books') }}" class="btn">Browse the catalog <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                    </div>
+                    <div class="rules-side-card">
+                        <h2>Need help?</h2>
+                        <p>For payment, account, reservation, or due-date questions, include your username, book title, and borrowing ID.</p>
+                        <a href="{{ url_for('help_center') }}" class="btn btn-outline">Open Help Center <i class="fas fa-circle-question" aria-hidden="true"></i></a>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

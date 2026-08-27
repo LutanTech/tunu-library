@@ -1,0 +1,79 @@
+{% extends "legal_page.html" %}
+
+{% block title %}Terms of Service — Tunu Library{% endblock %}
+
+{% block legal_title %}Terms of service.{% endblock %}
+{% block legal_intro %}The rules for using Tunu Library, creating an account, borrowing books, making reservations, and completing payments.{% endblock %}
+
+{% block legal_toc %}
+<li><a href="#agreement">Agreement</a></li>
+<li><a href="#accounts">Accounts</a></li>
+<li><a href="#membership">Membership & fees</a></li>
+<li><a href="#borrowing">Borrowing</a></li>
+<li><a href="#reservations">Reservations</a></li>
+<li><a href="#payments">Payments</a></li>
+<li><a href="#acceptable-use">Acceptable use</a></li>
+<li><a href="#service">Service changes</a></li>
+<li><a href="#contact">Contact</a></li>
+{% endblock %}
+
+{% block legal_body %}
+<section id="agreement" class="legal-section" aria-labelledby="agreement-title">
+    <h2 id="agreement-title">1. Agreement</h2>
+    <p>These Terms of Service govern your use of Tunu Library’s website and related library services. By creating an account, signing in, browsing the catalog, reserving a book, borrowing a book, or using a payment feature, you agree to follow these terms and any specific instructions shown in the application.</p>
+    <p>If you do not agree, do not create an account or use the borrowing, reservation, or payment features.</p>
+</section>
+
+<section id="accounts" class="legal-section" aria-labelledby="accounts-title">
+    <h2 id="accounts-title">2. Accounts and access</h2>
+    <p>You may need an account to borrow or reserve a book. You agree to provide information that is accurate and current, protect your password and sign-in details, and notify the library if you believe your account has been accessed without permission.</p>
+    <p>Accounts are personal. Do not impersonate another person, share access in a way that compromises account security, or use another member’s account to borrow, reserve, or pay.</p>
+    <p>Tunu may require an account to be signed in before showing member activity. If the session expires, sign in again and check your dashboard before repeating a borrowing or payment action.</p>
+</section>
+
+<section id="membership" class="legal-section" aria-labelledby="membership-title">
+    <h2 id="membership-title">3. Membership and fees</h2>
+    <p>Membership and borrowing are separate charges. Under the current Tunu Library rules:</p>
+    <div class="legal-table-wrap"><table class="legal-table"><thead><tr><th>Charge</th><th>Amount</th><th>Coverage</th></tr></thead><tbody><tr><td>Annual membership</td><td><strong>100 BOB</strong></td><td>Membership access for 12 months, subject to the library’s activation and renewal process.</td></tr><tr><td>Book borrowing</td><td><strong>100 BOB</strong></td><td>One borrowed book for the displayed 90-day borrowing window.</td></tr></tbody></table></div>
+    <p>An active membership is required before using borrowing and reservation features. Prices, eligibility requirements, and payment methods may be updated for future transactions; the amount shown at the relevant payment step should be checked before approval.</p>
+</section>
+
+<section id="borrowing" class="legal-section" aria-labelledby="borrowing-title">
+    <h2 id="borrowing-title">4. Borrowing books</h2>
+    <p>When you choose <strong>Borrow now</strong> for an available book, Tunu records a borrowing without requiring upfront payment. The borrowing record includes the book, the member, the borrowing date, the due date, the current status, and the payment state.</p>
+    <p>Each borrowing has a <strong>90-day borrowing window</strong> beginning on the recorded borrowing date. The due date shown in My Borrowings and on the dashboard is the date to use when planning your return.</p>
+    <ul><li>Borrow only for yourself and only when you intend to care for and return the physical book.</li><li>Pay the separate <strong>100 BOB borrowing fee</strong> from My Borrowings when ready.</li><li>Return the book through the library’s agreed process by the displayed due date.</li><li>Tell the library team promptly if a book is lost, damaged, or likely to be returned late.</li></ul>
+    <p>Tunu may prevent duplicate active borrowing records for the same member and book. Availability and borrowing eligibility may depend on the current catalog and account state.</p>
+</section>
+
+<section id="reservations" class="legal-section" aria-labelledby="reservations-title">
+    <h2 id="reservations-title">5. Reservations and pickup</h2>
+    <p>Reservations are intended to help members plan for a book that is not immediately available. An active membership and signed-in account may be required. Reservation statuses can include pending, approved, cancelled, and other states displayed by the application.</p>
+    <p>An approved reservation indicates that the library has marked the book ready according to its pickup process. Follow the pickup instructions provided by Tunu and cancel a pending or approved reservation if you no longer need it.</p>
+</section>
+
+<section id="payments" class="legal-section" aria-labelledby="payments-title">
+    <h2 id="payments-title">6. Payments and M-Pesa</h2>
+    <p>The current borrowing payment flow uses M-Pesa. You may be asked to enter the phone number that should receive the payment prompt, approve the prompt on your device, and wait for the borrowing record to update.</p>
+    <ul><li>Check the amount and borrowing ID before approving a prompt.</li><li>Do not repeatedly submit a payment after approving a prompt; first check My Borrowings and your M-Pesa confirmation.</li><li>A payment may remain pending if the payment provider, network, or callback is unavailable.</li><li>Tunu may record the payment amount, payment type, status, transaction reference, and creation time for reconciliation.</li></ul>
+    <p>M-Pesa is a third-party payment service. Its own terms, privacy rules, availability, and charges may also apply. Tunu cannot guarantee the availability of an external payment network.</p>
+</section>
+
+<section id="acceptable-use" class="legal-section" aria-labelledby="acceptable-use-title">
+    <h2 id="acceptable-use-title">7. Acceptable use and account safety</h2>
+    <p>You must not misuse the service, interfere with its operation, probe or bypass security controls, submit false information, attempt unauthorized access, abuse payment or callback endpoints, or use the catalog and member features in a way that harms other members or the library.</p>
+    <p>Do not submit passwords, M-Pesa PINs, or other sensitive secrets through support messages. Tunu staff should not need your M-Pesa PIN.</p>
+</section>
+
+<section id="service" class="legal-section" aria-labelledby="service-title">
+    <h2 id="service-title">8. Availability and changes</h2>
+    <p>The catalog, book metadata, availability, borrowing, reservation, notification, and payment features may be temporarily unavailable for maintenance, technical failures, network interruptions, or changes to third-party services. Tunu may update, suspend, or discontinue a feature while taking reasonable steps to communicate material changes.</p>
+    <p>These terms may also be updated. The effective version should be identified by its publication or last-updated date. Continued use after an update may constitute acceptance where permitted by applicable law.</p>
+</section>
+
+<section id="contact" class="legal-section" aria-labelledby="contact-title">
+    <h2 id="contact-title">9. Contact and unresolved details</h2>
+    <p>For account, borrowing, reservation, return, or payment questions, contact <a href="mailto:library@tunupublishers.com">library@tunupublishers.com</a>. Include your username, book title, borrowing or reservation ID, page address, and relevant M-Pesa confirmation details, but never include a password or M-Pesa PIN.</p>
+
+</section>
+{% endblock %}

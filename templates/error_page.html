@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}{{ error_code }} {{ error_title }} — Tunu Library{% endblock %}
+
+{% block head %}
+<style>
+    .error-page { --error-ink: var(--ink, #17231f); --error-muted: var(--muted, #718078); --error-paper: var(--paper, #f7f5ef); --error-line: var(--line, #dfe3da); --error-leaf: var(--leaf, #2f6b4f); --error-leaf-soft: var(--leaf-soft, #e6f0e8); --error-coral: var(--coral, #e46d4d); }
+    .error-wrap { width: min(100% - 48px, 1080px); min-height: min(690px, calc(100vh - 150px)); display: grid; place-items: center; margin-inline: auto; padding: 72px 0 92px; }
+    .error-card { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, .8fr); align-items: center; gap: clamp(34px, 7vw, 84px); padding: clamp(26px, 5vw, 58px); border: 1px solid var(--error-line); border-radius: 28px 28px 28px 7px; background: rgba(255,255,255,.74); box-shadow: 0 24px 65px rgba(23,35,31,.1); }
+    .error-kicker { display: inline-flex; align-items: center; gap: 9px; margin: 0 0 16px; color: var(--error-leaf); font-size: 10px; font-weight: 800; letter-spacing: .18em; line-height: 1; text-transform: uppercase; }
+    .error-kicker::before { content: ''; width: 26px; height: 2px; border-radius: 999px; background: var(--error-coral); }
+    .error-code { margin: 0; color: var(--error-coral); font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(82px, 14vw, 164px); font-weight: 400; letter-spacing: -.095em; line-height: .72; }
+    .error-title { max-width: 550px; margin: 22px 0 0; color: var(--error-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(36px, 5vw, 58px); font-weight: 400; letter-spacing: -.06em; line-height: .94; }
+    .error-message { max-width: 490px; margin: 16px 0 0; color: var(--error-muted); font-size: 13px; line-height: 1.75; }
+    .error-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 26px; }
+    .error-actions .btn { min-height: 43px; }
+    .error-note { display: flex; align-items: flex-start; gap: 8px; max-width: 490px; margin: 20px 0 0; color: var(--error-muted); font-size: 10px; line-height: 1.55; }
+    .error-note i { margin-top: 2px; color: var(--error-leaf); }
+    .error-note a { color: var(--error-leaf); font-weight: 800; text-decoration: underline; text-underline-offset: 2px; }
+    .error-visual { position: relative; min-height: 325px; display: grid; place-items: center; }
+    .error-orbit { position: absolute; width: min(100%, 345px); aspect-ratio: 1; border: 1px solid rgba(47,107,79,.16); border-radius: 50%; box-shadow: 0 0 0 30px rgba(47,107,79,.035), 0 0 0 61px rgba(47,107,79,.025); }
+    .error-orbit::before, .error-orbit::after { content: ''; position: absolute; width: 9px; height: 9px; border-radius: 50%; background: var(--error-coral); }
+    .error-orbit::before { top: 13%; right: 12%; }
+    .error-orbit::after { bottom: 12%; left: 9%; width: 6px; height: 6px; background: var(--error-leaf); }
+    .error-book { position: relative; z-index: 1; width: min(190px, 58vw); aspect-ratio: .72; display: flex; flex-direction: column; justify-content: space-between; padding: 24px 22px 20px; overflow: hidden; border-radius: 18px 18px 18px 4px; background: linear-gradient(155deg, #234c3a 0%, var(--error-ink) 72%); color: #fff; box-shadow: 14px 16px 0 rgba(228,109,77,.2), 0 24px 35px rgba(23,35,31,.2); transform: rotate(-8deg); }
+    .error-book::before { content: ''; position: absolute; top: -22px; right: -28px; width: 122px; height: 122px; border: 1px solid rgba(255,255,255,.18); border-radius: 50%; box-shadow: 0 0 0 17px rgba(255,255,255,.035); }
+    .error-book::after { content: ''; position: absolute; right: 16px; bottom: 19px; width: 8px; height: 8px; border-radius: 50%; background: var(--error-coral); }
+    .error-book-top { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; color: #a8c8b0; font-size: 9px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+    .error-book-icon { position: relative; z-index: 1; color: #f3c889; font-size: 44px; }
+    .error-book-label { position: relative; z-index: 1; max-width: 135px; font-family: 'DM Serif Display', Georgia, serif; font-size: 28px; font-weight: 400; line-height: .94; }
+    .error-book-rule { position: relative; z-index: 1; width: 42px; height: 2px; margin-top: 12px; border-radius: 999px; background: var(--error-coral); }
+    @media (max-width: 780px) { .error-wrap { width: min(100% - 36px, 1080px); min-height: auto; padding: 44px 0 70px; } .error-card { grid-template-columns: 1fr; gap: 36px; padding: 32px; } .error-visual { order: -1; min-height: 260px; } .error-orbit { width: min(270px, 74vw); } .error-book { width: 145px; } }
+    @media (max-width: 480px) { .error-wrap { width: min(100% - 28px, 1080px); padding: 30px 0 58px; } .error-card { gap: 28px; padding: 24px 20px 26px; border-radius: 21px 21px 21px 5px; } .error-visual { min-height: 218px; } .error-orbit { width: 218px; } .error-book { width: 119px; padding: 16px 15px 14px; border-radius: 13px 13px 13px 3px; box-shadow: 9px 10px 0 rgba(228,109,77,.18), 0 17px 25px rgba(23,35,31,.18); } .error-book-label { font-size: 22px; } .error-book-icon { font-size: 30px; } .error-code { font-size: 101px; } .error-title { font-size: 42px; } .error-message { font-size: 12px; } .error-actions { flex-direction: column; } .error-actions .btn { width: 100%; } }
+    @media (prefers-reduced-motion: reduce) { .error-book { transform: none; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="error-page" aria-labelledby="error-title">
+    <div class="error-wrap">
+        <section class="error-card">
+            <div>
+                <p class="error-kicker">{{ error_kicker }}</p>
+                <p class="error-code" aria-hidden="true">{{ error_code }}</p>
+                <h1 id="error-title" class="error-title">{{ error_title }}</h1>
+                <p class="error-message">{{ error_message }}</p>
+                <div class="error-actions">
+                    <a href="{{ url_for('index') }}" class="btn btn-brand"><i class="fas fa-house" aria-hidden="true"></i> Go home</a>
+                    <a href="{{ url_for('books') }}" class="btn btn-outline"><i class="fas fa-book-open" aria-hidden="true"></i> Browse the catalog</a>
+                    {% if current_user %}<a href="{{ url_for('my_borrowings') }}" class="btn btn-outline"><i class="fas fa-bookmark" aria-hidden="true"></i> My borrowings</a>{% endif %}
+                </div>
+                <p class="error-note"><i class="fas fa-circle-info" aria-hidden="true"></i><span>If this keeps happening, try again or contact <a href="mailto:library@tunupublishers.com">library@tunupublishers.com</a> with the page address and error code.</span></p>
+            </div>
+            <div class="error-visual" aria-hidden="true">
+                <div class="error-orbit"></div>
+                <div class="error-book">
+                    <div class="error-book-top"><span>Tunu</span><span>{{ error_code }}</span></div>
+                    <i class="fas {{ error_icon }} error-book-icon"></i>
+                    <div><div class="error-book-label">{{ error_visual_label }}</div><div class="error-book-rule"></div></div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+{% endblock %}

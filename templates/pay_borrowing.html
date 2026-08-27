@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Pay borrowing — Tunu Library{% endblock %}
+
+{% block head %}
+<style>
+    .pay-borrowing-page { --pay-ink: var(--ink, #17231f); --pay-muted: var(--muted, #718078); --pay-line: var(--line, #dfe3da); --pay-leaf: var(--leaf, #2f6b4f); --pay-leaf-soft: var(--leaf-soft, #e6f0e8); --pay-coral: var(--coral, #e46d4d); }
+    .pay-borrowing-wrap { width: min(100% - 48px, 760px); margin-inline: auto; padding: clamp(40px, 8vw, 88px) 0 90px; }
+    .pay-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 27px; color: var(--pay-muted); font-size: 11px; font-weight: 800; transition: color .2s ease, gap .2s ease; }
+    .pay-back:hover { gap: 11px; color: var(--pay-coral); }
+    .pay-back i { font-size: 10px; }
+    .pay-card { overflow: hidden; border: 1px solid var(--pay-line); border-radius: 20px; background: #fff; box-shadow: 0 17px 45px rgba(23,35,31,.1); }
+    .pay-card-header { padding: 30px 30px 24px; background: var(--pay-ink); color: #fff; }
+    .pay-eyebrow { display: inline-flex; align-items: center; gap: 9px; margin: 0 0 14px; color: #9fc7aa; font-size: 10px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+    .pay-eyebrow::before { content: ''; width: 24px; height: 2px; border-radius: 999px; background: var(--pay-coral); }
+    .pay-title { margin: 0; color: #fff; font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(37px, 6vw, 55px); font-weight: 400; letter-spacing: -.055em; line-height: .98; }
+    .pay-subtitle { max-width: 500px; margin: 13px 0 0; color: rgba(255,255,255,.62); font-size: 12px; line-height: 1.6; }
+    .pay-card-body { padding: 26px 30px 30px; }
+    .pay-book-row { display: flex; align-items: center; gap: 13px; padding-bottom: 22px; border-bottom: 1px solid var(--pay-line); }
+    .pay-book-icon { width: 42px; height: 52px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 10px 10px 10px 2px; background: linear-gradient(135deg, var(--pay-ink), #2c4b3c); color: #f3c889; box-shadow: 4px 4px 0 rgba(228,109,77,.17); }
+    .pay-book-label { display: block; margin-bottom: 4px; color: var(--pay-muted); font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .pay-book-title { display: block; color: var(--pay-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 22px; line-height: 1.05; }
+    .pay-summary { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 22px 0; }
+    .pay-summary-item { padding: 13px; border: 1px solid var(--pay-line); border-radius: 12px; background: var(--pay-leaf-soft); }
+    .pay-summary-item strong { display: block; color: var(--pay-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 25px; font-weight: 400; line-height: 1; }
+    .pay-summary-item span { display: block; margin-top: 5px; color: var(--pay-muted); font-size: 9px; font-weight: 800; }
+    .pay-note { display: flex; align-items: flex-start; gap: 9px; margin-bottom: 20px; padding: 13px; border: 1px solid #ead59b; border-radius: 12px; background: #fff9e8; color: #80621b; font-size: 10px; line-height: 1.55; }
+    .pay-note i { margin-top: 2px; color: #b2832b; }
+    .pay-actions { display: flex; align-items: end; justify-content: space-between; gap: 12px; }
+    .pay-form { display: flex; align-items: end; gap: 9px; }
+    .pay-phone-field { display: flex; flex-direction: column; gap: 5px; color: var(--pay-muted); font-size: 9px; font-weight: 800; }
+    .pay-phone-field input { width: 150px; height: 43px; padding: 0 11px; border: 1px solid var(--pay-line); border-radius: 999px; outline: none; color: var(--pay-ink); font-size: 11px; }
+    .pay-phone-field input:focus { border-color: var(--pay-leaf); box-shadow: 0 0 0 4px rgba(47,107,79,.1); }
+    .pay-actions .btn { min-height: 43px; }
+    .pay-actions .btn-brand { background: var(--pay-coral); }
+    .pay-actions .btn-brand:hover { background: #cf593d; }
+    @media (max-width: 520px) { .pay-borrowing-wrap { width: min(100% - 28px, 760px); padding-top: 28px; } .pay-card-header, .pay-card-body { padding-inline: 19px; } .pay-summary { grid-template-columns: 1fr; } .pay-actions { align-items: stretch; flex-direction: column-reverse; } .pay-form { width: 100%; align-items: stretch; flex-direction: column; } .pay-phone-field input { width: 100%; } .pay-actions .btn { width: 100%; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pay-borrowing-page">
+    <div class="pay-borrowing-wrap">
+        <a href="{{ url_for('my_borrowings') }}" class="pay-back"><i class="fas fa-arrow-left" aria-hidden="true"></i> Back to My borrowings</a>
+        <section class="pay-card" aria-labelledby="pay-title">
+            <header class="pay-card-header"><p class="pay-eyebrow">Payment handoff</p><h1 id="pay-title" class="pay-title">Complete your borrowing.</h1><p class="pay-subtitle">Your book is already recorded. This step is only for completing the borrowing payment.</p></header>
+            <div class="pay-card-body">
+                <div class="pay-book-row"><span class="pay-book-icon" aria-hidden="true"><i class="fas fa-book-open"></i></span><div><span class="pay-book-label">Book</span><span class="pay-book-title">{{ borrowing.book_title or "Book title" }}</span></div></div>
+                <div class="pay-summary"><div class="pay-summary-item"><strong>{{ borrowing_fee_bob or 100 }} BOB</strong><span>Borrowing fee</span></div><div class="pay-summary-item"><strong>90 days</strong><span>borrowing window</span></div></div>
+                <div class="pay-note"><i class="fas fa-circle-info" aria-hidden="true"></i><span>Annual membership is charged separately at 100 BOB for 12 months. This payment is only for borrowing this book.</span></div>
+                <div class="pay-actions"><a href="{{ url_for('my_borrowings') }}" class="btn btn-outline">Pay later</a><form method="POST" action="{{ url_for('pay_borrowing', borrowing_id=borrowing.id) }}" class="pay-form"><label class="pay-phone-field">M-Pesa phone number<input type="tel" name="phone" placeholder="07XXXXXXXX" value="{{ current_user.phone if current_user.phone is defined else '' }}" required></label><button type="submit" class="btn btn-brand">Pay 100 BOB <i class="fas fa-arrow-right" aria-hidden="true"></i></button></form></div>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

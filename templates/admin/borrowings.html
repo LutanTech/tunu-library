@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Active Borrowings — Admin{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 40px 0;">
+    <h2>Active Borrowings & Overdue Tracker</h2>
+
+    <div style="margin-top: 20px; background: white; border: 1px solid var(--line); border-radius: var(--radius-lg, 24px); overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <tr style="background: var(--paper); border-bottom: 1px solid var(--line);">
+                <th style="padding: 14px 20px;">Borrower</th>
+                <th style="padding: 14px 20px;">Book</th>
+                <th style="padding: 14px 20px;">Due Date</th>
+                <th style="padding: 14px 20px;">Status</th>
+                <th style="padding: 14px 20px;">Action</th>
+            </tr>
+            {% for b in borrowings %}
+            <tr style="border-bottom: 1px solid var(--line);">
+                <td style="padding: 14px 20px;">{{ b.user.username }}</td>
+                <td style="padding: 14px 20px;">{{ b.book_title }}</td>
+                <td style="padding: 14px 20px;">{{ b.due_date }}</td>
+                <td style="padding: 14px 20px;"><span class="status-badge status-borrowed">{{ b.status.replace('_', ' ')|title if b.status else 'Borrowing' }}</span></td>
+                <td style="padding: 14px 20px;">
+                    <form method="POST" action="{{ url_for('mark_returned', borrowing_id=b.id) }}"><button type="submit" class="btn btn-outline" style="padding: 4px 10px; font-size: 12px;">Mark Returned</button></form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}

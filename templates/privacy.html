@@ -1,0 +1,82 @@
+{% extends "legal_page.html" %}
+
+{% block title %}Privacy Policy — Tunu Library{% endblock %}
+
+{% block legal_title %}Privacy policy.{% endblock %}
+{% block legal_intro %}How Tunu Library collects, uses, stores, shares, and protects information when you use the library service.{% endblock %}
+
+{% block legal_toc %}
+<li><a href="#scope">Scope</a></li>
+<li><a href="#collect">Information collected</a></li>
+<li><a href="#use">How we use it</a></li>
+<li><a href="#share">When we share it</a></li>
+<li><a href="#payments">Payments</a></li>
+<li><a href="#cookies">Cookies & sessions</a></li>
+<li><a href="#retention">Retention</a></li>
+<li><a href="#security">Security</a></li>
+<li><a href="#rights">Your choices</a></li>
+<li><a href="#changes">Changes & contact</a></li>
+{% endblock %}
+
+{% block legal_body %}
+<section id="scope" class="legal-section" aria-labelledby="scope-title">
+    <h2 id="scope-title">1. Scope</h2>
+    <p>This Privacy Policy describes the information practices for the Tunu Library website and related account, catalog, borrowing, reservation, notification, membership, and payment features. It is a working draft based on the current application implementation and must be reviewed for applicable law and the library’s final operating practices before publication.</p>
+</section>
+
+<section id="collect" class="legal-section" aria-labelledby="collect-title">
+    <h2 id="collect-title">2. Information we collect</h2>
+    <p>Depending on how you use the service, Tunu Library may collect or receive the following categories of information:</p>
+    <div class="legal-table-wrap"><table class="legal-table"><thead><tr><th>Category</th><th>Examples</th><th>Why it is needed</th></tr></thead><tbody><tr><td>Account information</td><td>Username, email address, password hash, account creation date</td><td>To create and secure your account, sign you in, and provide member features.</td></tr><tr><td>Optional sign-in information</td><td>Google account identifier and login method</td><td>To support an enabled third-party sign-in method and associate it with your account.</td></tr><tr><td>Membership information</td><td>Membership expiry date and account status</td><td>To determine whether borrowing and reservation features are available.</td></tr><tr><td>Library activity</td><td>Book title, author, cover reference, borrowing date, due date, return date, status, rating state, reservation dates and status</td><td>To manage the collection and show your borrowing and reservation history.</td></tr><tr><td>Payment information</td><td>Amount, payment type, payment status, provider reference, payment creation time</td><td>To reconcile membership or borrowing payments and update payment status.</td></tr><tr><td>Notifications</td><td>Notification title, message, read state, creation time</td><td>To show account, reservation, borrowing, and payment updates.</td></tr><tr><td>Technical information</td><td>Session cookie, request details, error and security logs where enabled</td><td>To keep you signed in, operate the service, prevent misuse, and troubleshoot problems.</td></tr></tbody></table></div>
+    <p>Passwords should be stored as password hashes rather than plain-text passwords. Tunu should never need your M-Pesa PIN.</p>
+</section>
+
+<section id="use" class="legal-section" aria-labelledby="use-title">
+    <h2 id="use-title">3. How we use information</h2>
+    <p>Tunu Library uses information to provide and improve the library service, including to:</p>
+    <ul><li>create, authenticate, and protect member accounts;</li><li>display books, search results, availability, reservations, borrowings, due dates, and payment status;</li><li>activate or renew membership and determine borrowing eligibility;</li><li>record borrowing and reservation activity and coordinate pickup and returns;</li><li>start and reconcile M-Pesa payments and prevent duplicate payment attempts;</li><li>send service notifications and, where configured, account or transaction emails;</li><li>monitor errors, investigate misuse, maintain security, and keep the service reliable; and</li><li>comply with legal obligations or respond to lawful requests.</li></ul>
+</section>
+
+<section id="share" class="legal-section" aria-labelledby="share-title">
+    <h2 id="share-title">4. When information may be shared</h2>
+    <p>Tunu Library should limit access to information to what is necessary for the service. Information may be shared with:</p>
+    <ul><li>authorized library administrators who manage accounts, reservations, borrowings, returns, notifications, or payments;</li><li>service providers that host the application, database, email delivery, authentication, or infrastructure;</li><li>M-Pesa or another selected payment provider when needed to initiate and confirm a payment; and</li><li>authorities or professional advisers when required by law or reasonably necessary to protect people, rights, property, or the service.</li></ul>
+    <p>Tunu should not sell personal information. Any final policy should confirm the library’s actual provider list, data-processing terms, international transfer arrangements, and whether any analytics or advertising tools are enabled.</p>
+</section>
+
+<section id="payments" class="legal-section" aria-labelledby="payments-title">
+    <h2 id="payments-title">5. Payments and M-Pesa</h2>
+    <p>When you start a payment, Tunu may send the entered phone number, amount, account reference, and transaction description to the configured M-Pesa service. The payment provider may process additional information under its own privacy policy and terms.</p>
+    <p>Tunu records payment status and a provider transaction reference when returned. The current application does not store your M-Pesa PIN. Do not send a PIN to Tunu staff or enter it anywhere other than the official M-Pesa prompt.</p>
+</section>
+
+<section id="cookies" class="legal-section" aria-labelledby="cookies-title">
+    <h2 id="cookies-title">6. Cookies and sessions</h2>
+    <p>Tunu uses a session cookie named <code>tunu_session</code> to recognize a signed-in member across requests. The application configures the cookie as HttpOnly and SameSite Lax, and can enable the Secure flag when the service runs over HTTPS.</p>
+    <p>Without this session cookie, the site may not be able to keep you signed in or show member-only actions. You can control cookies through your browser, but disabling necessary session cookies may prevent login, borrowing, reservations, or payment handoff pages from working.</p>
+</section>
+
+<section id="retention" class="legal-section" aria-labelledby="retention-title">
+    <h2 id="retention-title">7. Retention and deletion</h2>
+    <p>Tunu should keep information only for as long as needed for the purposes described here, including account operation, borrowing and reservation history, payment reconciliation, security, dispute handling, and legal obligations. The library should set and publish specific retention periods for inactive accounts, borrowing records, payment records, notifications, and security logs.</p>
+    <p>If you request account deletion, some records may need to be retained in a minimized or anonymized form where required for accounting, security, fraud prevention, legal compliance, or unresolved library obligations.</p>
+</section>
+
+<section id="security" class="legal-section" aria-labelledby="security-title">
+    <h2 id="security-title">8. Security</h2>
+    <p>Tunu uses reasonable technical and organizational safeguards appropriate to the service, including password hashing, authenticated sessions, access checks for member and administrator actions, and protected payment callbacks. No internet service can guarantee absolute security.</p>
+    <p>Tell the library team promptly if you suspect unauthorized account access, an incorrect borrowing, a payment mismatch, or a security problem. Do not include your password or M-Pesa PIN in a support message.</p>
+</section>
+
+<section id="rights" class="legal-section" aria-labelledby="rights-title">
+    <h2 id="rights-title">9. Your choices and requests</h2>
+    <p>Subject to applicable law and reasonable verification, you may contact Tunu to request access to, correction of, or deletion of personal information associated with your account. You may also ask questions about how your data is used, withdraw from optional communications where available, or request help with a payment or borrowing record.</p>
+    <p>To protect members, Tunu may need to verify your identity before fulfilling a request. The library should add the specific rights, response timelines, complaint route, and responsible privacy contact required by the law that applies to its operations.</p>
+</section>
+
+<section id="changes" class="legal-section" aria-labelledby="changes-title">
+    <h2 id="changes-title">10. Changes and contact</h2>
+    <p>This policy may change when the application, payment provider, library operations, or applicable legal requirements change. The published version should show its effective date and a clear summary of material changes.</p>
+    <div class="legal-contact"><i class="fas fa-envelope" aria-hidden="true"></i><span>Privacy questions and requests can be sent to <a href="mailto:library@tunupublishers.com">library@tunupublishers.com</a>. Include your username and the nature of your request, but do not include passwords, payment PINs, or unnecessary sensitive information.</span></div>
+</section>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Registered Members — Admin{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 40px 0;">
+    <h2>Registered Members Directory</h2>
+
+    <div style="margin-top: 20px; background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <tr style="background: var(--bg-body); border-bottom: 1px solid var(--border);">
+                <th style="padding: 14px 20px;">Username</th>
+                <th style="padding: 14px 20px;">Email</th>
+                <th style="padding: 14px 20px;">Phone</th>
+                <th style="padding: 14px 20px;">Role</th>
+            </tr>
+            {% for u in users %}
+            <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 14px 20px;"><strong>{{ u.username }}</strong></td>
+                <td style="padding: 14px 20px;">{{ u.email }}</td>
+                <td style="padding: 14px 20px;">{{ u.phone or "N/A" }}</td>
+                <td style="padding: 14px 20px;">{{ "Admin" if u.is_admin else "Member" }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}

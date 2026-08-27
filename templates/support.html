@@ -1,0 +1,403 @@
+{% extends "base.html" %}
+
+{% block title %}Help Center — Tunu Library{% endblock %}
+
+{% block head %}
+<style>
+    .help-page { --help-ink: var(--ink, #17231f); --help-muted: var(--muted, #718078); --help-paper: var(--paper, #f7f5ef); --help-line: var(--line, #dfe3da); --help-leaf: var(--leaf, #2f6b4f); --help-leaf-soft: var(--leaf-soft, #e6f0e8); --help-coral: var(--coral, #e46d4d); --help-gold: var(--gold, #d6a84f); }
+    .help-container { width: min(100% - 48px, 1160px); margin-inline: auto; }
+    .help-hero { position: relative; overflow: hidden; padding: clamp(42px, 7vw, 78px) 0 85px; background: var(--help-ink); color: #fff; }
+    .help-hero::before { content: ''; position: absolute; right: -135px; top: -250px; width: 540px; height: 540px; border: 1px solid rgba(255,255,255,.13); border-radius: 50%; box-shadow: 0 0 0 34px rgba(255,255,255,.035), 0 0 0 74px rgba(255,255,255,.02); pointer-events: none; }
+    .help-hero::after { content: ''; position: absolute; left: 9%; bottom: -85px; width: 210px; height: 210px; border: 1px solid rgba(228,109,77,.3); border-radius: 50%; pointer-events: none; }
+    .help-hero-inner { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(270px, .7fr); align-items: end; gap: 48px; }
+    .help-eyebrow { display: inline-flex; align-items: center; gap: 9px; margin: 0 0 15px; color: #9fc7aa; font-size: 10px; font-weight: 800; letter-spacing: .18em; line-height: 1; text-transform: uppercase; }
+    .help-eyebrow::before { content: ''; width: 25px; height: 2px; border-radius: 999px; background: var(--help-coral); }
+    .help-title { max-width: 650px; margin: 0; color: #fff; font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(45px, 7vw, 82px); font-weight: 400; letter-spacing: -.065em; line-height: .9; }
+    .help-intro { max-width: 570px; margin: 18px 0 0; color: rgba(255,255,255,.65); font-size: 13px; line-height: 1.75; }
+    .help-hero-card { padding: 20px; border: 1px solid rgba(255,255,255,.15); border-radius: 17px; background: rgba(255,255,255,.07); }
+    .help-hero-card strong { display: block; color: #fff; font-family: 'DM Serif Display', Georgia, serif; font-size: 27px; font-weight: 400; line-height: 1; }
+    .help-hero-card p { margin: 9px 0 16px; color: rgba(255,255,255,.58); font-size: 10px; line-height: 1.65; }
+    .help-hero-card .btn { width: 100%; background: var(--help-coral); color: #fff; }
+    .help-hero-card .btn:hover { background: #cf593d; }
+
+    .help-content { position: relative; z-index: 2; margin-top: -32px; padding-bottom: 76px; }
+    .help-toolbar { display: flex; align-items: center; gap: 13px; padding: 12px; border: 1px solid var(--help-line); border-radius: 16px; background: #fff; box-shadow: 0 15px 35px rgba(23,35,31,.11); }
+    .help-search-wrap { position: relative; flex: 1; }
+    .help-search-wrap i { position: absolute; top: 50%; left: 16px; color: var(--help-muted); font-size: 13px; transform: translateY(-50%); pointer-events: none; }
+    .help-search { width: 100%; height: 48px; padding: 0 16px 0 44px; border: 1px solid var(--help-line); border-radius: 999px; outline: none; background: var(--help-paper); color: var(--help-ink); font-size: 12px; }
+    .help-search:focus { border-color: var(--help-leaf); box-shadow: 0 0 0 4px rgba(47,107,79,.11); background: #fff; }
+    .help-toolbar-actions { display: flex; gap: 8px; flex: 0 0 auto; }
+    .help-toolbar .btn { min-height: 42px; padding-inline: 13px; font-size: 10px; }
+    .help-result-status { margin: 11px 3px 0; color: var(--help-muted); font-size: 10px; }
+
+    .help-quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 17px; }
+    .help-quick-card { display: flex; align-items: flex-start; gap: 11px; min-width: 0; padding: 15px; border: 1px solid var(--help-line); border-radius: 14px; background: rgba(255,255,255,.68); transition: transform .2s ease, border .2s ease, background .2s ease, box-shadow .2s ease; }
+    .help-quick-card:hover { border-color: #b8cbbd; background: #fff; box-shadow: 0 8px 22px rgba(23,35,31,.07); transform: translateY(-2px); }
+    .help-quick-icon { width: 34px; height: 34px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 10px; background: var(--help-leaf-soft); color: var(--help-leaf); font-size: 13px; }
+    .help-quick-card:nth-child(2) .help-quick-icon { background: #fbe9e2; color: var(--help-coral); }
+    .help-quick-card:nth-child(3) .help-quick-icon { background: #f8efd9; color: #a87a29; }
+    .help-quick-card:nth-child(4) .help-quick-icon { background: #e8edf8; color: #536d9f; }
+    .help-quick-card strong { display: block; color: var(--help-ink); font-size: 11px; font-weight: 800; }
+    .help-quick-card span { display: block; margin-top: 3px; color: var(--help-muted); font-size: 9px; line-height: 1.45; }
+
+    .help-layout { display: grid; grid-template-columns: minmax(0, 1fr) 255px; align-items: start; gap: 22px; margin-top: 48px; }
+    .help-section { min-width: 0; scroll-margin-top: 102px; }
+    .help-section + .help-section { margin-top: 34px; }
+    .help-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 13px; }
+    .help-section-heading h2 { margin: 0; color: var(--help-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 32px; font-weight: 400; letter-spacing: -.045em; line-height: 1; }
+    .help-section-heading p { margin: 7px 0 0; color: var(--help-muted); font-size: 11px; line-height: 1.5; }
+    .help-section-label { display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px; border-radius: 999px; background: var(--help-leaf-soft); color: var(--help-leaf); font-size: 9px; font-weight: 800; white-space: nowrap; }
+    .help-faq-list { overflow: hidden; border: 1px solid var(--help-line); border-radius: 15px; background: #fff; box-shadow: 0 6px 20px rgba(23,35,31,.045); }
+    .help-faq { border-bottom: 1px solid var(--help-line); }
+    .help-faq:last-child { border-bottom: 0; }
+    .help-faq[hidden] { display: none; }
+    .help-faq summary { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 18px 20px; cursor: pointer; list-style: none; color: var(--help-ink); font-size: 12px; font-weight: 800; }
+    .help-faq summary::-webkit-details-marker { display: none; }
+    .help-faq summary::after { content: '+'; flex: 0 0 auto; color: var(--help-coral); font-family: 'Manrope', sans-serif; font-size: 20px; font-weight: 400; line-height: 1; }
+    .help-faq[open] summary::after { content: '−'; }
+    .help-faq[open] summary { background: #fcfcfa; }
+    .help-faq summary:hover { color: var(--help-leaf); background: #fcfcfa; }
+    .help-answer { max-width: 700px; padding: 0 55px 20px 20px; color: var(--help-muted); font-size: 11px; line-height: 1.75; }
+    .help-answer p { margin: 0 0 10px; }
+    .help-answer p:last-child { margin-bottom: 0; }
+    .help-answer strong { color: var(--help-ink); }
+    .help-answer a { color: var(--help-leaf); font-weight: 800; text-decoration: underline; text-underline-offset: 2px; }
+    .help-answer code { padding: 2px 5px; border-radius: 4px; background: var(--help-paper); color: var(--help-ink); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; }
+    .help-answer ul { margin: 8px 0 0 18px; padding: 0; }
+    .help-answer li + li { margin-top: 5px; }
+    .help-callout { display: flex; align-items: flex-start; gap: 9px; margin-top: 11px; padding: 11px 12px; border: 1px solid #ead59b; border-radius: 10px; background: #fff9e8; color: #80621b; font-size: 10px; line-height: 1.55; }
+    .help-callout i { margin-top: 2px; color: #b2832b; }
+    .help-no-results { display: none; margin-top: 22px; padding: 46px 22px; border: 1px dashed var(--help-line); border-radius: 15px; background: rgba(255,255,255,.6); text-align: center; }
+    .help-no-results.show { display: block; }
+    .help-no-results i { color: var(--help-coral); font-size: 24px; }
+    .help-no-results h2 { margin: 12px 0 6px; color: var(--help-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 26px; font-weight: 400; }
+    .help-no-results p { margin: 0; color: var(--help-muted); font-size: 11px; }
+
+    .help-sidebar { position: sticky; top: calc(var(--nav-height, 78px) + 22px); display: flex; flex-direction: column; gap: 11px; }
+    .help-side-card { padding: 18px; border: 1px solid var(--help-line); border-radius: 15px; background: rgba(255,255,255,.68); }
+    .help-side-card.dark { border-color: var(--help-ink); background: var(--help-ink); color: #fff; }
+    .help-side-card h2 { margin: 0 0 11px; color: var(--help-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 24px; font-weight: 400; line-height: 1; }
+    .help-side-card.dark h2 { color: #fff; }
+    .help-side-card p { margin: 0; color: var(--help-muted); font-size: 10px; line-height: 1.65; }
+    .help-side-card.dark p { color: rgba(255,255,255,.62); }
+    .help-side-links { display: flex; flex-direction: column; gap: 5px; margin: 0; padding: 0; list-style: none; }
+    .help-side-links a { display: flex; align-items: center; gap: 8px; padding: 8px 0; color: var(--help-muted); font-size: 10px; font-weight: 800; }
+    .help-side-links a:hover { color: var(--help-leaf); }
+    .help-side-links i { width: 15px; color: var(--help-coral); text-align: center; }
+    .help-side-card .btn { width: 100%; margin-top: 14px; }
+    .help-side-card.dark .btn { background: var(--help-coral); color: #fff; }
+    .help-side-card.dark .btn:hover { background: #cf593d; }
+    .help-contact-line { display: flex; align-items: flex-start; gap: 9px; margin-top: 12px; color: var(--help-muted); font-size: 10px; line-height: 1.5; }
+    .help-contact-line i { margin-top: 2px; color: var(--help-leaf); }
+    .help-highlight { animation: help-highlight 1.1s ease 2; }
+    @keyframes help-highlight { 0%,100% { box-shadow: none; } 50% { box-shadow: 0 0 0 4px rgba(228,109,77,.24); } }
+
+    @media (max-width: 920px) { .help-hero-inner { grid-template-columns: 1fr; gap: 27px; } .help-hero-card { max-width: 390px; } .help-layout { grid-template-columns: 1fr; } .help-sidebar { position: static; display: grid; grid-template-columns: repeat(2, 1fr); } .help-sidebar .dark { grid-column: 1 / -1; } }
+    @media (max-width: 700px) { .help-container { width: min(100% - 36px, 1160px); } .help-toolbar { align-items: stretch; flex-direction: column; } .help-toolbar-actions { justify-content: stretch; } .help-toolbar-actions .btn { flex: 1; } .help-quick-grid { grid-template-columns: repeat(2, 1fr); } .help-section-heading { align-items: flex-start; flex-direction: column; gap: 10px; } }
+    @media (max-width: 480px) { .help-container { width: min(100% - 28px, 1160px); } .help-hero { padding-top: 34px; } .help-title { font-size: 49px; } .help-intro { font-size: 12px; } .help-quick-grid { gap: 8px; } .help-quick-card { padding: 12px; gap: 8px; } .help-quick-icon { width: 30px; height: 30px; font-size: 11px; } .help-quick-card strong { font-size: 10px; } .help-quick-card span { font-size: 8px; } .help-layout { margin-top: 35px; } .help-section-heading h2 { font-size: 29px; } .help-faq summary { padding: 16px 14px; font-size: 11px; } .help-answer { padding: 0 14px 17px; font-size: 10px; } .help-sidebar { grid-template-columns: 1fr; } .help-sidebar .dark { grid-column: auto; } }
+    @media (prefers-reduced-motion: reduce) { .help-quick-card, .help-highlight { animation: none; transition: none; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="help-page">
+    <section class="help-hero" aria-labelledby="help-title">
+        <div class="help-container help-hero-inner">
+            <div>
+                <p class="help-eyebrow">Support & guidance</p>
+                <h1 id="help-title" class="help-title">Find your way around Tunu.</h1>
+                <p class="help-intro">Answers for your account, the catalog, borrowing, payments, reservations, pickup, returns and the small issues that can interrupt a good reading day.</p>
+            </div>
+            <div class="help-hero-card">
+                <strong>Need a quick answer?</strong>
+                <p>Search the support topics below or jump straight to the part of the library you need.</p>
+                <a href="#support-topics" class="btn">Browse support topics <i class="fas fa-arrow-down" aria-hidden="true"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <div class="help-content">
+        <div class="help-container">
+            <div class="help-toolbar" aria-label="Help Center controls">
+                <div class="help-search-wrap">
+                    <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+                    <input id="helpSearch" class="help-search" type="search" placeholder="Search help topics, payments, borrowing..." aria-label="Search help topics">
+                </div>
+                <div class="help-toolbar-actions">
+                    <button type="button" id="expandAll" class="btn btn-outline">Expand all</button>
+                    <button type="button" id="collapseAll" class="btn btn-outline">Collapse all</button>
+                </div>
+            </div>
+            <p id="helpResultStatus" class="help-result-status" aria-live="polite">Showing all support topics.</p>
+
+            <nav class="help-quick-grid" aria-label="Jump to support topic">
+                <a class="help-quick-card" href="#account">
+                    <span class="help-quick-icon" aria-hidden="true"><i class="fas fa-user-plus"></i></span>
+                    <span><strong>Account</strong><span>Register, sign in and profile access.</span></span>
+                </a>
+                <a class="help-quick-card" href="#borrowing">
+                    <span class="help-quick-icon" aria-hidden="true"><i class="fas fa-book-open"></i></span>
+                    <span><strong>Borrowing</strong><span>Borrowing fees, windows and due dates.</span></span>
+                </a>
+                <a class="help-quick-card" href="#payments">
+                    <span class="help-quick-icon" aria-hidden="true"><i class="fas fa-mobile-screen-button"></i></span>
+                    <span><strong>Payments</strong><span>M-Pesa and payment status guidance.</span></span>
+                </a>
+                <a class="help-quick-card" href="#reservations">
+                    <span class="help-quick-icon" aria-hidden="true"><i class="fas fa-calendar-check"></i></span>
+                    <span><strong>Pickup & returns</strong><span>Reservations, pickup and returns.</span></span>
+                </a>
+            </nav>
+
+            <div id="support-topics" class="help-layout">
+                <main>
+                    <section id="account" class="help-section" data-section="account" aria-labelledby="account-title">
+                        <div class="help-section-heading"><div><h2 id="account-title">Account & access</h2><p>Everything you need to get in, stay signed in and manage your library account.</p></div><span class="help-section-label"><i class="fas fa-user" aria-hidden="true"></i> Start here</span></div>
+                        <div class="help-faq-list">
+                            <details class="help-faq" data-tags="account register create sign up">
+                                <summary>How do I create a Tunu Library account?</summary>
+                                <div class="help-answer"><p>Select <strong>Join the library</strong> or <a href="{{ url_for('register') }}">Register here</a>. Enter your username, email and password, then submit the form. After registration, you can sign in and use the catalog, borrowing, reservations and dashboard.</p></div>
+                            </details>
+                            <details class="help-faq" data-tags="account login sign in password">
+                                <summary>How do I sign in?</summary>
+                                <div class="help-answer"><p>Choose <strong>Log in</strong> from the navigation or open the <a href="{{ url_for('login') }}">login page</a>. You can sign in with your username or email address and your password.</p><p>If you arrived from a book page, signing in will return you to the page you were trying to use.</p></div>
+                            </details>
+                            <details class="help-faq" data-tags="account login button authenticated session cookie">
+                                <summary>Why does the navigation still show “Log in” after I sign in?</summary>
+                                <div class="help-answer"><p>The navigation is rendered from the server-side session. The app must receive the <code>tunu_session</code> cookie on the next request before it can show your username, dashboard, notifications and Log out controls.</p><p>Use the Flask app URL rather than opening a template directly with <code>file://</code>. If the issue continues, sign out and in again, confirm cookies are enabled and verify that local HTTP development is not forcing the cookie to be Secure.</p></div>
+                            </details>
+                            <details class="help-faq" data-tags="account logout sign out">
+                                <summary>How do I sign out?</summary>
+                                <div class="help-answer"><p>Open your profile menu and choose <strong>Log out</strong>. Your session cookie is removed and the public navigation returns to Log in and Join the library.</p></div>
+                            </details>
+                        </div>
+                    </section>
+
+                    <section id="catalog" class="help-section" data-section="catalog" aria-labelledby="catalog-title">
+                        <div class="help-section-heading"><div><h2 id="catalog-title">Catalog & discovery</h2><p>Search the collection, inspect book details and find available copies.</p></div><span class="help-section-label"><i class="fas fa-compass" aria-hidden="true"></i> Explore</span></div>
+                        <div class="help-faq-list">
+                            <details class="help-faq" data-tags="catalog browse search books authors">
+                                <summary>How do I find a book?</summary>
+                                <div class="help-answer"><p>Use the search field in the top navigation or open the <a href="{{ url_for('books') }}">Browse catalog</a> page. Search by title or author, then use the available filters to narrow the collection.</p></div>
+                            </details>
+                            <details class="help-faq" data-tags="catalog filters grade status pagination next page">
+                                <summary>How do filters and pages work?</summary>
+                                <div class="help-answer"><p>Choose a grade or availability filter, submit the search and use the numbered pagination controls to move through the collection. Your search and filter choices should remain attached to each page link.</p></div>
+                            </details>
+                            <details class="help-faq" data-tags="catalog image cover mobile phone small screen">
+                                <summary>Why does a cover image look different on my phone?</summary>
+                                <div class="help-answer"><p>Book covers are intentionally constrained on small screens so they do not dominate the page. If a remote cover cannot load, Tunu shows a title-based fallback cover instead.</p></div>
+                            </details>
+                            <details class="help-faq" data-tags="catalog unavailable copies status">
+                                <summary>What does “All reserved” or unavailable mean?</summary>
+                                <div class="help-answer"><p>It means there is currently no available physical copy to borrow. Check the catalog again later or explore another title while copies return to the library.</p></div>
+                            </details>
+                        </div>
+                    </section>
+
+                    <section id="borrowing" class="help-section" data-section="borrowing" aria-labelledby="borrowing-title">
+                        <div class="help-section-heading"><div><h2 id="borrowing-title">Borrowing books</h2><p>Borrow now without upfront payment, then complete the borrowing payment from your account.</p></div><span class="help-section-label"><i class="fas fa-book-open" aria-hidden="true"></i> Read more</span></div>
+                        <div class="help-faq-list">
+                            <details class="help-faq" data-tags="borrowing borrow button book available">
+                                <summary>How do I borrow a book?</summary>
+                                <div class="help-answer"><p>Sign in, open an available book and choose <strong>Borrow now</strong>. The borrowing is recorded immediately without blocking you on payment. You are then taken to <a href="{{ url_for('my_borrowings') }}">My Borrowings</a>, where the borrowing and payment action are listed.</p></div>
+                            </details>
+                            <details class="help-faq" data-tags="borrowing fee price 100 bob cost charge">
+                                <summary>How much does borrowing cost?</summary>
+                                <div class="help-answer"><p>Each borrowed book has a <strong>100 BOB borrowing fee</strong>. This fee is separate from the annual membership fee. You can borrow first and pay later from the borrowing record.</p></div>
+                            </details>
+                            <details class="help-faq" data-tags="borrowing window due date 90 days deadline">
+                                <summary>How long can I keep a borrowed book?</summary>
+                                <div class="help-answer"><p>Each borrowing has a <strong>90-day borrowing window</strong>. The due date is shown in My Borrowings and on your member dashboard. Return the book by the displayed due date.</p></div>
+                            </details>
+                            <details class="help-faq" data-tags="borrowing list dashboard my borrowings payment">
+                                <summary>Where can I see my borrowed books?</summary>
+                                <div class="help-answer"><p>Open <a href="{{ url_for('my_borrowings') }}">My Borrowings</a> from your profile menu, dashboard or the borrowing confirmation. Each record shows the title, borrowed date, due date, status and its 100 BOB payment action.</p></div>
+                            </details>
+                            <details class="help-faq" data-tags="borrowing duplicate already borrowing restriction">
+                                <summary>Why can’t I borrow the same book twice?</summary>
+                                <div class="help-answer"><p>Tunu prevents duplicate active borrowing records for the same book and member. Finish or return the current borrowing before starting another borrowing of that title.</p></div>
+                            </details>
+                        </div>
+                    </section>
+
+                    <section id="payments" class="help-section" data-section="payments" aria-labelledby="payments-title">
+                        <div class="help-section-heading"><div><h2 id="payments-title">Membership & payments</h2><p>Understand the separate annual membership charge and per-book borrowing charge.</p></div><span class="help-section-label"><i class="fas fa-receipt" aria-hidden="true"></i> Money matters</span></div>
+                        <div class="help-faq-list">
+                            <details class="help-faq" data-tags="membership annual fee 100 bob year renewal">
+                                <summary>How much is annual membership?</summary>
+                                <div class="help-answer"><p>Annual membership costs <strong>100 BOB</strong> and is valid for 12 months. Membership is separate from the 100 BOB charge for each borrowed book.</p></div>
+                            </details>
+                            <details class="help-faq" data-tags="payment borrowing 100 bob pay later">
+                                <summary>What am I paying for when I choose Pay 100 BOB?</summary>
+                                <div class="help-answer"><p>That button pays the borrowing charge for one book. It does not pay or renew annual membership. The borrowing charge covers the 90-day borrowing window for that specific book.</p></div>
+                            </details>
+                            <details class="help-faq" data-tags="payment mpesa phone stk prompt">
+                                <summary>How do I pay through M-Pesa?</summary>
+                                <div class="help-answer"><p>Open the Pay action from My Borrowings, enter the M-Pesa phone number that should receive the prompt and choose <strong>Pay 100 BOB</strong>. Keep your phone nearby and approve the STK prompt if it appears.</p></div>
+                            </details>
+                            <details class="help-faq" data-tags="payment failed pending status retry">
+                                <summary>What if M-Pesa fails or does not send a prompt?</summary>
+                                <div class="help-answer"><p>Check the phone number, network connection and M-Pesa balance, then try the payment page again. If the app says M-Pesa is not configured, the library administrator must finish the payment configuration before live payments can start.</p><div class="help-callout"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i><span>Do not repeatedly submit a payment if you already approved an M-Pesa prompt. Check your borrowing status or contact support first.</span></div></div>
+                            </details>
+                            <details class="help-faq" data-tags="payment receipt paid button still showing">
+                                <summary>Why is the Pay button still visible after payment?</summary>
+                                <div class="help-answer"><p>The Pay button disappears after the M-Pesa callback marks the borrowing as paid. Refresh My Borrowings after approving the prompt. If it remains visible, save the M-Pesa confirmation and contact support so the payment can be checked against the borrowing record.</p></div>
+                            </details>
+                        </div>
+                    </section>
+
+                    <section id="reservations" class="help-section" data-section="reservations" aria-labelledby="reservations-title">
+                        <div class="help-section-heading"><div><h2 id="reservations-title">Reservations, pickup & returns</h2><p>Know what happens after reserving a copy and how to close a borrowing.</p></div><span class="help-section-label"><i class="fas fa-calendar-check" aria-hidden="true"></i> Next steps</span></div>
+                        <div class="help-faq-list">
+                            <details class="help-faq" data-tags="reservation reserve membership active">
+                                <summary>What do I need before making a reservation?</summary>
+                                <div class="help-answer"><p>You need to be signed in and have an active membership. Membership costs 100 BOB annually. Reservation status is shown in your dashboard and reservation area.</p></div>
+                            </details>
+                            <details class="help-faq" data-tags="reservation approved pickup ready station">
+                                <summary>What happens after a reservation is approved?</summary>
+                                <div class="help-answer"><p>An approved reservation means the book is ready for pickup according to the library’s pickup arrangements. Check the status in your dashboard and follow the pickup instructions provided by Tunu.</p></div>
+                            </details>
+                            <details class="help-faq" data-tags="reservation cancel dashboard">
+                                <summary>Can I cancel a reservation?</summary>
+                                <div class="help-answer"><p>Pending and approved reservations can be cancelled from your dashboard or reservations page. Completed or already cancelled reservations cannot be cancelled again.</p></div>
+                            </details>
+                            <details class="help-faq" data-tags="return returned due date borrowing">
+                                <summary>How do I return a borrowed book?</summary>
+                                <div class="help-answer"><p>Return the physical book through the library’s agreed return process before the 90-day due date. Staff or an administrator records the borrowing as returned. If you need help locating the return point, contact the library team.</p></div>
+                            </details>
+                            <details class="help-faq" data-tags="overdue late due date borrowing">
+                                <summary>What if my book is overdue?</summary>
+                                <div class="help-answer"><p>Contact the library as soon as possible, explain the situation and arrange the return. Your due date is shown in My Borrowings, so check it before planning a pickup or return.</p></div>
+                            </details>
+                        </div>
+                    </section>
+
+                    <section id="notifications" class="help-section" data-section="notifications" aria-labelledby="notifications-title">
+                        <div class="help-section-heading"><div><h2 id="notifications-title">Dashboard & notifications</h2><p>Keep track of activity after you sign in.</p></div><span class="help-section-label"><i class="fas fa-bell" aria-hidden="true"></i> Stay informed</span></div>
+                        <div class="help-faq-list">
+                            <details class="help-faq" data-tags="dashboard reservations borrowing account">
+                                <summary>What can I do from my dashboard?</summary>
+                                <div class="help-answer"><p>Your dashboard summarizes active reservations and current borrowings, gives you quick access to the catalog and lets you cancel eligible reservations. Use My Borrowings for payment details and due dates.</p></div>
+                            </details>
+                            <details class="help-faq" data-tags="notifications unread bell">
+                                <summary>Where do I find notifications?</summary>
+                                <div class="help-answer"><p>Signed-in users can use the notification bell in the navigation. Notifications may include account updates, reservation decisions and borrowing payment confirmations.</p></div>
+                            </details>
+                        </div>
+                    </section>
+
+                    <section id="troubleshooting" class="help-section" data-section="troubleshooting" aria-labelledby="troubleshooting-title">
+                        <div class="help-section-heading"><div><h2 id="troubleshooting-title">Troubleshooting</h2><p>Quick checks for common problems with the app.</p></div><span class="help-section-label"><i class="fas fa-wrench" aria-hidden="true"></i> Fix it</span></div>
+                        <div class="help-faq-list">
+                            <details class="help-faq" data-tags="troubleshooting page error 404 500">
+                                <summary>A page shows an error. What should I do?</summary>
+                                <div class="help-answer"><p>Refresh once, confirm you are using the running Flask app URL and try again. If the issue persists, note the page URL, the action you took and the visible error message before contacting support.</p></div>
+                            </details>
+                            <details class="help-faq" data-tags="troubleshooting template file jinja file browser">
+                                <summary>Why do I see template code instead of the finished page?</summary>
+                                <div class="help-answer"><p>Jinja templates must be rendered by Flask. Opening an HTML template directly with <code>file://</code> does not execute routes, sessions or template conditions. Run the app and open its local HTTP address instead.</p></div>
+                            </details>
+                            <details class="help-faq" data-tags="troubleshooting mobile responsive phone layout">
+                                <summary>Why does the page look different on a small device?</summary>
+                                <div class="help-answer"><p>The interface intentionally reflows on small screens. Navigation becomes a drawer, tables become stacked cards and book covers are capped so images remain compact and readable.</p></div>
+                            </details>
+                            <details class="help-faq" data-tags="troubleshooting contact support email help">
+                                <summary>How do I contact the library team?</summary>
+                                <div class="help-answer"><p>For account, borrowing, payment or reservation issues, include your username, the book title, the relevant borrowing or reservation ID and any M-Pesa confirmation details. Email <a href="mailto:library@tunupublishers.com">library@tunupublishers.com</a> for assistance.</p></div>
+                            </details>
+                        </div>
+                    </section>
+
+                    <div id="helpNoResults" class="help-no-results" role="status">
+                        <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+                        <h2>No matching help topic</h2>
+                        <p>Try a shorter search such as “payment”, “borrow”, “login” or “reservation”.</p>
+                    </div>
+                </main>
+
+                <aside class="help-sidebar" aria-label="Help Center shortcuts">
+                    <div class="help-side-card">
+                        <h2>Jump to a topic.</h2>
+                        <ul class="help-side-links">
+                            <li><a href="#account"><i class="fas fa-user" aria-hidden="true"></i>Account & access</a></li>
+                            <li><a href="#catalog"><i class="fas fa-book" aria-hidden="true"></i>Catalog & discovery</a></li>
+                            <li><a href="#borrowing"><i class="fas fa-book-open" aria-hidden="true"></i>Borrowing books</a></li>
+                            <li><a href="#payments"><i class="fas fa-receipt" aria-hidden="true"></i>Membership & payments</a></li>
+                            <li><a href="#reservations"><i class="fas fa-calendar-check" aria-hidden="true"></i>Pickup & returns</a></li>
+                            <li><a href="#troubleshooting"><i class="fas fa-wrench" aria-hidden="true"></i>Troubleshooting</a></li>
+                        </ul>
+                    </div>
+                    <div class="help-side-card dark">
+                        <h2>Still need help?</h2>
+                        <p>Send the library team enough detail to find your account and resolve the issue quickly.</p>
+                        <a href="mailto:library@tunupublishers.com" class="btn">Email support <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                    </div>
+                    <div class="help-side-card">
+                        <h2>Remember</h2>
+                        <p>Membership is 100 BOB annually. Each borrowed book costs 100 BOB and has a 90-day borrowing window.</p>
+                        <div class="help-contact-line"><i class="fas fa-circle-info" aria-hidden="true"></i><span>Borrowing is recorded first; payment can be completed from My Borrowings.</span></div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const search = document.getElementById('helpSearch');
+        const status = document.getElementById('helpResultStatus');
+        const noResults = document.getElementById('helpNoResults');
+        const faqs = [...document.querySelectorAll('.help-faq')];
+        const sections = [...document.querySelectorAll('.help-section')];
+        const expandAll = document.getElementById('expandAll');
+        const collapseAll = document.getElementById('collapseAll');
+
+        const updateResults = () => {
+            const query = (search?.value || '').trim().toLocaleLowerCase();
+            let visible = 0;
+            faqs.forEach((faq) => {
+                const haystack = `${faq.textContent} ${faq.dataset.tags || ''}`.toLocaleLowerCase();
+                const matches = !query || haystack.includes(query);
+                faq.hidden = !matches;
+                if (matches) visible += 1;
+            });
+            sections.forEach((section) => {
+                const visibleInSection = section.querySelectorAll('.help-faq:not([hidden])').length;
+                section.hidden = visibleInSection === 0;
+            });
+            noResults?.classList.toggle('show', visible === 0);
+            if (status) status.textContent = query ? `${visible} matching topic${visible === 1 ? '' : 's'} found.` : 'Showing all support topics.';
+        };
+
+        search?.addEventListener('input', updateResults);
+        expandAll?.addEventListener('click', () => faqs.filter((faq) => !faq.hidden).forEach((faq) => { faq.open = true; }));
+        collapseAll?.addEventListener('click', () => faqs.forEach((faq) => { faq.open = false; }));
+
+        const topicAliases = {
+            account: 'account', login: 'account', access: 'account',
+            catalog: 'catalog', search: 'catalog', books: 'catalog',
+            borrow: 'borrowing', borrowed: 'borrowing', borrowing: 'borrowing',
+            payment: 'payments', payments: 'payments', mpesa: 'payments', membership: 'payments',
+            reservation: 'reservations', reservations: 'reservations', pickup: 'reservations', returns: 'reservations', return: 'reservations',
+            dashboard: 'notifications', notifications: 'notifications',
+            troubleshooting: 'troubleshooting', error: 'troubleshooting', mobile: 'troubleshooting'
+        };
+        const topic = new URLSearchParams(window.location.search).get('topic');
+        const topicKey = topic ? topic.toLocaleLowerCase().split(/\s+/).map((part) => topicAliases[part]).find(Boolean) : null;
+        if (topicKey) {
+            const section = document.getElementById(topicKey);
+            const firstFaq = section?.querySelector('.help-faq');
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                if (firstFaq) {
+                    firstFaq.open = true;
+                    firstFaq.classList.add('help-highlight');
+                    window.setTimeout(() => firstFaq.classList.remove('help-highlight'), 4200);
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

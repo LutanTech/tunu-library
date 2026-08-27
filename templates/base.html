@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Tunu Library — Knowledge & Community{% endblock %}</title>
+    <meta name="description" content="Browse, borrow, reserve, and keep track of your reading life with Tunu Library.">
+    <meta name="theme-color" content="#17231f">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Tunu Library">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.webmanifest') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='logo/favicon-32.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='logo/apple-touch-icon.png') }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+
+    <style>
+        :root {
+            --ink: #17231f;
+            --ink-soft: #34443d;
+            --muted: #718078;
+            --paper: #f7f5ef;
+            --paper-deep: #efede4;
+            --surface: #ffffff;
+            --line: #dfe3da;
+            --line-dark: #c8d0c7;
+            --leaf: #2f6b4f;
+            --leaf-dark: #22543e;
+            --leaf-soft: #e6f0e8;
+            --coral: #e46d4d;
+            --coral-soft: #fbe9e2;
+            --gold: #d6a84f;
+            --danger: #b5473a;
+            --shadow-sm: 0 5px 20px rgba(23, 35, 31, .06);
+            --shadow-md: 0 16px 45px rgba(23, 35, 31, .11);
+            --shadow-lg: 0 28px 70px rgba(23, 35, 31, .16);
+            --radius-sm: 10px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+            --pill: 999px;
+            --nav-height: 78px;
+            --container: 1240px;
+            --ease: cubic-bezier(.22, 1, .36, 1);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            min-width: 320px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+        body.menu-open { overflow: hidden; }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            opacity: .28;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
+        }
+        a { color: inherit; text-decoration: none; }
+        button, input { font: inherit; }
+        button { color: inherit; }
+        img { max-width: 100%; display: block; }
+        :focus-visible { outline: 3px solid rgba(228, 109, 77, .72); outline-offset: 3px; }
+        ::selection { background: var(--coral); color: #fff; }
+
+        .container {
+            width: min(100% - 48px, var(--container));
+            margin-inline: auto;
+        }
+        .skip-link {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 2000;
+            transform: translateY(-180%);
+            padding: 10px 16px;
+            border-radius: var(--pill);
+            background: var(--ink);
+            color: #fff;
+            font-weight: 800;
+            transition: transform .2s ease;
+        }
+        .skip-link:focus { transform: translateY(0); }
+
+        /* Header */
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            height: var(--nav-height);
+            border-bottom: 1px solid rgba(223, 227, 218, .86);
+            background: rgba(247, 245, 239, .88);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+        .navbar {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            gap: 28px;
+        }
+        .brand-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 11px;
+            flex: 0 0 auto;
+            color: var(--ink);
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -.045em;
+        }
+        .brand-mark {
+            position: relative;
+            width: 39px;
+            height: 39px;
+            display: grid;
+            place-items: center;
+            border-radius: 13px 13px 13px 4px;
+            background: var(--ink);
+            color: #fff;
+            box-shadow: 5px 5px 0 var(--coral);
+            transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+        }
+        .brand-mark::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            right: 7px;
+            top: 7px;
+            border-radius: 50%;
+            background: var(--gold);
+        }
+        .brand-mark i { position: relative; z-index: 1; font-size: 16px; }
+        .brand-logo:hover .brand-mark { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--coral); }
+        .brand-wordmark { line-height: 1; }
+        .brand-wordmark small {
+            display: block;
+            margin-top: 5px;
+            color: var(--muted);
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: .17em;
+            text-transform: uppercase;
+        }
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin: 0 auto;
+            padding: 0;
+            list-style: none;
+
+        }
+        .nav-link {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 12px;
+            border-radius: var(--pill);
+            color: var(--muted);
+            font-size: 12px;
+            border:1px solid var(--leaf-soft);
+            letter-spacing: .01em;
+            transition: color .2s ease, background .2s ease;
+            z-index:6;
+            overflow:hidden;
+        }
+        .nav-link i { font-size: 12px; color: var(--leaf); }
+        .nav-link:hover, .nav-link.active { color: var(--ink); background: var(--leaf-soft); }
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: 0px;
+            width: 85%;
+            height: 4px;
+            background: var(--leaf-dark);
+            z-index:4;
+            transform: translateX(-50%);
+        }
+        .nav-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+        .nav-search-form { position: relative; width: clamp(150px, 16vw, 220px); }
+        .nav-search-input, .mobile-search-input {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: var(--pill);
+            background: rgba(255,255,255,.65);
+            color: var(--ink);
+            outline: none;
+            transition: border .2s ease, box-shadow .2s ease, background .2s ease;
+        }
+        .nav-search-input { height: 38px; padding: 0 13px 0 36px; font-size: 12px; }
+        .nav-search-input::placeholder, .mobile-search-input::placeholder { color: #96a19a; }
+        .nav-search-input:focus, .mobile-search-input:focus {
+            border-color: var(--leaf);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(47,107,79,.11);
+        }
+        .nav-search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            color: var(--muted);
+            font-size: 12px;
+            pointer-events: none;
+            transform: translateY(-50%);
+        }
+        .icon-button {
+            position: relative;
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--line);
+            border-radius: 50%;
+            background: rgba(255,255,255,.6);
+            cursor: pointer;
+            transition: background .2s ease, border .2s ease, transform .2s ease;
+        }
+        .icon-button:hover { border-color: var(--line-dark); background: #fff; transform: translateY(-1px); }
+        .notification-badge {
+            position: absolute;
+            top: -3px;
+            right: -3px;
+            min-width: 17px;
+            height: 17px;
+            display: grid;
+            place-items: center;
+            padding: 0 4px;
+            border: 2px solid var(--paper);
+            border-radius: var(--pill);
+            background: var(--coral);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .notif-title{
+            font-weight:bolder;
+        }
+        .user-dropdown-container { position: relative; }
+        .user-avatar-btn {
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 3px 10px 3px 4px;
+            border: 1px solid var(--line);
+            border-radius: var(--pill);
+            background: rgba(255,255,255,.6);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 800;
+            transition: background .2s ease, border .2s ease;
+        }
+        .user-avatar-btn:hover, .user-avatar-btn[aria-expanded="true"] { border-color: var(--line-dark); background: #fff; }
+        .user-avatar-icon {
+            width: 32px;
+            height: 32px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: var(--leaf-soft);
+            color: var(--leaf-dark);
+        }
+        .user-avatar-btn > i { margin-left: 2px; color: var(--muted); font-size: 9px; }
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            width: 228px;
+            display: none;
+            padding: 8px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+            background: var(--surface);
+            box-shadow: var(--shadow-md);
+        }
+        .dropdown-menu.show { display: block; animation: dropdown-in .2s var(--ease) both; }
+        @keyframes dropdown-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 10px 11px;
+            border-radius: 9px;
+            color: var(--ink-soft);
+            font-size: 12px;
+            font-weight: 700;
+            transition: background .18s ease, color .18s ease;
+        }
+        .dropdown-item i { width: 17px; color: var(--leaf); text-align: center; }
+        .dropdown-item:hover { background: var(--paper); color: var(--ink); }
+        .dropdown-divider { height: 1px; margin: 7px 4px; background: var(--line); }
+
+        /* Shared controls */
+        .btn {
+            min-height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border: 1px solid transparent;
+            border-radius: var(--pill);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 800;
+            line-height: 1;
+            transition: transform .2s var(--ease), box-shadow .2s ease, background .2s ease, border .2s ease;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-brand { background: var(--ink); color: #fff; box-shadow: 0 5px 0 rgba(23,35,31,.12); }
+        .btn-brand:hover { background: var(--leaf-dark); box-shadow: 0 8px 18px rgba(34,84,62,.2); }
+        .btn-outline { border-color: var(--line-dark); background: transparent; color: var(--ink); }
+        .btn-outline:hover { border-color: var(--ink); background: var(--surface); }
+        .btn-coral { background: var(--coral); color: #fff; box-shadow: 0 6px 16px rgba(228,109,77,.18); }
+        .btn-coral:hover { background: #cc573a; box-shadow: 0 10px 20px rgba(228,109,77,.25); }
+        .mobile-toggle-btn { display: none; width: 40px; height: 40px; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: transparent; cursor: pointer; }
+        .mobile-toggle-btn:hover { background: #fff; }
+
+        /* Alerts */
+        .flash-container { padding-top: 20px; }
+        .alert-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 10px;
+            padding: 13px 16px;
+            border: 1px solid;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-sm);
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .large-menu{
+            width:350px;
+            max-height:80vh;
+            padding-top:9px;
+        }
+
+        .notif{
+            border-bottom:1px solid rgba(184, 222, 196, 0.67);
+            font-size:small;
+            display:flex;
+            align-items:center;
+            width:100%;
+            gap:8px;
+            padding:5px;
+            color:rgb(100, 126, 108);
+
+            .notif-title{
+                color:var(--leaf-dark)
+            }
+            .notif-actions{
+                justify-content:flex-end;
+                gap:9px;
+                display:flex;
+            }
+
+            .noti-content{
+                flex-grow:1;
+            }
+
+
+            .notif-text{
+                margin-bottom:5px;
+            }
+            .notif-action-btn:nth-child(2){
+                padding:2px 5px;
+                color:red;
+                border-radius:5px;
+                border: 1px solid  rgba(211, 131, 131, 0.46);
+                &:hover{
+                    outline:2px solid rgba(255, 0, 0, 0.37);
+                }
+                i{
+
+                    color:red;
+
+                }
+            }
+            .notif-action-btn:nth-child(1){
+                padding:2px 5px;
+                color:blue;
+                border-radius:5px;
+                border: 1px solid  rgba(131, 206, 211, 0.46);
+                &:hover{
+                    outline:2px solid rgba(0, 149, 255, 0.37);
+                }
+                i{
+
+                    color:blue;
+
+                }
+            }
+            .notif-icon{
+                width:40px;
+                min-width:40px;
+                height:40px;
+                border-radius:50%;
+                display:flex;
+                background: rgba(4, 125, 44, 0.74);
+                align-items:center;
+                justify-content:center;
+               .fa-bell{
+                font-size:large;
+                color:white;
+               }
+
+
+            }
+        }
+        .alert-box span { display: inline-flex; align-items: center; gap: 9px; }
+        .alert-success { border-color: #b8dec4; background: #edf8ef; color: #27643f; }
+        .alert-warning { border-color: #ead59b; background: #fff9e8; color: #80621b; }
+        .alert-danger { border-color: #efc2bb; background: #fff0ed; color: #963f34; }
+        .alert-close { padding: 2px 4px; border: 0; background: transparent; color: inherit; cursor: pointer; opacity: .68; }
+        .alert-close:hover { opacity: 1; }
+
+        /* Content surface */
+        .main-wrapper { flex: 1; min-width: 0; }
+        .content-frame { min-height: 320px; }
+
+        /* PWA install prompt */
+        .pwa-install-card {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            z-index: 1200;
+            width: min(370px, calc(100vw - 36px));
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border: 1px solid var(--line-dark);
+            border-radius: 16px;
+            background: rgba(255,255,255,.96);
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: blur(16px);
+        }
+        .pwa-install-card[hidden] { display: none; }
+        .pwa-install-logo { width: 42px; height: 42px; flex: 0 0 auto; border-radius: 12px; object-fit: cover; }
+        .pwa-install-copy { min-width: 0; flex: 1; }
+        .pwa-install-copy strong { display: block; color: var(--ink); font-size: 11px; font-weight: 800; }
+        .pwa-install-copy span { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; line-height: 1.4; }
+        .pwa-install-card .btn { min-height: 34px; padding: 8px 11px; font-size: 10px; }
+        .pwa-install-dismiss { width: 25px; height: 25px; display: grid; place-items: center; flex: 0 0 auto; border: 0; border-radius: 50%; background: transparent; color: var(--muted); cursor: pointer; }
+        .pwa-install-dismiss:hover { background: var(--paper-deep); color: var(--ink); }
+
+        /* Footer */
+        .site-footer {
+            position: relative;
+            margin-top: 88px;
+            padding: 64px 0 26px;
+            overflow: hidden;
+            background: var(--ink);
+            color: #a9b7ae;
+        }
+        .site-footer::before {
+            content: '';
+            position: absolute;
+            top: -125px;
+            right: 8%;
+            width: 280px;
+            height: 280px;
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 50%;
+            box-shadow: 0 0 0 35px rgba(255,255,255,.02), 0 0 0 70px rgba(255,255,255,.018);
+        }
+        .footer-grid {
+            position: relative;
+            display: grid;
+            grid-template-columns: minmax(260px, 1.7fr) repeat(3, minmax(120px, 1fr));
+            gap: 48px;
+            padding-bottom: 52px;
+        }
+        .footer-brand { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 16px; color: #fff; font-size: 19px; font-weight: 800; letter-spacing: -.04em; }
+        .footer-brand i { color: var(--coral); }
+        .footer-desc { max-width: 300px; margin: 0; color: #94a69a; font-size: 12px; line-height: 1.8; }
+        .footer-column-title { margin: 2px 0 16px; color: #fff; font-size: 11px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+        .footer-links { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+        .footer-link { color: #94a69a; font-size: 12px; transition: color .2s ease; }
+        .footer-link:hover { color: #fff; }
+        .footer-bottom { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 22px; border-top: 1px solid rgba(255,255,255,.1); color: #778980; font-size: 11px; }
+        .footer-bottom p { margin: 0; }
+        .footer-bottom a { color: #a9b7ae; }
+
+        /* Mobile drawer */
+        .mobile-drawer-backdrop { position: fixed; inset: 0; z-index: 998; visibility: hidden; background: rgba(23,35,31,.42); opacity: 0; backdrop-filter: blur(6px); transition: opacity .25s ease, visibility .25s ease; }
+        .mobile-drawer-backdrop.active { visibility: visible; opacity: 1; }
+        .mobile-drawer { position: fixed; top: 0; right: 0; z-index: 999; width: min(360px, 88vw); height: 100dvh; display: flex; flex-direction: column; padding: calc(var(--nav-height) + 20px) 22px 24px; overflow-y: auto; background: var(--paper); box-shadow: -20px 0 60px rgba(23,35,31,.16); transform: translateX(105%); transition: transform .35s var(--ease); }
+        .mobile-drawer.active { transform: translateX(0); }
+        .mobile-search-wrap { position: relative; margin-bottom: 22px; }
+        .mobile-search-input { height: 46px; padding: 0 14px 0 42px; font-size: 13px; }
+        .mobile-search-wrap i { position: absolute; top: 50%; left: 16px; color: var(--muted); font-size: 13px; transform: translateY(-50%); }
+        .mobile-nav-list { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+        .mobile-nav-link { display: flex; align-items: center; gap: 13px; padding: 14px 15px; border-radius: 12px; color: var(--ink-soft); font-size: 13px; font-weight: 800; }
+        .mobile-nav-link i { width: 18px; color: var(--leaf); text-align: center; }
+        .mobile-nav-link:hover, .mobile-nav-link.active { background: var(--leaf-soft); color: var(--leaf-dark); }
+        .mobile-drawer-actions { display: flex; flex-direction: column; gap: 10px; margin-top: auto; padding-top: 22px; border-top: 1px solid var(--line); }
+        .mobile-drawer-actions .btn { width: 100%; }
+
+        @media (max-width: 1120px) {
+            .navbar { gap: 16px; }
+            .nav-menu { gap: 0; }
+            .nav-link { padding-inline: 9px; }
+            .nav-link span { display: none; }
+            .nav-link{
+                padding: 10px 30px;
+            }
+        }
+        @media (max-width: 860px) {
+            :root { --nav-height: 70px; }
+            .container { width: min(100% - 36px, var(--container)); }
+            .nav-menu, .nav-search-form { display: none; }
+            .mobile-toggle-btn { display: grid; }
+            .site-footer { margin-top: 64px; }
+            .footer-grid { grid-template-columns: 1.4fr 1fr 1fr; gap: 30px; }
+            .footer-grid > div:first-child { grid-column: 1 / -1; }
+        }
+        @media (max-width: 560px) {
+            .container { width: min(100% - 28px, var(--container)); }
+            .brand-wordmark small, .username, .fa-chevron-down { display: none; }
+            .brand-logo { font-size: 16px; }
+            .brand-mark { width: 36px; height: 36px; }
+            .nav-actions { gap: 7px; }
+            .nav-actions > .btn { display: none; }
+            .user-avatar-btn { padding-right: 4px; }
+            .footer-grid { grid-template-columns: 1fr 1fr; gap: 34px 22px; }
+            .footer-grid > div:first-child { grid-column: 1 / -1; }
+            .footer-bottom { flex-direction: column; align-items: flex-start; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <header class="site-header">
+        <div class="container navbar">
+            <a href="{{ url_for('index') }}" class="brand-logo" aria-label="Tunu Library home">
+                <span class="brand-mark" aria-hidden="true"><i class="fas fa-book-open"></i></span>
+                <span class="brand-wordmark">Tunu Library<small>Read. Discover. Belong.</small></span>
+            </a>
+
+            <nav aria-label="Primary navigation">
+                <ul class="nav-menu">
+                    <li><a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}"><i class="fas fa-house" aria-hidden="true"></i><span>Home</span></a></li>
+                    <li><a href="{{ url_for('books') }}" class="nav-link {% if request.endpoint == 'books' %}active{% endif %}"><i class="fas fa-book-open" aria-hidden="true"></i><span>Browse catalog</span></a></li>
+                    <li><a href="{{ url_for('books') }}?category=all" class="nav-link"><i class="fas fa-layer-group" aria-hidden="true"></i><span>Categories</span></a></li>
+                    <li><a href="#about" class="nav-link"><i class="fas fa-circle-info" aria-hidden="true"></i><span>About us</span></a></li>
+                </ul>
+            </nav>
+
+            <div class="nav-actions">
+                <form action="{{ url_for('books') }}" method="GET" class="nav-search-form">
+                    <i class="fas fa-magnifying-glass nav-search-icon" aria-hidden="true"></i>
+                    <input type="search" name="q" class="nav-search-input" placeholder="Search the collection" aria-label="Search books and authors">
+                </form>
+
+                {% if current_user %}
+                    <div class="noti-dropdown-container">
+                        <button type="button" class="icon-button noti-avatar-btn" id="notiBtn" aria-expanded="false" aria-controls="userNotis">
+                            <span class="noti-icon " aria-hidden="true"><i class="fas fa-bell"></i></span>
+                            {% if unread_notifications %}<span class="notification-badge">{{ unread_count if unread_count < 100 else "99+" }}</span>{% endif %}
+                        </button>
+                        <div class="dropdown-menu large-menu" id="notiDropdown" role="menu" style="overflow:auto;">
+                            {% if unread_notifications %}
+                            {% for noti in unread_notifications %}
+                             <div class="notif">
+                                <div class="notif-icon">
+                                <i class="fas fa-bell"></i>
+                                </div>
+                                <div class="noti-content">
+                                <div class="notif-title">
+                                    {{ noti.title  }}
+                                </div> 
+                                <div class="notif-text">
+                                    {{ noti.message }}
+                                </div>
+                                <div class="notif-actions">
+                                    
+
+                                    <a class="notif-action-btn" href="{{url_for('help_center', topic=noti.title + ' notification')}}"> <i class="fas fa-question-circle"></i> Help</a>
+
+                                    <a class="notif-action-btn" href="{{url_for('notification_read', id=noti.id)}}"> <i class="fas fa-check-circle"></i> Mark as Read</a>
+                                </div>
+                             </div>
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                             <i> <i class="fas fa-ban"></i> No new notifications</i>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="user-dropdown-container">
+                        <button type="button" class="user-avatar-btn" id="userMenuBtn" aria-expanded="false" aria-controls="userDropdown">
+                            <span class="user-avatar-icon" aria-hidden="true"><i class="fas fa-user"></i></span>
+                            <span class="username">{{ current_user.username or "Account" }}</span>
+                            <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                        </button>
+                        <div class="dropdown-menu" id="userDropdown" role="menu">
+                            <a href="{{ url_for('dashboard') }}" class="dropdown-item" role="menuitem"><i class="fas fa-gauge" aria-hidden="true"></i>My dashboard</a>
+                            <a href="{{ url_for('reservations') }}" class="dropdown-item" role="menuitem"><i class="fas fa-bookmark" aria-hidden="true"></i>My reservations</a>
+                            <a href="{{ url_for('my_borrowings') }}" class="dropdown-item" role="menuitem"><i class="fas fa-book-open" aria-hidden="true"></i>My borrowings</a>
+                            <a href="#" class="dropdown-item" role="menuitem"><i class="fas fa-heart" aria-hidden="true"></i>Saved favorites</a>
+                            <div class="dropdown-divider" role="separator"></div>
+                            <a href="{{ url_for('logout') }}" class="dropdown-item" role="menuitem" style="color: var(--danger);"><i class="fas fa-right-from-bracket" aria-hidden="true" style="color: currentColor;"></i>Log out</a>
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-outline">Log in</a>
+                    <a href="{{ url_for('register') }}" class="btn btn-brand">Join the library</a>
+                {% endif %}
+
+                <button type="button" class="mobile-toggle-btn" id="mobileToggleBtn" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobileDrawer">
+                    <i class="fas fa-bars" id="toggleIcon" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="mobile-drawer-backdrop" id="drawerBackdrop"></div>
+    <aside class="mobile-drawer" id="mobileDrawer" aria-label="Mobile navigation" aria-hidden="true">
+        <form action="{{ url_for('books') }}" method="GET" class="mobile-search-wrap">
+            <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+            <input type="search" name="q" class="mobile-search-input" placeholder="Search the collection" aria-label="Search books and authors">
+        </form>
+        <nav aria-label="Mobile primary navigation">
+            <ul class="mobile-nav-list">
+                <li><a href="{{ url_for('index') }}" class="mobile-nav-link {% if request.endpoint == 'index' %}active{% endif %}"><i class="fas fa-house" aria-hidden="true"></i>Home</a></li>
+                <li><a href="{{ url_for('books') }}" class="mobile-nav-link {% if request.endpoint == 'books' %}active{% endif %}"><i class="fas fa-book-open" aria-hidden="true"></i>Browse catalog</a></li>
+                <li><a href="{{ url_for('books') }}?category=all" class="mobile-nav-link"><i class="fas fa-layer-group" aria-hidden="true"></i>Categories</a></li>
+                <li><a href="#about" class="mobile-nav-link"><i class="fas fa-circle-info" aria-hidden="true"></i>About us</a></li>
+                <li><a href="{{ url_for('help_center') }}" class="mobile-nav-link"><i class="fas fa-headset" aria-hidden="true"></i>Support & help</a></li>
+                <li><a href="{{ url_for('borrowing_rules') }}" class="mobile-nav-link"><i class="fas fa-scroll" aria-hidden="true"></i>Borrowing rules</a></li>
+                {% if current_user %}<li><a href="{{ url_for('dashboard') }}" class="mobile-nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}"><i class="fas fa-gauge" aria-hidden="true"></i>My dashboard</a></li><li><a href="{{ url_for('my_borrowings') }}" class="mobile-nav-link {% if request.endpoint == 'my_borrowings' %}active{% endif %}"><i class="fas fa-book-open" aria-hidden="true"></i>My borrowings</a></li>{% endif %}
+            </ul>
+        </nav>
+        <div class="mobile-drawer-actions">
+            {% if current_user %}
+                <a href="{{ url_for('logout') }}" class="btn btn-outline" style="border-color: #efb4aa; color: var(--danger);">Log out</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-outline">Log in</a>
+                <a href="{{ url_for('register') }}" class="btn btn-brand">Join the library</a>
+            {% endif %}
+        </div>
+    </aside>
+
+    <main id="main-content" class="main-wrapper">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="container flash-container" aria-live="polite">
+                    {% for category, message in messages %}
+                        <div class="alert-box alert-{{ category if category in ['success', 'warning', 'danger'] else 'warning' }}" role="status">
+                            <span>
+                                {% if category == 'success' %}<i class="fas fa-circle-check" aria-hidden="true"></i>
+                                {% elif category == 'danger' %}<i class="fas fa-circle-xmark" aria-hidden="true"></i>
+                                {% else %}<i class="fas fa-circle-info" aria-hidden="true"></i>{% endif %}
+                                {{ message }}
+                            </span>
+                            <button type="button" class="alert-close" aria-label="Dismiss message" onclick="this.closest('.alert-box').remove();">&times;</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        <div class="content-frame">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <div class="pwa-install-card" id="pwaInstallCard" role="status" aria-live="polite" hidden>
+        <img class="pwa-install-logo" src="{{ url_for('static', filename='logo/apple-touch-icon.png') }}" alt="">
+        <div class="pwa-install-copy"><strong>Install Tunu Library</strong><span>Keep the library close for faster access.</span></div>
+        <button type="button" class="btn btn-brand" id="pwaInstallBtn">Install</button>
+        <button type="button" class="pwa-install-dismiss" id="pwaInstallDismiss" aria-label="Dismiss install prompt"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+    </div>
+
+    <footer class="site-footer" id="about">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <div class="footer-brand"><i class="fas fa-book-open" aria-hidden="true"></i>Tunu Library</div>
+                    <p class="footer-desc">A thoughtful place to find your next book, keep your reading life organized and stay connected to your community.</p>
+                </div>
+                <div>
+                    <h2 class="footer-column-title">Explore</h2>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('index') }}" class="footer-link"> <i class="fas fa-home"></i> Home</a></li>
+                        <li><a href="{{ url_for('books') }}" class="footer-link"> <i class="fas fa-book"></i> Catalog</a></li>
+                        {% if current_user %}<li><a href="{{ url_for('dashboard') }}" class="footer-link"> <i class="fas fa-user-circle"></i> Dashboard</a></li>{% else %}<li><a href="{{ url_for('register') }}" class="footer-link">Join the library</a></li>{% endif %}
+                        <li><a href="https://lutan-tech.is-great.org/?utm_source=tunu-library&utm_medium=footer-link" class="footer-link"><i class="fas fa-external-link"></i> Developer API </a></li>
+
+                    </ul>
+                </div>
+                <div id="support">
+                    <h2 class="footer-column-title">Support</h2>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('help_center') }}" class="footer-link"> <i class="fas fa-headset"></i> Help center</a></li>
+                        <li><a href="{{ url_for('reservations') }}" class="footer-link"> <i class="fas fa-bookmark"></i> Reservation guide</a></li>
+                        <li><a href="/help_center#support-topics" class="footer-link"><i class="fas fa-question-circle"></i> FAQs</a></li>
+                        <li><a href="mailto:library@tunupublishers.com" class="footer-link"> <i class="fas fa-envelope"></i> Email Us</a></li>
+
+                    </ul>
+                </div>
+                <div>
+                    <h2 class="footer-column-title">Good to know</h2>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('privacy_policy') }}" class="footer-link"> <i class="fas fa-scroll"></i> Privacy policy</a></li>
+                        <li><a href="{{ url_for('terms_of_service') }}" class="footer-link"> <i class="fas fa-pen"></i> Terms of service</a></li>
+                        <li><a href="{{ url_for('borrowing_rules') }}" class="footer-link"> <i class="fas fa-hands"></i> Borrowing rules</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Tunu Library. Built for curious minds.</p>
+                <a href="#" class="footer-link"><i class="fas fa-globe" aria-hidden="true"></i> English</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            const userDropdown = document.getElementById('userDropdown');
+            const notiBtn = document.getElementById('notiBtn');
+            const notiDropdown = document.getElementById('notiDropdown');
+            const mobileToggleBtn = document.getElementById('mobileToggleBtn');
+            const toggleIcon = document.getElementById('toggleIcon');
+            const mobileDrawer = document.getElementById('mobileDrawer');
+            const drawerBackdrop = document.getElementById('drawerBackdrop');
+
+            const closeUserMenu = () => {
+                if (!userDropdown || !userMenuBtn) return;
+                userDropdown.classList.remove('show');
+                userMenuBtn.setAttribute('aria-expanded', 'false');
+            };
+
+            if (userMenuBtn && userDropdown) {
+                userMenuBtn.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    const isOpen = userDropdown.classList.toggle('show');
+                    userMenuBtn.setAttribute('aria-expanded', String(isOpen));
+                });
+                document.addEventListener('click', closeUserMenu);
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape') closeUserMenu();
+                });
+            }
+
+            const closeNotiMenu = () => {
+                if (!notiDropdown || !notiBtn) return;
+                notiDropdown.classList.remove('show');
+                notiBtn.setAttribute('aria-expanded', 'false');
+            };
+
+            if (notiBtn && notiDropdown) {
+                notiBtn.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    const isOpen = notiDropdown.classList.toggle('show');
+                    notiBtn.setAttribute('aria-expanded', String(isOpen));
+                });
+                document.addEventListener('click', closeNotiMenu);
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape') closeNotiMenu();
+                });
+            }
+
+            const setDrawerState = (isOpen) => {
+                if (!mobileDrawer || !drawerBackdrop || !mobileToggleBtn) return;
+                mobileDrawer.classList.toggle('active', isOpen);
+                drawerBackdrop.classList.toggle('active', isOpen);
+                mobileDrawer.setAttribute('aria-hidden', String(!isOpen));
+                mobileToggleBtn.setAttribute('aria-expanded', String(isOpen));
+                mobileToggleBtn.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+                document.body.classList.toggle('menu-open', isOpen);
+                if (toggleIcon) toggleIcon.className = isOpen ? 'fas fa-xmark' : 'fas fa-bars';
+            };
+
+            if (mobileToggleBtn) mobileToggleBtn.addEventListener('click', () => setDrawerState(!mobileDrawer.classList.contains('active')));
+            if (drawerBackdrop) drawerBackdrop.addEventListener('click', () => setDrawerState(false));
+            if (mobileDrawer) mobileDrawer.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => setDrawerState(false)));
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && mobileDrawer?.classList.contains('active')) setDrawerState(false);
+            });
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 860) setDrawerState(false);
+            });
+            
+
+            function addToReserve(){
+                const bookDict = (window.activeBook)
+                let reserve = JSON.parse(localStorage.getItem('reserve') || '[]')
+
+                if(!Array.isArray(reserve)){
+                   reserve = []
+                }
+                const exists = reserve.find(i=>i.id === bookDict.id)
+                if(exists) {
+                    alert('Book already reserved')
+                    return
+                }
+                reserve.push(bookDict) 
+                localStorage.setItem('reserve', JSON.stringify(reserve))
+                alert('Reserve Updated')
+            }
+            window.addToReserve = addToReserve
+
+        });
+    </script>
+
+    <script>
+        (() => {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+            const installCard = document.getElementById('pwaInstallCard');
+            const installButton = document.getElementById('pwaInstallBtn');
+            const dismissButton = document.getElementById('pwaInstallDismiss');
+            let deferredInstallPrompt = null;
+
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('{{ url_for("service_worker") }}', { scope: '/' }).catch(() => {});
+                });
+            }
+
+            window.addEventListener('beforeinstallprompt', (event) => {
+                event.preventDefault();
+                deferredInstallPrompt = event;
+                if (installCard && !isStandalone && sessionStorage.getItem('tunu-pwa-dismissed') !== '1') {
+                    installCard.hidden = false;
+                }
+            });
+
+            installButton?.addEventListener('click', async () => {
+                if (!deferredInstallPrompt) return;
+                deferredInstallPrompt.prompt();
+                await deferredInstallPrompt.userChoice;
+                deferredInstallPrompt = null;
+                if (installCard) installCard.hidden = true;
+            });
+
+            dismissButton?.addEventListener('click', () => {
+                if (installCard) installCard.hidden = true;
+                sessionStorage.setItem('tunu-pwa-dismissed', '1');
+            });
+
+            window.addEventListener('appinstalled', () => {
+                deferredInstallPrompt = null;
+                if (installCard) installCard.hidden = true;
+            });
+        })();
+    </script>
+</body>
+</html>

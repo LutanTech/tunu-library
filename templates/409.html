@@ -1,0 +1,7 @@
+{% extends "error_page.html" %}
+{% set error_code = "409" %}
+{% set error_kicker = "That record has changed" %}
+{% set error_title = "Someone else got to this page first." %}
+{% set error_message = "The action conflicts with the current library record, such as a duplicate borrowing or reservation. Refresh the page and check your account activity." %}
+{% set error_icon = "fa-code-merge" %}
+{% set error_visual_label = "Refresh the record." %}
