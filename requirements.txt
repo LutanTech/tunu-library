@@ -1,6 +1,6 @@
 Flask
-Flask SQLAlchemy
-Flask Mail
+Flask-SQLAlchemy
+Flask-Mail
 Authlib
 Requests
 Werkzeug
