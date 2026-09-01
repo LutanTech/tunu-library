@@ -1,6 +1,9 @@
 Flask
 Flask-SQLAlchemy
 Flask-Mail
-Authlib
+OAuthlib
 Requests
 Werkzeug
+flask_limiter
+flask_migrate
+google_auth_oauthlib
