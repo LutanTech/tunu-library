@@ -9,15 +9,15 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 60px 20px;
+        padding: 40px 10px;
     }
 
     .auth-card {
         background: white;
         width: 100%;
         max-width: 480px;
-        padding: 40px;
-        border-radius: var(--radius-lg);
+        padding: 20px;
+        border-radius: var(--radius-sm);
         border: 1px solid var(--border);
         box-shadow: var(--shadow-lg);
     }
@@ -53,7 +53,7 @@
 
     .form-control {
         width: 100%;
-        padding: 12px 16px;
+        padding: 12px 40px 12px 35px;
         border: 1px solid var(--border);
         border-radius: var(--radius-md);
         font-size: 14px;
@@ -81,13 +81,26 @@
         .inp-icon{
             position: absolute;
             left: 10px;
-            top: 25%;
+            top: 50%;
+            transform: translateY(-50%);
             padding-right: 8px;
             border-right: 1px solid #11ff0026;
         }
         input{
-            padding-left: 35px;
             border: 1px solid #0c460826;
+        }
+    }
+    .toggle-password {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: var(--text-muted);
+        font-size: 14px;
+        z-index: 10;
+        &:hover {
+            color: var(--primary);
         }
     }
     .or{
@@ -146,6 +159,31 @@
             scale: 0.9;
         }
     }
+
+    .password-checklist {
+        list-style: none;
+        padding: 0;
+        margin-top: 8px;
+        font-size: 12px;
+    }
+
+    .password-checklist li {
+        color: #ef4444;
+        margin-bottom: 3px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: color 0.3s ease;
+    }
+
+    .password-checklist li.valid {
+        color: #22c55e;
+    }
+
+    button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed !important;
+    }
 </style>
 {% endblock %}
 
@@ -162,7 +200,7 @@
                 <label for="username">Username</label>
                 <div class="inp-group">
                     <div class="inp-icon"> <i class="fas fa-user-circle"></i> </div>
-                <input type="text" id="username" name="username" class="form-control" placeholder="John Reese" required>
+                <input type="text" id="username" name="username" class="form-control" placeholder="John Reese" style="padding-left: 35px;" required>
                 </div>
             </div>
 
@@ -171,7 +209,7 @@
 
                 <div class="inp-group">
                     <div class="inp-icon"> <i class="fas fa-envelope"></i> </div>
-                <input type="email" id="email" name="email" class="form-control" placeholder="you@example.com" required>
+                <input type="email" id="email" name="email" class="form-control" placeholder="you@example.com" style="padding-left: 35px;" required>
                 </div>
             </div>
 
@@ -179,7 +217,7 @@
                 <label for="phone">Phone Number</label>
                 <div class="inp-group">
                     <div class="inp-icon"> <i class="fas fa-phone"></i> </div>
-                <input type="tel" id="phone" name="phone" class="form-control" placeholder="0700 000000" required>
+                <input type="tel" id="phone" name="phone" class="form-control" placeholder="0700 000000" style="padding-left: 35px;" required>
                 </div>
             </div>
 
@@ -187,19 +225,29 @@
                 <label for="password">Password</label>
                 <div class="inp-group">
                     <div class="inp-icon"> <i class="fas fa-lock-open"></i> </div>
-                <input type="password" id="password" name="password" class="form-control" placeholder="*******" required></div>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="*******" required>
+                    <span class="toggle-password" id="toggle-password-btn">
+                        <i class="fas fa-eye" id="toggle-icon"></i>
+                    </span>
+                </div>
+                <ul class="password-checklist">
+                    <li id="length-check"><i class="fas fa-circle-xmark"></i> At least 8 characters</li>
+                    <li id="upper-check"><i class="fas fa-circle-xmark"></i> At least one uppercase letter(A-Z)</li>
+                    <li id="number-check"><i class="fas fa-circle-xmark"></i> At least one number (0-9)</li>
+                    <li id="symbol-check"><i class="fas fa-circle-xmark"></i> At least one special symbol (%&*$.)</li>
+                </ul>
             </div>
 
-            <button type="submit" class="btn btn-brand" style="width: 100%; padding: 12px; margin-top: 10px;">
+            <button type="submit" id="submit-btn" class="btn btn-brand" style="width: 100%; padding: 12px; margin-top: 10px;" disabled>
                 Create Member Account
             </button>
             <div class="or">
                 <hr> <span>or</span> <hr>
             </div>
             <div class="or-buttons">
-                <div class="or-button">
+                <a href="{{ url_for('google_login') }}" class="or-button">
                     <i class="fab fa-google"></i>
-                </div>
+                </a>
                 <div class="or-button">
                     <i class="fab fa-facebook"></i>
                 </div>
@@ -211,4 +259,57 @@
         </div>
     </div>
 </div>
+
+<script>
+    const passwordInput = document.getElementById('password');
+    const submitBtn = document.getElementById('submit-btn');
+    const togglePasswordBtn = document.getElementById('toggle-password-btn');
+    const toggleIcon = document.getElementById('toggle-icon');
+    
+    const lengthCheck = document.getElementById('length-check');
+    const upperCheck = document.getElementById('upper-check');
+    const numberCheck = document.getElementById('number-check');
+    const symbolCheck = document.getElementById('symbol-check');
+
+    togglePasswordBtn.addEventListener('click', function() {
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.className = 'fas fa-eye-slash';
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.className = 'fas fa-eye';
+        }
+    });
+
+    passwordInput.addEventListener('input', function() {
+        const val = passwordInput.value;
+
+        const hasLength = val.length >= 8;
+        const hasUpper = /[A-Z]/.test(val);
+        const hasNumber = /[0-9]/.test(val);
+        const hasSymbol = /[^A-Za-z0-9]/.test(val);
+
+        updateCheckItem(lengthCheck, hasLength);
+        updateCheckItem(upperCheck, hasUpper);
+        updateCheckItem(numberCheck, hasNumber);
+        updateCheckItem(symbolCheck, hasSymbol);
+
+        if (hasLength && hasUpper && hasNumber && hasSymbol) {
+            submitBtn.removeAttribute('disabled');
+        } else {
+            submitBtn.setAttribute('disabled', 'true');
+        }
+    });
+
+    function updateCheckItem(element, isValid) {
+        const icon = element.querySelector('i');
+        if (isValid) {
+            element.classList.add('valid');
+            icon.className = 'fas fa-circle-check';
+        } else {
+            element.classList.remove('valid');
+            icon.className = 'fas fa-circle-xmark';
+        }
+    }
+</script>
 {% endblock %}

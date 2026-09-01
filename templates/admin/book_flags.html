@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Book Flags — Admin{% endblock %}
+
+{% block content %}
+<main style="width:min(100% - 48px,1200px); margin:40px auto 80px;">
+    <header style="margin-bottom:24px;">
+        <h1 style="margin:0;">Book flags</h1>
+        <p>Review reports about damaged copies, missing pages, availability, and incorrect details.</p>
+        <p><a class="btn btn-outline" href="{{ url_for('admin_borrowing') }}">Back to borrowings</a></p>
+    </header>
+    <div style="overflow:auto; border:1px solid #dfe3da; border-radius:8px;">
+        <table style="width:100%; border-collapse:collapse; text-align:left;">
+            <thead><tr><th style="padding:12px;">Book</th><th style="padding:12px;">Reported by</th><th style="padding:12px;">Report</th><th style="padding:12px;">Status</th><th style="padding:12px;">Review</th></tr></thead>
+            <tbody>
+            {% for flag in flags %}
+                <tr style="border-top:1px solid #dfe3da; vertical-align:top;">
+                    <td style="padding:12px;"><code>{{ flag.book_id }}</code><br><small>{{ flag.created_at.strftime('%d %b %Y, %H:%M') }}</small></td>
+                    <td style="padding:12px;">{{ flag.user.username if flag.user else 'Anonymous / removed user' }}</td>
+                    <td style="padding:12px;"><strong>{{ flag.category|replace('_',' ')|title }}</strong><br>{{ flag.reason }}{% if flag.details %}<br><small>{{ flag.details }}</small>{% endif %}</td>
+                    <td style="padding:12px;">{{ flag.status|title }}{% if flag.admin_note %}<br><small>{{ flag.admin_note }}</small>{% endif %}</td>
+                    <td style="padding:12px;"><form method="POST" action="{{ url_for('review_book_flag', flag_id=flag.id) }}" style="display:grid; gap:7px;"><select name="status"><option value="reviewed">Reviewed</option><option value="resolved">Resolved</option><option value="dismissed">Dismissed</option></select><input name="admin_note" placeholder="Admin note"><button class="btn btn-brand" type="submit">Save</button></form></td>
+                </tr>
+            {% else %}
+                <tr><td colspan="5" style="padding:40px; text-align:center;">No book flags have been submitted.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if pagination and pagination.pages > 1 %}
+    <p style="margin-top:20px;">{% if pagination.has_prev %}<a href="{{ url_for('admin_book_flags',page=pagination.prev_num) }}">Previous</a>{% endif %} Page {{ pagination.page }} of {{ pagination.pages }} {% if pagination.has_next %}<a href="{{ url_for('admin_book_flags',page=pagination.next_num) }}">Next</a>{% endif %}</p>
+    {% endif %}
+</main>
+{% endblock %}

@@ -1,30 +1,132 @@
 {% extends "base.html" %}
 
-{% block title %}Manage Reservations — Admin{% endblock %}
+{% block title %}Reservations Queue — Admin{% endblock %}
+
+{% block head %}
+<style>
+    .admin-page { --adm-ink: #17231f; --adm-muted: #718078; --adm-paper: #f7f5ef; --adm-line: #dfe3da; --adm-leaf: #2f6b4f; --adm-leaf-soft: #e6f0e8; --adm-coral: #e46d4d; }
+    .admin-container { width: min(100% - 48px, 1200px); margin-inline: auto; padding: 40px 0 80px; }
+    
+    .admin-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--adm-line); }
+    .admin-header-content h1 { margin: 0; color: var(--adm-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 32px; font-weight: 400; letter-spacing: -0.02em; }
+    .admin-header-content p { margin: 4px 0 0; color: var(--adm-muted); font-size: 13px; }
+
+    .admin-nav-tabs { display: flex; gap: 8px; margin-bottom: 32px; padding: 6px; border-radius: var(--radius-md); background: var(--adm-leaf-soft); }
+    .admin-nav-tab { padding: 10px 18px; border-radius: var(--radius-sm); color: var(--adm-muted); font-size: 12px; font-weight: 800; transition: all 0.2s ease; }
+    .admin-nav-tab:hover { color: var(--adm-ink); background: rgba(255,255,255,0.5); }
+    .admin-nav-tab.active { color: #fff; background: var(--adm-leaf); box-shadow: 0 4px 12px rgba(47, 107, 79, 0.2); }
+
+    .admin-table-card { border: 1px solid var(--adm-line); border-radius: var(--radius-md); background: #fff; overflow: hidden; box-shadow: var(--shadow-sm); }
+    .admin-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .admin-table th { padding: 16px 20px; background: var(--adm-leaf-soft); color: var(--adm-leaf); font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; border-bottom: 1px solid var(--adm-line); }
+    .admin-table td { padding: 18px 20px; border-bottom: 1px solid var(--adm-line); vertical-align: middle; }
+    
+    .book-info { display: flex; align-items: center; gap: 12px; }
+    .book-title { display: block; color: var(--adm-ink); font-weight: 800; font-size: 14px; }
+    .book-author { display: block; color: var(--adm-muted); font-size: 11px; }
+
+    .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px; font-size: 10px; font-weight: 800; }
+    .status-pending { background: #fff9e8; color: #80621b; }
+    .status-approved { background: #edf8ef; color: #27643f; }
+
+    .pagination { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 32px; }
+    .page-link { display: grid; place-items: center; min-width: 36px; height: 36px; border: 1px solid var(--adm-line); border-radius: 4px; background: #fff; color: var(--adm-ink); font-size: 13px; font-weight: 700; transition: all 0.2s ease; }
+    .page-link:hover:not(.disabled) { border-color: var(--adm-leaf); color: var(--adm-leaf); }
+    .page-link.active { background: var(--adm-leaf); border-color: var(--adm-leaf); color: #fff; }
+    .page-link.disabled { opacity: 0.4; cursor: not-allowed; }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container" style="padding: 40px 0;">
-    <h2>Reservation Approvals & Queue</h2>
-    
-    <div style="margin-top: 20px; background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left;">
-            <tr style="background: var(--bg-body); border-bottom: 1px solid var(--border);">
-                <th style="padding: 14px 20px;">Member</th>
-                <th style="padding: 14px 20px;">Book Title</th>
-                <th style="padding: 14px 20px;">Date Reserved</th>
-                <th style="padding: 14px 20px;">Actions</th>
-            </tr>
-            {% for res in reservations %}
-            <tr style="border-bottom: 1px solid var(--border);">
-                <td style="padding: 14px 20px;">{{ res.user.username if res.user else "User" }}</td>
-                <td style="padding: 14px 20px;">{{ res.book.title if res.book else "Book" }}</td>
-                <td style="padding: 14px 20px;">{{ res.created_at }}</td>
-                <td style="padding: 14px 20px;">
-                    <button class="btn btn-brand" style="padding: 4px 10px; font-size: 12px;">Approve Pick-up</button>
-                </td>
-            </tr>
+<div class="admin-page">
+    <div class="admin-container">
+        <header class="admin-header">
+            <div class="admin-header-content">
+                <h1>Reservations Queue</h1>
+                <p>Manage member book reservations and approvals.</p>
+            </div>
+        </header>
+
+        <nav class="admin-nav-tabs" aria-label="Admin navigation">
+            <a href="{{ url_for('admin_dashboard') }}" class="admin-nav-tab {{ 'active' if request.endpoint == 'admin_dashboard' else '' }}">Overview</a>
+            <a href="{{ url_for('admin_borrowing') }}" class="admin-nav-tab {{ 'active' if request.endpoint == 'admin_borrowing' else '' }}">Borrowings</a>
+            <a href="{{ url_for('admin_reservations') }}" class="admin-nav-tab {{ 'active' if request.endpoint == 'admin_reservations' else '' }}">Reservations</a>
+            <a href="{{ url_for('admin_users') }}" class="admin-nav-tab {{ 'active' if request.endpoint == 'admin_users' else '' }}">Users</a>
+            <a href="{{ url_for('admin_payments') }}" class="admin-nav-tab {{ 'active' if request.endpoint == 'admin_payments' else '' }}">Payments</a>
+        </nav>
+
+        <div class="admin-table-card">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>Member</th>
+                        <th>Status</th>
+                        <th>Date Reserved</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for res in reservations %}
+                    <tr>
+                        <td>
+                            <div class="book-info">
+                                <div>
+                                    <span class="book-title">{{ res.book_title }}</span>
+                                    <span class="book-author">{{ res.book_authors or 'Unknown Author' }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span style="font-weight: 700;">{{ res.user.username }}</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ res.status }}">
+                                {{ res.status|title }}
+                            </span>
+                        </td>
+                        <td>
+                            <span style="font-size: 12px; color: var(--adm-muted);">{{ res.reserved_at.strftime('%d %b %Y') if res.reserved_at else '—' }}</span>
+                        </td>
+                        <td>
+                            {% if res.status == 'pending' %}
+                                <form method="POST" action="{{ url_for('approve_reservation', id=res.id) }}">
+                                    <button type="submit" class="btn btn-brand btn-sm">Approve</button>
+                                </form>
+                            {% else %}
+                                <span style="color: var(--adm-muted); font-size: 11px; font-weight: 700;">Processed</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="padding: 60px 20px; text-align: center; color: var(--adm-muted);">
+                            <i class="fas fa-bookmark" style="font-size: 32px; margin-bottom: 12px; display: block;"></i>
+                            No reservations in queue.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if pagination and pagination.pages > 1 %}
+        <div class="pagination">
+            <a href="{{ url_for('admin_reservations', page=pagination.prev_num) }}" class="page-link {{ 'disabled' if not pagination.has_prev else '' }}">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            {% for page_num in pagination.iter_pages() %}
+                {% if page_num %}
+                    <a href="{{ url_for('admin_reservations', page=page_num) }}" class="page-link {{ 'active' if page_num == pagination.page else '' }}">{{ page_num }}</a>
+                {% else %}
+                    <span class="page-link disabled">...</span>
+                {% endif %}
             {% endfor %}
-        </table>
+            <a href="{{ url_for('admin_reservations', page=pagination.next_num) }}" class="page-link {{ 'disabled' if not pagination.has_next else '' }}">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

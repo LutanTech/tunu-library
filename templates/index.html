@@ -457,17 +457,17 @@
                     {% for book in books[:4] %}
                         <a href="{{ url_for('book', book_id=book.id) }}" class="home-book-card" aria-label="View {{ book.title }} by {{ book.authors or 'Tunu Publishers' }}">
                             <div class="home-book-cover">
-                                <span class="home-book-cover-badge">{{ book.grade or "General" }}</span>
+                                <span class="home-book-cover-badge" translate="no">{{ book.grade or "General" }}</span>
                                 {% if book.cover %}
                                     <img src="{{ book.cover }}" alt="Cover of {{ book.title }}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                     <div class="home-fallback-cover" style="display: none;" aria-hidden="true"><i class="fa-solid fa-book"></i><span class="home-fallback-title">{{ book.title }}</span></div>
                                 {% else %}
-                                    <div class="home-fallback-cover" aria-hidden="true"><i class="fa-solid fa-book"></i><span class="home-fallback-title">{{ book.title }}</span></div>
+                                    <div class="home-fallback-cover" translate="no" aria-hidden="true"><i class="fa-solid fa-book"></i><span class="home-fallback-title">{{ book.title }}</span></div>
                                 {% endif %}
                                 <span class="home-book-view" aria-hidden="true"><i class="fas fa-arrow-up-right-from-square"></i></span>
                             </div>
                             <div class="home-book-details">
-                                <span class="home-book-title" title="{{ book.title }}">{{ book.title }}</span>
+                                <span class="home-book-title" translate="no" title="{{ book.title }}">{{ book.title }}</span>
                                 <span class="home-book-author">By {{ book.authors or "Tunu Publishers" }}</span>
                                 <div class="home-book-meta">
                                     <span class="home-book-grade">{{ book.grade or "General" }}</span>

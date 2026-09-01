@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Tunu Library — Knowledge & Community{% endblock %}</title>
-    <meta name="description" content="Browse, borrow, reserve, and keep track of your reading life with Tunu Library.">
+    <meta name="description" content="Browse, borrow, reserve and keep track of your reading life with Tunu Library.">
     <meta name="theme-color" content="#17231f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -49,6 +49,17 @@
             --ease: cubic-bezier(.22, 1, .36, 1);
         }
 
+        /* Admin Overrides - Sharper UI */
+        {% if request.path.startswith('/admin') %}
+        :root {
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            --radius-xl: 10px;
+            --pill: 4px;
+        }
+        {% endif %}
+
         *, *::before, *::after { box-sizing: border-box; }
         html { scroll-behavior: smooth; }
         body {
@@ -82,6 +93,10 @@
         img { max-width: 100%; display: block; }
         :focus-visible { outline: 3px solid rgba(228, 109, 77, .72); outline-offset: 3px; }
         ::selection { background: var(--coral); color: #fff; }
+
+        .skiptranslate{
+            display: none;
+        }
 
         .container {
             width: min(100% - 48px, var(--container));
@@ -371,68 +386,70 @@
             gap:8px;
             padding:5px;
             color:rgb(100, 126, 108);
+            font-size:x-small;
 
-            .notif-title{
-                color:var(--leaf-dark)
-            }
-            .notif-actions{
-                justify-content:flex-end;
-                gap:9px;
-                display:flex;
-            }
+            
+        }
+        .notif-title{
+            color:var(--leaf-dark)
+        }
+        .notif-actions{
+            justify-content:flex-end;
+            gap:9px;
+            display:flex;
+        }
 
-            .noti-content{
-                flex-grow:1;
-            }
+        .noti-content{
+            flex-grow:1;
+        }
 
 
-            .notif-text{
-                margin-bottom:5px;
+        .notif-text{
+            margin-bottom:5px;
+        }
+        .notif-action-btn:nth-child(2){
+            padding:2px 5px;
+            color:red;
+            border-radius:5px;
+            border: 1px solid  rgba(211, 131, 131, 0.46);
+            &:hover{
+                outline:2px solid rgba(255, 0, 0, 0.37);
             }
-            .notif-action-btn:nth-child(2){
-                padding:2px 5px;
+            i{
+
                 color:red;
-                border-radius:5px;
-                border: 1px solid  rgba(211, 131, 131, 0.46);
-                &:hover{
-                    outline:2px solid rgba(255, 0, 0, 0.37);
-                }
-                i{
 
-                    color:red;
-
-                }
             }
-            .notif-action-btn:nth-child(1){
-                padding:2px 5px;
+        }
+        .notif-action-btn:nth-child( 1){
+            padding:2px 5px;
+            color:blue;
+            border-radius:5px;
+            border: 1px solid  rgba(131, 206, 211, 0.46);
+            &:hover{
+                outline:2px solid rgba(0, 149, 255, 0.37);
+            }
+            i{
+
                 color:blue;
-                border-radius:5px;
-                border: 1px solid  rgba(131, 206, 211, 0.46);
-                &:hover{
-                    outline:2px solid rgba(0, 149, 255, 0.37);
-                }
-                i{
-
-                    color:blue;
-
-                }
-            }
-            .notif-icon{
-                width:40px;
-                min-width:40px;
-                height:40px;
-                border-radius:50%;
-                display:flex;
-                background: rgba(4, 125, 44, 0.74);
-                align-items:center;
-                justify-content:center;
-               .fa-bell{
-                font-size:large;
-                color:white;
-               }
-
 
             }
+        }
+        .notif-icon{
+            width:40px;
+            min-width:40px;
+            height:40px;
+            border-radius:50%;
+            display:flex;
+            background: rgba(4, 125, 44, 0.74);
+            align-items:center;
+            justify-content:center;
+           .fa-bell{
+            font-size:large;
+            color:white;
+           }
+
+
         }
         .alert-box span { display: inline-flex; align-items: center; gap: 9px; }
         .alert-success { border-color: #b8dec4; background: #edf8ef; color: #27643f; }
@@ -508,6 +525,34 @@
         .footer-bottom { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 22px; border-top: 1px solid rgba(255,255,255,.1); color: #778980; font-size: 11px; }
         .footer-bottom p { margin: 0; }
         .footer-bottom a { color: #a9b7ae; }
+        .language-picker { position: relative; }
+        .language-picker-btn { display: inline-flex; align-items: center; gap: 7px; min-height: 32px; padding: 7px 10px; border: 1px solid rgba(255,255,255,.14); border-radius: var(--pill); background: transparent; color: #a9b7ae; cursor: pointer; font-size: 10px; font-weight: 800; }
+        .language-picker-btn:hover, .language-picker-btn[aria-expanded="true"] { border-color: rgba(255,255,255,.3); color: #fff; }
+        .language-picker-btn .language-globe { color: var(--coral); }
+        .language-picker-btn .language-chevron { font-size: 8px; opacity: .75; }
+        .language-menu { position: absolute; right: 0; bottom: calc(100% + 9px); width: 190px; max-height: 300px; display: none; padding: 7px; overflow-y: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow-md); }
+        .language-menu.show { display: grid; gap: 2px; animation: dropdown-in .2s var(--ease) both; }
+        .language-option { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 10px; border-radius: 8px; color: var(--ink-soft); font-size: 11px; font-weight: 700; }
+        .language-option small { color: var(--muted); font-size: 9px; font-weight: 600; }
+        .language-option:hover, .language-option.active { background: var(--leaf-soft); color: var(--leaf-dark); }
+        .language-option.active::after { content: '\\f00c'; color: var(--leaf); font-family: 'Font Awesome 7 Free'; font-size: 9px; font-weight: 900; }
+        .google-language-menu { width: 235px; padding: 10px; }
+        .google-language-heading { padding: 3px 5px 8px; color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+        .google-language-options { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; max-height: 310px; overflow-y: auto; }
+        .google-language-option { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 4px; width: 100%; min-height: 31px; padding: 7px 8px; border: 0; border-radius: 8px; background: transparent; color: var(--ink-soft); cursor: pointer; font-size: 10px; font-weight: 800; text-align: start; }
+        .google-language-option small { color: var(--muted); font-size: 8px; font-weight: 600; }
+        .google-language-option:hover, .google-language-option.active { background: var(--leaf-soft); color: var(--leaf-dark); }
+        .google-language-option.active::after { content: '\\f00c'; margin-left: auto; color: var(--leaf); font-family: 'Font Awesome 7 Free'; font-size: 8px; font-weight: 900; }
+        .google-language-note { margin-top: 9px; padding-top: 8px; border-top: 1px solid var(--line); color: var(--muted); font-size: 8px; text-align: center; }
+        #google_translate_element { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
+        .goog-te-banner-frame.skiptranslate { display: none !important; }
+        body { top: 0 !important; }
+        html[dir="rtl"] .nav-search-icon { right: 14px; left: auto; }
+        html[dir="rtl"] .nav-search-input { padding-right: 36px; padding-left: 13px; }
+        html[dir="rtl"] .mobile-search-wrap i { right: 16px; left: auto; }
+        html[dir="rtl"] .mobile-search-input { padding-right: 42px; padding-left: 14px; }
+        html[dir="rtl"] .dropdown-menu { right: auto; left: 0; }
+        html[dir="rtl"] .language-menu { right: auto; left: 0; }
 
         /* Mobile drawer */
         .mobile-drawer-backdrop { position: fixed; inset: 0; z-index: 998; visibility: hidden; background: rgba(23,35,31,.42); opacity: 0; backdrop-filter: blur(6px); transition: opacity .25s ease, visibility .25s ease; }
@@ -560,14 +605,14 @@
     </style>
     {% block head %}{% endblock %}
 </head>
-<body>
+<body data-logged-in="{{ 'true' if current_user else 'false' }}">
     <a class="skip-link" href="#main-content">Skip to content</a>
 
     <header class="site-header">
         <div class="container navbar">
             <a href="{{ url_for('index') }}" class="brand-logo" aria-label="Tunu Library home">
                 <span class="brand-mark" aria-hidden="true"><i class="fas fa-book-open"></i></span>
-                <span class="brand-wordmark">Tunu Library<small>Read. Discover. Belong.</small></span>
+                <span class="brand-wordmark" no-translate translate="no">Tunu Library<small>Read. Discover. Belong.</small></span>
             </a>
 
             <nav aria-label="Primary navigation">
@@ -593,19 +638,23 @@
                         </button>
                         <div class="dropdown-menu large-menu" id="notiDropdown" role="menu" style="overflow:auto;">
                             {% if unread_notifications %}
+                           <a href="{{ url_for('notifications_tab') }}" target="_blank" style="margin-bottom: 40px; color:#00caea; text-decoration:underline"><button style="background: none; border:none;cursor:pointer;margin-bottom: 40px;"> <i class="fas fa-external-link"></i> Open in new window</button></a>
                             {% for noti in unread_notifications %}
                              <div class="notif">
                                 <div class="notif-icon">
                                 <i class="fas fa-bell"></i>
                                 </div>
                                 <div class="noti-content">
-                                <div class="notif-title">
-                                    {{ noti.title  }}
+                                <div class="notif-title" style="display:flex; justify-content:space-between">
+                                    {{ noti.title  }}   <a style="font-size:x-small; font-weight:normal;">
+                                          {{ noti.created_at.strftime('%D %H:%M:%S') }}
+                                    </a>
                                 </div> 
                                 <div class="notif-text">
                                     {{ noti.message }}
                                 </div>
                                 <div class="notif-actions">
+                                    
                                     
 
                                     <a class="notif-action-btn" href="{{url_for('help_center', topic=noti.title + ' notification')}}"> <i class="fas fa-question-circle"></i> Help</a>
@@ -623,13 +672,14 @@
                     <div class="user-dropdown-container">
                         <button type="button" class="user-avatar-btn" id="userMenuBtn" aria-expanded="false" aria-controls="userDropdown">
                             <span class="user-avatar-icon" aria-hidden="true"><i class="fas fa-user"></i></span>
-                            <span class="username">{{ current_user.username or "Account" }}</span>
+                            <span class="username" translate="no">{{ current_user.username or "Account" }}</span>
                             <i class="fas fa-chevron-down" aria-hidden="true"></i>
                         </button>
                         <div class="dropdown-menu" id="userDropdown" role="menu">
                             <a href="{{ url_for('dashboard') }}" class="dropdown-item" role="menuitem"><i class="fas fa-gauge" aria-hidden="true"></i>My dashboard</a>
-                            <a href="{{ url_for('reservations') }}" class="dropdown-item" role="menuitem"><i class="fas fa-bookmark" aria-hidden="true"></i>My reservations</a>
+                            <a href="{{ url_for('my_reservations') }}" class="dropdown-item" role="menuitem"><i class="fas fa-bookmark" aria-hidden="true"></i>My reservations</a>
                             <a href="{{ url_for('my_borrowings') }}" class="dropdown-item" role="menuitem"><i class="fas fa-book-open" aria-hidden="true"></i>My borrowings</a>
+                            {% if current_user.is_admin %}<a href="{{ url_for('admin_dashboard') }}" class="dropdown-item" role="menuitem"><i class="fas fa-shield-halved" aria-hidden="true"></i>Admin control</a>{% endif %}
                             <a href="#" class="dropdown-item" role="menuitem"><i class="fas fa-heart" aria-hidden="true"></i>Saved favorites</a>
                             <div class="dropdown-divider" role="separator"></div>
                             <a href="{{ url_for('logout') }}" class="dropdown-item" role="menuitem" style="color: var(--danger);"><i class="fas fa-right-from-bracket" aria-hidden="true" style="color: currentColor;"></i>Log out</a>
@@ -661,7 +711,7 @@
                 <li><a href="#about" class="mobile-nav-link"><i class="fas fa-circle-info" aria-hidden="true"></i>About us</a></li>
                 <li><a href="{{ url_for('help_center') }}" class="mobile-nav-link"><i class="fas fa-headset" aria-hidden="true"></i>Support & help</a></li>
                 <li><a href="{{ url_for('borrowing_rules') }}" class="mobile-nav-link"><i class="fas fa-scroll" aria-hidden="true"></i>Borrowing rules</a></li>
-                {% if current_user %}<li><a href="{{ url_for('dashboard') }}" class="mobile-nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}"><i class="fas fa-gauge" aria-hidden="true"></i>My dashboard</a></li><li><a href="{{ url_for('my_borrowings') }}" class="mobile-nav-link {% if request.endpoint == 'my_borrowings' %}active{% endif %}"><i class="fas fa-book-open" aria-hidden="true"></i>My borrowings</a></li>{% endif %}
+                {% if current_user %}<li><a href="{{ url_for('dashboard') }}" class="mobile-nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}"><i class="fas fa-gauge" aria-hidden="true"></i>My dashboard</a></li><li><a href="{{ url_for('my_borrowings') }}" class="mobile-nav-link {% if request.endpoint == 'my_borrowings' %}active{% endif %}"><i class="fas fa-book-open" aria-hidden="true"></i>My borrowings</a></li>{% if current_user.is_admin %}<li><a href="{{ url_for('admin_dashboard') }}" class="mobile-nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}"><i class="fas fa-shield-halved" aria-hidden="true"></i>Admin control</a></li>{% endif %}{% endif %}
             </ul>
         </nav>
         <div class="mobile-drawer-actions">
@@ -708,15 +758,15 @@
         <div class="container">
             <div class="footer-grid">
                 <div>
-                    <div class="footer-brand"><i class="fas fa-book-open" aria-hidden="true"></i>Tunu Library</div>
+                    <div class="footer-brand" translate="no"><i class="fas fa-book-open" aria-hidden="true"></i>Tunu Library</div>
                     <p class="footer-desc">A thoughtful place to find your next book, keep your reading life organized and stay connected to your community.</p>
                 </div>
                 <div>
                     <h2 class="footer-column-title">Explore</h2>
                     <ul class="footer-links">
                         <li><a href="{{ url_for('index') }}" class="footer-link"> <i class="fas fa-home"></i> Home</a></li>
-                        <li><a href="{{ url_for('books') }}" class="footer-link"> <i class="fas fa-book"></i> Catalog</a></li>
-                        {% if current_user %}<li><a href="{{ url_for('dashboard') }}" class="footer-link"> <i class="fas fa-user-circle"></i> Dashboard</a></li>{% else %}<li><a href="{{ url_for('register') }}" class="footer-link">Join the library</a></li>{% endif %}
+                        <li><a href="{{ url_for('books') }}" class="footer-link"> <i class="fas fa-book"></i> Browse catalog</a></li>
+                        {% if current_user %}<li><a href="{{ url_for('dashboard') }}" class="footer-link"> <i class="fas fa-user-circle"></i> My dashboard</a></li>{% else %}<li><a href="{{ url_for('register') }}" class="footer-link">Join the library</a></li>{% endif %}
                         <li><a href="https://lutan-tech.is-great.org/?utm_source=tunu-library&utm_medium=footer-link" class="footer-link"><i class="fas fa-external-link"></i> Developer API </a></li>
 
                     </ul>
@@ -725,9 +775,9 @@
                     <h2 class="footer-column-title">Support</h2>
                     <ul class="footer-links">
                         <li><a href="{{ url_for('help_center') }}" class="footer-link"> <i class="fas fa-headset"></i> Help center</a></li>
-                        <li><a href="{{ url_for('reservations') }}" class="footer-link"> <i class="fas fa-bookmark"></i> Reservation guide</a></li>
+                        <li><a href="{{ url_for('my_reservations') }}" class="footer-link"> <i class="fas fa-bookmark"></i> Reservation guide</a></li>
                         <li><a href="/help_center#support-topics" class="footer-link"><i class="fas fa-question-circle"></i> FAQs</a></li>
-                        <li><a href="mailto:library@tunupublishers.com" class="footer-link"> <i class="fas fa-envelope"></i> Email Us</a></li>
+                        <li><a href="mailto:library@tunupublishers.com" class="footer-link"> <i class="fas fa-envelope"></i> Email us</a></li>
 
                     </ul>
                 </div>
@@ -737,12 +787,38 @@
                         <li><a href="{{ url_for('privacy_policy') }}" class="footer-link"> <i class="fas fa-scroll"></i> Privacy policy</a></li>
                         <li><a href="{{ url_for('terms_of_service') }}" class="footer-link"> <i class="fas fa-pen"></i> Terms of service</a></li>
                         <li><a href="{{ url_for('borrowing_rules') }}" class="footer-link"> <i class="fas fa-hands"></i> Borrowing rules</a></li>
+                        <li><a href="https://tunupublishers.com" target="_blank" class="footer-link"> <i class="fas fa-book"></i> Publisher Website</a></li>
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 Tunu Library. Built for curious minds.</p>
-                <a href="#" class="footer-link"><i class="fas fa-globe" aria-hidden="true"></i> English</a>
+                <p>&copy; 2026 <span translate="no">Tunu Library </span>. Built for curious minds.</p>
+                <div class="language-picker notranslate" id="languagePicker">
+                    <button type="button" class="language-picker-btn" id="languagePickerBtn" aria-expanded="false" aria-controls="languageMenu">
+                        <i class="fas fa-globe language-globe" aria-hidden="true"></i><span>Language: <b id="googleLanguageName">English</b></span><i class="fas fa-chevron-up language-chevron" aria-hidden="true"></i>
+                    </button>
+                    <div class="language-menu google-language-menu" id="languageMenu" role="menu" aria-label="Change language">
+                        <div class="google-language-heading">Change language</div>
+                        <div class="google-language-options" id="googleLanguageOptions">
+                            <button type="button" class="google-language-option active" data-google-lang="en" lang="en" role="menuitem">English <small>English</small></button>
+                            <button type="button" class="google-language-option" data-google-lang="sw" lang="sw" role="menuitem">Kiswahili <small>Kiswahili</small></button>
+                            <button type="button" class="google-language-option" data-google-lang="fr" lang="fr" role="menuitem">Français <small>French</small></button>
+                            <button type="button" class="google-language-option" data-google-lang="ar" lang="ar" role="menuitem">العربية <small>Arabic</small></button>
+                            <button type="button" class="google-language-option" data-google-lang="de" lang="de" role="menuitem">Deutsch <small>German</small></button>
+                            <button type="button" class="google-language-option" data-google-lang="es" lang="es" role="menuitem">Español <small>Spanish</small></button>
+                            <button type="button" class="google-language-option" data-google-lang="pt" lang="pt" role="menuitem">Português <small>Portuguese</small></button>
+                            <button type="button" class="google-language-option" data-google-lang="it" lang="it" role="menuitem">Italiano <small>Italian</small></button>
+                            <button type="button" class="google-language-option" data-google-lang="zh-CN" lang="zh-CN" role="menuitem">简体中文 <small>Chinese</small></button>
+                            <button type="button" class="google-language-option" data-google-lang="hi" lang="hi" role="menuitem">हिन्दी <small>Hindi</small></button>
+                            <button type="button" class="google-language-option" data-google-lang="ja" lang="ja" role="menuitem">日本語 <small>Japanese</small></button>
+                            <button type="button" class="google-language-option" data-google-lang="ko" lang="ko" role="menuitem">한국어 <small>Korean</small></button>
+                            <button type="button" class="google-language-option" data-google-lang="tr" lang="tr" role="menuitem">Türkçe <small>Turkish</small></button>
+                            <button type="button" class="google-language-option" data-google-lang="ru" lang="ru" role="menuitem">Русский <small>Russian</small></button>
+                            <button type="button" class="google-language-option" data-google-lang="nl" lang="nl" role="menuitem">Nederlands <small>Dutch</small></button>
+                        </div>
+                        <div id="google_translate_element" aria-hidden="true"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </footer>
@@ -816,67 +892,99 @@
             });
             
 
-            function addToReserve(){
-                const bookDict = (window.activeBook)
-                let reserve = JSON.parse(localStorage.getItem('reserve') || '[]')
-
-                if(!Array.isArray(reserve)){
-                   reserve = []
+            window.addToReserve = function() {
+                if (window.activeBook) {
+                    if (Wishlist.add(window.activeBook)) {
+                        alert('Added to wishlist');
+                    } else {
+                        alert('Already in wishlist');
+                    }
                 }
-                const exists = reserve.find(i=>i.id === bookDict.id)
-                if(exists) {
-                    alert('Book already reserved')
-                    return
-                }
-                reserve.push(bookDict) 
-                localStorage.setItem('reserve', JSON.stringify(reserve))
-                alert('Reserve Updated')
             }
-            window.addToReserve = addToReserve
 
         });
     </script>
+    <script src="{{ url_for('static', filename='scripts/wishlist.js') }}"></script>
 
     <script>
+        window.googleTranslateElementInit = function() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'sw,fr,ar,de,es,pt,it,zh-CN,hi,ja,ko,tr,ru,nl',
+                autoDisplay: false,
+                multilanguagePage: true
+            }, 'google_translate_element');
+            window.dispatchEvent(new Event('google-translate-ready'));
+        };
         (() => {
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-            const installCard = document.getElementById('pwaInstallCard');
-            const installButton = document.getElementById('pwaInstallBtn');
-            const dismissButton = document.getElementById('pwaInstallDismiss');
-            let deferredInstallPrompt = null;
-
-            if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('{{ url_for("service_worker") }}', { scope: '/' }).catch(() => {});
-                });
-            }
-
-            window.addEventListener('beforeinstallprompt', (event) => {
-                event.preventDefault();
-                deferredInstallPrompt = event;
-                if (installCard && !isStandalone && sessionStorage.getItem('tunu-pwa-dismissed') !== '1') {
-                    installCard.hidden = false;
+            const p = document.getElementById('languagePicker'),
+                b = document.getElementById('languagePickerBtn'),
+                m = document.getElementById('languageMenu'),
+                n = document.getElementById('googleLanguageName'),
+                o = [...document.querySelectorAll('.google-language-option')],
+                names = Object.fromEntries(o.map(x => [x.dataset.googleLang, x.firstChild.textContent.trim()]));
+            let lang = localStorage.getItem('tunu-google-language') || 'en';
+            const cookie = c => {
+                document.cookie = `googtrans=/en/${c};path=/`;
+            };
+            const clearCookie = () => {
+                document.cookie = 'googtrans=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+                document.cookie = 'googtrans=;max-age=0;path=/';
+            };
+            const visual = c => {
+                lang = c;
+                localStorage.setItem('tunu-google-language', c);
+                if (n) n.textContent = names[c] || 'English';
+                o.forEach(x => x.classList.toggle('active', x.dataset.googleLang === c));
+                document.documentElement.lang = c;
+                document.documentElement.dir = c === 'ar' ? 'rtl' : 'ltr';
+            };
+            const apply = c => {
+                const s = document.querySelector('.goog-te-combo');
+                if (!s) return false;
+                s.value = c;
+                s.dispatchEvent(new Event('change', {
+                    bubbles: true
+                }));
+                return true;
+            };
+            const wait = c => {
+                let i = 0;
+                const t = setInterval(() => {
+                    if (apply(c) || ++i > 30) clearInterval(t);
+                }, 200);
+            };
+            visual(lang);
+            b?.addEventListener('click', e => {
+                e.stopPropagation();
+                m?.classList.toggle('show');
+            });
+            o.forEach(x => x.addEventListener('click', () => {
+                const c = x.dataset.googleLang;
+                visual(c);
+                m?.classList.remove('show');
+                if (c === 'en') {
+                    clearCookie();
+                    window.location.reload();
+                    return;
                 }
+                cookie(c);
+                wait(c);
+            }));
+            document.addEventListener('click', e => {
+                if (p && !p.contains(e.target)) m?.classList.remove('show');
             });
-
-            installButton?.addEventListener('click', async () => {
-                if (!deferredInstallPrompt) return;
-                deferredInstallPrompt.prompt();
-                await deferredInstallPrompt.userChoice;
-                deferredInstallPrompt = null;
-                if (installCard) installCard.hidden = true;
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape') m?.classList.remove('show');
             });
-
-            dismissButton?.addEventListener('click', () => {
-                if (installCard) installCard.hidden = true;
-                sessionStorage.setItem('tunu-pwa-dismissed', '1');
-            });
-
-            window.addEventListener('appinstalled', () => {
-                deferredInstallPrompt = null;
-                if (installCard) installCard.hidden = true;
-            });
+            window.addEventListener('google-translate-ready', () => wait(lang));
+            if (lang !== 'en') wait(lang);
         })();
-    </script>
+        
+        </script>
+        
+
+    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
+
 </body>
 </html>

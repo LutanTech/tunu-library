@@ -147,7 +147,7 @@
                         <div class="detail-fallback-cover" aria-hidden="true"><i class="fa-solid fa-book"></i><span class="detail-fallback-title">{{ book.title }}</span></div>
                     {% endif %}
                 </div>
-                <p class="detail-cover-note"><i class="fas fa-circle-info" aria-hidden="true"></i><span>Physical copy available for pickup. Borrowing costs 100 BOB for the 90-day borrowing window.</span></p>
+                <p class="detail-cover-note"><i class="fas fa-circle-info" aria-hidden="true"></i><span>Request this physical copy today. Pickup is scheduled two days after your request, and an admin must confirm the handover before the 90-day borrowing window begins.</span></p>
             </aside>
 
             <main class="detail-content">
@@ -181,31 +181,79 @@
                 </section>
 
                 {% if current_user %}
-                    {% if is_already_borrowed %}
+{% if is_already_borrowed %}
                         <section class="detail-reservation detail-reservation-warning" aria-labelledby="borrowing-title">
                             <div><h2 id="borrowing-title">Already borrowed</h2><p>This book is already in your borrowings list.</p></div>
-                            <a href="{{ url_for('my_borrowings') }}" class="btn btn-brand">View my Borrowings <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                            <a href="{{ url_for('my_borrowings') }}" class="btn btn-brand">View my borrowings <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
                         </section>
-  
+                    {% elif is_already_requested %}
+                        <section class="detail-reservation detail-reservation-warning" aria-labelledby="requested-title">
+                            <div><h2 id="requested-title">Borrowing requested</h2><p>Your pickup is scheduled two days after your request. An admin must confirm the handover before this book becomes an active borrowing.</p></div>
+                            <a href="{{ url_for('my_borrowings') }}" class="btn btn-brand">View my borrowings <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                        </section>
                     {% elif book.available_copies and book.available_copies > 0 %}
-                        <form method="POST" action="{{ url_for('borrow_book', book_id=book.id) }}" class="detail-reservation detail-reservation-available">
-                            <div><h2>Borrow this book</h2><p>Borrow now without upfront payment. The borrowing fee will be required when picking up your book and the book has a 90-day reading window.</p></div>
-                            <button type="submit" class="btn btn-brand"><i class="fa-solid fa-bookmark" aria-hidden="true"></i> Borrow now</button>
-                            <button type="button" class="btn" style="border:1px solid black" onclick='addToReserve()'><i class="fa-solid fa-bookmark" aria-hidden="true"></i> Add to reserve</button>
-                        </form>
+                        <div class="detail-reservation detail-reservation-available">
+                            <div><h2>Borrow this book</h2><p>Request the book without upfront payment. Come to collect it two days after your request. Only an admin can confirm the handover; the 90-day borrowing window starts then.</p></div>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <form method="POST" action="{{ url_for('borrow_book', book_id=book.id) }}" style="margin:0;">
+                                    <button type="submit" class="btn btn-brand"><i class="fa-solid fa-hand-holding-hand" aria-hidden="true"></i> Borrow Book</button>
+                                </form>
+                                <button type="button" class="btn btn-outline" style="width:fit-content" onclick='addToReserve()'><i class="fa-solid fa-heart" aria-hidden="true"></i> Add to wishlist</button>
+                            </div>
+                        </div>
                     {% else %}
                         <section class="detail-reservation detail-reservation-unavailable" aria-labelledby="unavailable-title">
-                            <div><h2 id="unavailable-title">Currently unavailable</h2><p>All physical copies are currently checked out or reserved.</p></div>
+                            <div><h2 id="unavailable-title">Currently unavailable</h2><p>All physical copies are currently checked out. Add to your wishlist to track it.</p></div>
+                            <button type="button" class="btn btn-brand" onclick='addToReserve()'><i class="fa-solid fa-heart" aria-hidden="true"></i> Add to wishlist</button>
                         </section>
                     {% endif %}
                 {% else %}
                     <section class="detail-login" aria-labelledby="login-title">
                         <div><h2 id="login-title">Sign in to borrow</h2><p>Log into your member account to borrow this book. Annual membership is 100 BOB.</p></div>
-                        <a href="{{ url_for('login', next=request.path) }}" class="btn btn-brand"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> Log in to borrow</a>
-                        <button type="button" class="btn btn-brand"><i class="fa-solid fa-bookmark" aria-hidden="true"></i> Add to reserve</button>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <a href="{{ url_for('login', next=request.path) }}" class="btn btn-brand"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> Log in to borrow</a>
+                            <button type="button" class="btn btn-outline" onclick='addToReserve()'><i class="fa-solid fa-heart" aria-hidden="true"></i> Add to wishlist</button>
+                        </div>
                     </section>
                 {% endif %}
+                {% if current_user %}
+                <details class="detail-summary" style="margin-top: 20px; background-color: #f4f6f4; border: 1px solid #dcdfdc; border-radius: 12px; font-family: sans-serif; color: #222;">
+                    <summary style="cursor: pointer; font-weight: 600; padding: 14px 18px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; list-style: none; color: #1e3a2b; border-bottom: 1px solid #e2e6e2; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                        <i class="fas fa-flag" aria-hidden="true" style="font-size: 0.85rem;"></i> Report a problem with this book
+                    </summary>
+                    
+                    <form method="POST" action="{{ url_for('flag_book', book_id=book.id) }}" style="display: flex; flex-direction: column; gap: 16px; padding: 20px;">
+                        
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <label style="font-size: 0.85rem; font-weight: 600; color: #2d3748;">Select type</label>
+                            <select name="category" required style="width: 100%; padding: 10px 14px; background-color: #e8ebe8; border: 1px solid #cfd5cf; border-radius: 20px; outline: none; font-size: 0.9rem; color: #333;">
+                                <option value="" disabled selected>Select a book</option>
+                                <option value="damaged">Damaged copy</option>
+                                <option value="missing_pages">Missing pages</option>
+                                <option value="incorrect_details">Incorrect book details</option>
+                                <option value="availability">Availability problem</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
                 
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <label style="font-size: 0.85rem; font-weight: 600; color: #2d3748;">Text input</label>
+                            <input name="reason" maxlength="500" required placeholder="Brief reason for the report" style="width: 100%; padding: 10px 14px; background-color: #e8ebe8; border: 1px solid #cfd5cf; border-radius: 20px; outline: none; font-size: 0.9rem; color: #333; box-sizing: border-box;">
+                        </div>
+                
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <label style="font-size: 0.85rem; font-weight: 600; color: #2d3748;">Textarea</label>
+                            <textarea name="details" rows="3" placeholder="Add useful details (optional)" style="width: 100%; padding: 10px 14px; background-color: #e8ebe8; border: 1px solid #cfd5cf; border-radius: 12px; outline: none; font-size: 0.9rem; color: #333; resize: vertical; box-sizing: border-box;"></textarea>
+                        </div>
+                
+                        <button type="submit" class="btn btn-outline" style="align-self: flex-start; padding: 8px 18px; background-color: #e8ebe8; border: 1px solid #1e3a2b; border-radius: 6px; font-weight: 600; color: #1e3a2b; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; transition: background-color 0.2s ease;">
+                            <i class="fas fa-flag" aria-hidden="true"></i> Submit report
+                        </button>
+                
+                    </form>
+                </details>
+                {% endif %}
+                 
             </main>
         </div>
     </div>

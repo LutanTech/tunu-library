@@ -164,7 +164,7 @@
                             </details>
                             <details class="help-faq" data-tags="account login button authenticated session cookie">
                                 <summary>Why does the navigation still show “Log in” after I sign in?</summary>
-                                <div class="help-answer"><p>The navigation is rendered from the server-side session. The app must receive the <code>tunu_session</code> cookie on the next request before it can show your username, dashboard, notifications and Log out controls.</p><p>Use the Flask app URL rather than opening a template directly with <code>file://</code>. If the issue continues, sign out and in again, confirm cookies are enabled and verify that local HTTP development is not forcing the cookie to be Secure.</p></div>
+                                <div class="help-answer"><p>The navigation is rendered from the server-side session. The app must receive the session data on the next request before it can show your username, dashboard, notifications and Log out controls.</p><p>Refresh the page twice.</p></div>
                             </details>
                             <details class="help-faq" data-tags="account logout sign out">
                                 <summary>How do I sign out?</summary>
@@ -238,7 +238,7 @@
                             </details>
                             <details class="help-faq" data-tags="payment failed pending status retry">
                                 <summary>What if M-Pesa fails or does not send a prompt?</summary>
-                                <div class="help-answer"><p>Check the phone number, network connection and M-Pesa balance, then try the payment page again. If the app says M-Pesa is not configured, the library administrator must finish the payment configuration before live payments can start.</p><div class="help-callout"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i><span>Do not repeatedly submit a payment if you already approved an M-Pesa prompt. Check your borrowing status or contact support first.</span></div></div>
+                                <div class="help-answer"><p>Check the phone number, network connection and M-Pesa balance, then try the payment page again.</p><div class="help-callout"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i><span>Do not repeatedly submit a payment if you already approved an M-Pesa prompt. Check your borrowing status or contact support first.</span></div></div>
                             </details>
                             <details class="help-faq" data-tags="payment receipt paid button still showing">
                                 <summary>Why is the Pay button still visible after payment?</summary>
@@ -292,12 +292,9 @@
                         <div class="help-faq-list">
                             <details class="help-faq" data-tags="troubleshooting page error 404 500">
                                 <summary>A page shows an error. What should I do?</summary>
-                                <div class="help-answer"><p>Refresh once, confirm you are using the running Flask app URL and try again. If the issue persists, note the page URL, the action you took and the visible error message before contacting support.</p></div>
+                                <div class="help-answer"><p>Refresh the page. If the issue persists, note the page URL, the action you took and the visible error message before contacting support.</p></div>
                             </details>
-                            <details class="help-faq" data-tags="troubleshooting template file jinja file browser">
-                                <summary>Why do I see template code instead of the finished page?</summary>
-                                <div class="help-answer"><p>Jinja templates must be rendered by Flask. Opening an HTML template directly with <code>file://</code> does not execute routes, sessions or template conditions. Run the app and open its local HTTP address instead.</p></div>
-                            </details>
+
                             <details class="help-faq" data-tags="troubleshooting mobile responsive phone layout">
                                 <summary>Why does the page look different on a small device?</summary>
                                 <div class="help-answer"><p>The interface intentionally reflows on small screens. Navigation becomes a drawer, tables become stacked cards and book covers are capped so images remain compact and readable.</p></div>

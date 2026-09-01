@@ -169,7 +169,7 @@
                 </div>
                 <select name="grade" class="catalog-filter-select" aria-label="Filter by category or grade" onchange="this.form.submit()">
                     <option value="">All categories / grades</option>
-                    <option value="Primary" {% if request.args.get('grade') == 'Primary' %}selected{% endif %}>Primary education</option>
+                    <option value="Primary" {% if request.args.get('grade') == 'Primary' %}selected{% endif %}>Junior Secondary</option>
                     <option value="Secondary" {% if request.args.get('grade') == 'Secondary' %}selected{% endif %}>Secondary education</option>
                     <option value="General" {% if request.args.get('grade') == 'General' %}selected{% endif %}>General literature</option>
                 </select>
@@ -191,25 +191,31 @@
                     {% for book in books %}
                         <article class="catalog-card" onclick="window.location.href='{{ url_for('book', book_id=book.id) }}'" style="cursor:pointer">
                             <div class="catalog-cover">
-                                <span class="catalog-cover-label">{{ book.grade or "General" }}</span>
+                                <span class="catalog-cover-label"  translate="no">{{ book.grade or "General" }}</span>
                                 {% if book.cover %}
                                     <img src="{{ book.cover }}" alt="Cover of {{ book.title }}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                    <div class="catalog-fallback-cover" style="display: none;" aria-hidden="true"><i class="fa-solid fa-book"></i><span class="catalog-fallback-title">{{ book.title }}</span></div>
+                                    <div class="catalog-fallback-cover" style="display: none;" aria-hidden="true"><i class="fa-solid fa-book"></i><span class="catalog-fallback-title" translate="no">{{ book.title }}</span></div>
                                 {% else %}
                                     <div class="catalog-fallback-cover" aria-hidden="true"><i class="fa-solid fa-book"></i><span class="catalog-fallback-title">{{ book.title }}</span></div>
                                 {% endif %}
                                 <span class="catalog-cover-action" aria-hidden="true"><i class="fas fa-arrow-up-right-from-square"></i></span>
                             </div>
                             <div class="catalog-book-info">
-                                <span class="catalog-book-title" title="{{ book.title }}">{{ book.title }}</span>
+                                <span class="catalog-book-title"  translate="no" title="{{ book.title }}">{{ book.title }}</span>
                                 <span class="catalog-book-author">By {{ book.authors or "Unknown Author" }}</span>
-                                <div class="catalog-book-actions">
-                                    {% if book.available_copies and book.available_copies > 0 %}
-                                        <span class="catalog-status catalog-status-available"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>Available</span>
+                                <div class="catalog-book-actions" >
+              <!--               {% if book.available_copies and book.available_copies > 0 %}
+                                        <span  class="catalog-status catalog-status-available"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>Available</span>
                                     {% else %}
                                         <span class="catalog-status catalog-status-availability"><i class="fa-solid fa-clock" aria-hidden="true"></i>Unavailable</span>
                                     {% endif %}
-                                    <a href="{{ url_for('book', book_id=book.id) }}" class="catalog-reserve-btn">View book <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+                                -->
+
+                                
+
+                                    <a target="_blank" href="https://tunupublishers.com/book/{{ book.slug }}" class="catalog-reserve-btn" title="Purchase this book"> <i class="fas fa-external-link"  aria-hidden="true"></i> Purchase</a>
+
+                                    <a href="{{ url_for('book', book_id=book.id) }}" class="catalog-reserve-btn">Borrow book <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
                                 </div>
                             </div>
                         </article>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{{ title|default("Library Notification") }} — Tunu Library</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style type="text/css">
+        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+        table { border-collapse: collapse !important; }
+        body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #f7f5ef; font-family: 'Manrope', system-ui, -apple-system, sans-serif; color: #17231f; }
+        
+        @media screen and (max-width: 600px) {
+            .email-container { width: 100% !important; max-width: 100% !important; border-radius: 0 !important; border-left: 0 !important; border-right: 0 !important; }
+            .content-padding { padding: 24px 20px !important; }
+            .header-padding { padding: 28px 20px !important; }
+            .grid-stack { display: block !important; width: 100% !important; }
+            .mobile-center { text-align: center !important; }
+            .btn-mobile { display: block !important; width: 100% !important; text-align: center !important; }
+        }
+    </style>
+</head>
+<body style="margin:0;padding:0;background-color:#f7f5ef;font-family:'Manrope',system-ui,-apple-system,sans-serif;color:#17231f;-webkit-font-smoothing:antialiased;">
+
+    <div style="display:none;font-size:1px;color:#f7f5ef;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;mso-hide:all;">
+        {{ preview_text|default(message|truncate(120)|default("Notification from Tunu Library — Read. Discover. Belong.")) }}
+    </div>
+
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f7f5ef;padding:36px 0;">
+        <tr>
+            <td align="center" style="padding:0 12px;">
+                
+                <table role="presentation" class="email-container" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:20px;overflow:hidden;border:1px solid #dfe3da;box-shadow:0 16px 45px rgba(23,35,31,.08);">
+                    
+                    <tr>
+                        <td class="header-padding" align="center" style="background-color:#17231f;padding:36px 32px;text-align:center;">
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
+                                <tr>
+                                    <td align="center">
+                                        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td align="center" style="width:48px;height:48px;background-color:#ffffff;color:#17231f;border-radius:14px 14px 14px 4px;font-size:22px;line-height:48px;text-align:center;box-shadow:4px 4px 0px #e46d4d;">
+                                                    📚
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding-top:14px;">
+                                        <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:800;letter-spacing:-0.03em;font-family:'DM Serif Display', Georgia, serif;">
+                                            Tunu Library
+                                        </h1>
+                                        <p style="margin:4px 0 0;color:#94a69a;font-size:9px;text-transform:uppercase;letter-spacing:0.2em;font-weight:800;font-family:'Manrope',sans-serif;">
+                                            Read &bull; Discover &bull; Belong
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    {% if category_label or created_at %}
+                    <tr>
+                        <td style="background-color:#e6f0e8;padding:10px 24px;border-bottom:1px solid #dfe3da;">
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                <tr>
+                                    <td style="color:#22543e;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;font-family:'Manrope',sans-serif;">
+                                        🔔 {{ category_label|default("Official Library Notice") }}
+                                    </td>
+                                    {% if created_at %}
+                                    <td align="right" style="color:#718078;font-size:11px;font-weight:600;font-family:'Manrope',sans-serif;">
+                                        {{ created_at }}
+                                    </td>
+                                    {% endif %}
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    {% endif %}
+
+                    <tr>
+                        <td class="content-padding" style="padding:36px 36px 28px 36px;">
+                            
+                            <h2 style="margin:0 0 12px 0;color:#17231f;font-size:20px;font-weight:800;letter-spacing:-0.02em;font-family:'DM Serif Display', Georgia, serif;">
+                                {{ title|default("Notice from Tunu Library") }}
+                            </h2>
+
+                            <p style="color:#34443d;font-size:15px;line-height:1.7;margin:0 0 20px 0;font-family:'Manrope',sans-serif;">
+                                Hello <strong style="color:#17231f;">{{ user.username|default("Member") }}</strong>,
+                            </p>
+
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f7f5ef;border:1px solid #dfe3da;border-left:4px solid #2f6b4f;border-radius:12px;margin-bottom:24px;">
+                                <tr>
+                                    <td style="padding:20px;color:#17231f;font-size:14px;line-height:1.7;font-family:'Manrope',sans-serif;">
+                                        {{ message }}
+                                    </td>
+                                </tr>
+                            </table>
+
+                            {% if item_details or book %}
+                            <div style="margin-bottom:24px;">
+                                <h3 style="margin:0 0 10px 0;color:#17231f;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;font-family:'Manrope',sans-serif;">
+                                    📌 Notification Details
+                                </h3>
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#ffffff;border:1px solid #dfe3da;border-radius:12px;overflow:hidden;">
+                                    {% if book %}
+                                    <tr>
+                                        <td style="padding:12px 16px;border-bottom:1px solid #dfe3da;color:#718078;font-size:12px;font-weight:700;width:35%;">Book Title</td>
+                                        <td style="padding:12px 16px;border-bottom:1px solid #dfe3da;color:#17231f;font-size:13px;font-weight:800;">{{ book.title }}</td>
+                                    </tr>
+                                    {% if book.author %}
+                                    <tr>
+                                        <td style="padding:12px 16px;border-bottom:1px solid #dfe3da;color:#718078;font-size:12px;font-weight:700;">Author</td>
+                                        <td style="padding:12px 16px;border-bottom:1px solid #dfe3da;color:#34443d;font-size:13px;font-weight:600;">{{ book.author }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% endif %}
+
+                                    {% if item_details %}
+                                        {% for key, val in item_details.items() %}
+                                        <tr>
+                                            <td style="padding:12px 16px;border-bottom:1px solid #dfe3da;color:#718078;font-size:12px;font-weight:700;width:35%;">{{ key }}</td>
+                                            <td style="padding:12px 16px;border-bottom:1px solid #dfe3da;color:#17231f;font-size:13px;font-weight:700;">{{ val }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    {% endif %}
+                                </table>
+                            </div>
+                            {% endif %}
+
+                            {% if action_url %}
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:28px 0;">
+                                <tr>
+                                    <td align="center" style="border-radius:999px;background-color:#17231f;">
+                                        <a href="{{ action_url }}" class="btn-mobile" target="_blank" style="display:inline-block;padding:14px 28px;font-family:'Manrope',sans-serif;font-size:13px;font-weight:800;color:#ffffff;text-decoration:none;border-radius:999px;background-color:#17231f;box-shadow:0 6px 16px rgba(23,35,31,0.2);">
+                                            {{ action_text|default("View in Library Dashboard &rarr;") }}
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            {% endif %}
+
+                        <!--    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#fbe9e2;border:1px solid #e46d4d;border-radius:12px;margin-bottom:24px;">
+                                <tr>
+                                    <td style="padding:14px 18px;color:#b5473a;font-size:12px;line-height:1.6;font-family:'Manrope',sans-serif;">
+                                        <strong>💡 Good to know:</strong> Reserved books are held at the loans desk for up to 3 business days. Please remember to bring your digital library pass or member ID when picking up books.
+                                    </td>
+                                </tr>
+                            </table>
+                        -->
+
+                            <div style="border-top:1px solid #dfe3da;padding-top:20px;margin-top:28px;">
+                                <p style="margin:0 0 12px 0;color:#718078;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;font-family:'Manrope',sans-serif;">
+                                    Quick Shortcuts
+                                </p>
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                    <tr>
+                                        <td class="grid-stack" style="padding-bottom:8px;">
+                                            <a href="{{ url_for('dashboard', _external=True) if url_for else '#' }}" style="color:#2f6b4f;font-size:12px;font-weight:700;text-decoration:none;font-family:'Manrope',sans-serif;">
+                                                📊 My Dashboard &rarr;
+                                            </a>
+                                        </td>
+                                        <td class="grid-stack" style="padding-bottom:8px;">
+                                            <a href="{{ url_for('my_reservations', _external=True) if url_for else '#' }}" style="color:#2f6b4f;font-size:12px;font-weight:700;text-decoration:none;font-family:'Manrope',sans-serif;">
+                                                🔖 My Reservations &rarr;
+                                            </a>
+                                        </td>
+                                        <td class="grid-stack" style="padding-bottom:8px;">
+                                            <a href="{{ url_for('help_center', _external=True) if url_for else '#' }}" style="color:#2f6b4f;font-size:12px;font-weight:700;text-decoration:none;font-family:'Manrope',sans-serif;">
+                                                🎧 Support & FAQs &rarr;
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="background-color:#17231f;padding:28px 32px;text-align:center;">
+                            <p style="margin:0 0 8px 0;color:#ffffff;font-size:13px;font-weight:800;font-family:'DM Serif Display', Georgia, serif;">
+                                Tunu Library Community
+                            </p>
+                            <p style="margin:0 0 16px 0;color:#94a69a;font-size:11px;line-height:1.6;font-family:'Manrope',sans-serif;">
+                                Building connected reading communities. Need help? Visit our 
+                                <a href="{{ url_for('help_center', _external=True) if url_for else '#' }}" style="color:#d6a84f;text-decoration:underline;font-weight:700;">Help Center</a> 
+                                or contact us at <a href="mailto:library@tunupublishers.com" style="color:#d6a84f;text-decoration:none;">library@tunupublishers.com</a>.
+                            </p>
+                            
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin-bottom:16px;">
+                                <tr>
+                                    <td style="padding:0 8px;">
+                                        <a href="{{ url_for('borrowing_rules', _external=True) if url_for else '#' }}" style="color:#718078;font-size:11px;text-decoration:none;font-family:'Manrope',sans-serif;">Borrowing Rules</a>
+                                    </td>
+                                    <td style="color:#718078;font-size:11px;">&bull;</td>
+                                    <td style="padding:0 8px;">
+                                        <a href="{{ url_for('privacy_policy', _external=True) if url_for else '#' }}" style="color:#718078;font-size:11px;text-decoration:none;font-family:'Manrope',sans-serif;">Privacy Policy</a>
+                                    </td>
+                                    <td style="color:#718078;font-size:11px;">&bull;</td>
+                                    <td style="padding:0 8px;">
+                                        <a href="{{ url_for('terms_of_service', _external=True) if url_for else '#' }}" style="color:#718078;font-size:11px;text-decoration:none;font-family:'Manrope',sans-serif;">Terms of Service</a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:16px;">
+                                <p style="margin:0;color:#718078;font-size:10px;font-weight:600;font-family:'Manrope',sans-serif;">
+                                    &copy; 2026 Tunu Library. Built for curious minds. All rights reserved.
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

@@ -43,10 +43,11 @@
     <div class="pay-membership-wrap">
         <a href="{{ url_for('dashboard') }}" class="pay-back"><i class="fas fa-arrow-left" aria-hidden="true"></i> Back to dashboard</a>
         <section class="pay-card" aria-labelledby="pay-title">
-            <header class="pay-card-header"><p class="pay-eyebrow">Payment handoff</p><h1 id="pay-title" class="pay-title" style="text-transform:capitalize">{{ type }} your membership.</h1><p class="pay-subtitle">You need to {{ type }} your membership to proceed. This membership fee of<span style="color:orange"> Ksh.{{ membership_fee }}</span>  is required only once a year.</p></header>
+            <header class="pay-card-header"><p class="pay-eyebrow">M-Pesa payment</p><h1 id="pay-title" class="pay-title" style="text-transform:capitalize">{{ type }} your membership.</h1><p class="pay-subtitle">Use M-Pesa Pochi la Biashara to pay the annual membership fee of <span style="color:orange">Ksh.{{ membership_fee }}</span>.</p></header>
             <div class="pay-card-body">
                 
-                <div class="pay-actions"><a href="{{ url_for('logout') }}" class="btn btn-outline">Pay later</a><form method="POST" action="{{ url_for('membership') }}" class="pay-form"><label class="pay-phone-field">M-Pesa phone number<input type="tel" name="phone" placeholder="07XXXXXXXX" value="{{ current_user.phone if current_user.phone is defined else '' }}" required></label><button type="submit" class="btn btn-brand">Pay 100 BOB <i class="fas fa-arrow-right" aria-hidden="true"></i></button></form></div>
+                <div class="pay-note"><i class="fas fa-circle-info" aria-hidden="true"></i><span>Open M-Pesa, choose <strong>Pochi la Biashara</strong>, then send <strong>Ksh.{{ membership_fee }}</strong> to <strong>+254 722 682129</strong>.</span></div>
+                <div class="pay-actions"><a href="{{ url_for('dashboard') }}" class="btn btn-outline">Back to dashboard</a></div>
             </div>
         </section>
     </div>

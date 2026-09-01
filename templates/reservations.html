@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}My Reserves — Tunu Library{% endblock %}
+{% block title %}My Wishlist — Tunu Library{% endblock %}
 
 {% block head %}
 <style>
@@ -31,25 +31,20 @@
     .reservation-card-top { display: flex; align-items: start; justify-content: space-between; gap: 14px; }
     .reservation-book { display: flex; align-items: center; gap: 11px; min-width: 0; }
     .reservation-book-icon { width: 38px; height: 47px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 9px 9px 9px 2px; background: linear-gradient(135deg, var(--borrow-ink), #2c4b3c); color: #f3c889; box-shadow: 4px 4px 0 rgba(228,109,77,.16); }
+    .reservation-book-icon img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
     .reservation-book-title { display: -webkit-box; overflow: hidden; color: var(--borrow-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 20px; line-height: 1.04; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
     .reservation-status { display: inline-flex; align-items: center; gap: 5px; flex: 0 0 auto; padding: 5px 8px; border-radius: 999px; background: var(--borrow-leaf-soft); color: var(--borrow-leaf); font-size: 9px; font-weight: 800; white-space: nowrap; }
     .reservation-status::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
     .reservation-card-meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 20px 0 17px; padding-top: 15px; border-top: 1px solid var(--borrow-line); }
     .reservation-meta-label { display: block; margin-bottom: 5px; color: var(--borrow-muted); font-size: 8px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
     .reservation-meta-value { display: block; color: var(--borrow-ink); font-size: 11px; font-weight: 800; }
-    .reservation-fee-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--borrow-line); }
-    .reservation-fee-copy strong { display: block; color: var(--borrow-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 20px; font-weight: 400; line-height: 1; }
-    .reservation-fee-copy span { display: block; margin-top: 5px; color: var(--borrow-muted); font-size: 9px; }
-    .reservation-pay-btn { min-height: 37px; padding-inline: 14px; background: var(--borrow-coral); color: #fff; }
-    .reservation-pay-btn:hover { background: #cf593d; }
-    .reservation-paid { display: inline-flex; align-items: center; gap: 6px; color: var(--borrow-leaf); font-size: 10px; font-weight: 800; }
+    .reservation-actions { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--borrow-line); }
     .reservation-empty { padding: 58px 22px; border: 1px dashed var(--borrow-line); border-radius: 16px; background: rgba(255,255,255,.48); text-align: center; }
     .reservation-empty-icon { width: 51px; height: 51px; display: grid; place-items: center; margin: 0 auto 14px; border-radius: 50%; background: var(--borrow-leaf-soft); color: var(--borrow-leaf); }
     .reservation-empty h3 { margin: 0 0 7px; color: var(--borrow-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 27px; font-weight: 400; }
     .reservation-empty p { max-width: 320px; margin: 0 auto 18px; color: var(--borrow-muted); font-size: 11px; line-height: 1.6; }
     @media (max-width: 800px) { .reservations-container { width: min(100% - 36px, 1160px); } .reservations-hero-inner { align-items: start; flex-direction: column; } .reservations-fee-strip { grid-template-columns: 1fr; } .reservations-fee-item + .reservations-fee-item { border-top: 1px solid var(--borrow-line); border-left: 0; } .reservations-list { grid-template-columns: 1fr; } }
-    @media (max-width: 480px) { .reservations-container { width: min(100% - 28px, 1160px); } .reservations-hero { padding-top: 32px; } .reservations-title { font-size: 45px; } .reservations-heading { align-items: start; flex-direction: column; gap: 12px; } .reservations-heading .btn { width: 100%; } .reservation-card { padding: 13px; } .reservation-card-top { gap: 9px; } .reservation-book-title { font-size: 17px; } .reservation-status { font-size: 8px; } .reservation-fee-row { align-items: stretch; flex-direction: column; gap: 12px; } .reservation-pay-btn { width: 100%; } }
-    @media (prefers-reduced-motion: reduce) { .reservation-pay-btn { transition: none; } }
+    @media (max-width: 480px) { .reservations-container { width: min(100% - 28px, 1160px); } .reservations-hero { padding-top: 32px; } .reservations-title { font-size: 45px; } .reservations-heading { align-items: start; flex-direction: column; gap: 12px; } .reservations-heading .btn { width: 100%; } .reservation-card { padding: 13px; } .reservation-card-top { gap: 9px; } .reservation-book-title { font-size: 17px; } .reservation-status { font-size: 8px; } .reservation-actions { align-items: stretch; flex-direction: column; gap: 12px; } .reservation-actions .btn { width: 100%; } }
 </style>
 {% endblock %}
 
@@ -59,10 +54,10 @@
         <div class="reservations-container reservations-hero-inner">
             <div>
                 <p class="reservations-eyebrow">Your reading activity</p>
-                <h1 id="reservations-title" class="reservations-title">My reservations.</h1>
-                <p class="reservations-hero-copy">Reserve first, pay when you are ready. Every book has a 100 BOB reservation fee and a 90-day reading window.</p>
+                <h1 id="reservations-title" class="reservations-title">My wishlist.</h1>
+                <p class="reservations-hero-copy">Save books you're interested in for later. Log in to sync your wishlist across all your devices.</p>
             </div>
-            <div class="reservations-hero-aside"><strong>Pay later.</strong><span>Your reserves is recorded here so you can return to it and complete payment when ready.</span></div>
+            <div class="reservations-hero-aside"><strong>Save for later.</strong><span>Your wishlist is recorded here so you can easily find and borrow your favorite titles.</span></div>
         </div>
     </section>
 
@@ -71,41 +66,123 @@
             <section class="reservations-fee-strip" aria-label="Tunu Library fee information">
                 <div class="reservations-fee-item"><strong>100 BOB</strong><span>Annual membership · 12 months</span></div>
                 <div class="reservations-fee-item"><strong>100 BOB</strong><span>Each book borrowed</span></div>
-                <div class="reservations-fee-item"><strong>90 days</strong><span>reservation window per book</span></div>
+                <div class="reservations-fee-item"><strong>90 days</strong><span>Borrowing window per book</span></div>
             </section>
 
             <div class="reservations-heading">
-                <div><h2>Books you have reserved</h2><p>Your active books and outstanding reservation payments.</p></div>
-                <a href="{{ url_for('books') }}" class="btn btn-brand">Borrow another book <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                <div><h2>Books in your wishlist</h2><p>Track titles you want to read next.</p></div>
+                <a href="{{ url_for('books') }}" class="btn btn-brand">Browse catalog <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
             </div>
 
-            {% if reservations %}
-                <div class="reservations-list">
+            <div id="wishlistContainer" class="reservations-list">
+                {% if reservations %}
                     {% for b in reservations %}
-                        <article class="reservation-card">
+                        <article class="reservation-card" data-book-id="{{ b.book_id }}">
                             <div class="reservation-card-top">
-                                <div class="reservation-book"><span class="reservation-book-icon" aria-hidden="true"><i class="fas fa-book-open"></i></span><span class="reservation-book-title">{{ b.book_title or "Book title" }}</span></div>
-                                <span class="reservation-status">{{ b.status.replace('_', ' ')|title if b.status else "reservation" }}</span>
+                                <div class="reservation-book">
+                                    <span class="reservation-book-icon" aria-hidden="true">
+                                        {% if b.book_image %}
+                                            <img src="{{ b.book_image }}" alt="">
+                                        {% else %}
+                                            <i class="fas fa-book-open"></i>
+                                        {% endif %}
+                                    </span>
+                                    <span class="reservation-book-title">{{ b.book_title or "Book title" }}</span>
+                                </div>
+                                <span class="reservation-status">Saved</span>
                             </div>
                             <div class="reservation-card-meta">
-                                <div><span class="reservation-meta-label">Borrowed</span><span class="reservation-meta-value">{{ b.borrowed_at.strftime('%b %d, %Y') if b.borrowed_at else "Recently" }}</span></div>
-                                <div><span class="reservation-meta-label">Due date</span><span class="reservation-meta-value">{{ b.due_date.strftime('%b %d, %Y') if b.due_date and b.due_date.strftime is defined else (b.due_date or "90-day window") }}</span></div>
+                                <div><span class="reservation-meta-label">Author</span><span class="reservation-meta-value">{{ b.book_authors or "Unknown" }}</span></div>
+                                <div><span class="reservation-meta-label">Saved on</span><span class="reservation-meta-value">{{ b.reserved_at.strftime('%b %d, %Y') if b.reserved_at else "Recently" }}</span></div>
                             </div>
-                            <div class="reservation-fee-row">
-                                <div class="reservation-fee-copy"><strong>100 BOB</strong><span>reservation fee · 90-day window</span></div>
-                                {% if b.fee_paid %}
-                                    <span class="reservation-paid"><i class="fas fa-circle-check" aria-hidden="true"></i> Paid</span>
-                                {% else %}
-                                    <a href="{{ url_for('pay_reservation', reservation_id=b.id) }}" class="btn reservation-pay-btn">Pay 100 BOB <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
-                                {% endif %}
+                            <div class="reservation-actions">
+                                <a href="{{ url_for('book_detail', book_id=b.book_id) }}" class="btn btn-brand">View Details</a>
+                                <form action="{{ url_for('cancel_reservation', res_id=b.id) }}" method="POST" style="margin:0;">
+                                    <button type="submit" class="btn btn-outline" style="color:var(--danger); border-color:var(--danger);">Remove</button>
+                                </form>
                             </div>
                         </article>
                     {% endfor %}
-                </div>
-            {% else %}
-                <div class="reservation-empty" role="status"><div class="reservation-empty-icon"><i class="fas fa-book-open" aria-hidden="true"></i></div><h3>Your reservation list is empty.</h3><p>Borrow a book and it will appear here with its 100 BOB payment action and 90-day reservation window.</p><a href="{{ url_for('books') }}" class="btn btn-brand">Browse the catalog <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div>
-            {% endif %}
+                {% endif %}
+            </div>
+
+            <div id="emptyWishlist" class="reservation-empty" style="display: none;" role="status">
+                <div class="reservation-empty-icon"><i class="fas fa-heart" aria-hidden="true"></i></div>
+                <h3>Your wishlist is empty.</h3>
+                <p>Save books you're interested in and they will appear here.</p>
+                <a href="{{ url_for('books') }}" class="btn btn-brand">Browse the catalog <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('wishlistContainer');
+    const emptyState = document.getElementById('emptyWishlist');
+    const isLoggedIn = document.body.dataset.loggedIn === 'true';
+
+    function renderLocalItems() {
+        const localItems = Wishlist.get();
+        if (localItems.length === 0 && (!container || container.children.length === 0)) {
+            if (emptyState) emptyState.style.display = 'block';
+            if (container) container.style.display = 'none';
+            return;
+        }
+
+        localItems.forEach(item => {
+            // Check if already rendered (from backend)
+            if (document.querySelector(`[data-book-id="${item.id}"]`)) return;
+
+            const article = document.createElement('article');
+            article.className = 'reservation-card';
+            article.dataset.bookId = item.id;
+            article.innerHTML = `
+                <div class="reservation-card-top">
+                    <div class="reservation-book">
+                        <span class="reservation-book-icon" aria-hidden="true">
+                            ${item.image ? `<img src="${item.image}" alt="">` : '<i class="fas fa-book-open"></i>'}
+                        </span>
+                        <span class="reservation-book-title">${item.title}</span>
+                    </div>
+                    <span class="reservation-status">Local Save</span>
+                </div>
+                <div class="reservation-card-meta">
+                    <div><span class="reservation-meta-label">Author</span><span class="reservation-meta-value">${item.authors || 'Unknown'}</span></div>
+                    <div><span class="reservation-meta-label">Saved on</span><span class="reservation-meta-value">${new Date(item.added_at).toLocaleDateString()}</span></div>
+                </div>
+                <div class="reservation-actions">
+                    <a href="/book/${item.id}" class="btn btn-brand">View Details</a>
+                    <button type="button" class="btn btn-outline remove-local" style="color:var(--danger); border-color:var(--danger);">Remove</button>
+                </div>
+            `;
+            container.appendChild(article);
+            
+            article.querySelector('.remove-local').addEventListener('click', () => {
+                Wishlist.remove(item.id);
+                article.remove();
+                if (container.children.length === 0) {
+                    emptyState.style.display = 'block';
+                    container.style.display = 'none';
+                }
+            });
+        });
+
+        if (container.children.length > 0) {
+            emptyState.style.display = 'none';
+            container.style.display = 'grid';
+        } else {
+            emptyState.style.display = 'block';
+            container.style.display = 'none';
+        }
+    }
+
+    if (!isLoggedIn) {
+        renderLocalItems();
+    } else {
+        // For logged in users, we might still have local items not yet synced
+        renderLocalItems();
+    }
+});
+</script>
 {% endblock %}

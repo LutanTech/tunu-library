@@ -43,12 +43,12 @@
     <div class="pay-borrowing-wrap">
         <a href="{{ url_for('my_borrowings') }}" class="pay-back"><i class="fas fa-arrow-left" aria-hidden="true"></i> Back to My borrowings</a>
         <section class="pay-card" aria-labelledby="pay-title">
-            <header class="pay-card-header"><p class="pay-eyebrow">Payment handoff</p><h1 id="pay-title" class="pay-title">Complete your borrowing.</h1><p class="pay-subtitle">Your book is already recorded. This step is only for completing the borrowing payment.</p></header>
+            <header class="pay-card-header"><p class="pay-eyebrow">M-Pesa payment</p><h1 id="pay-title" class="pay-title">Pay using Pochi la Biashara.</h1><p class="pay-subtitle">Send the borrowing fee via M-Pesa Pochi la Biashara to the number below.</p></header>
             <div class="pay-card-body">
                 <div class="pay-book-row"><span class="pay-book-icon" aria-hidden="true"><i class="fas fa-book-open"></i></span><div><span class="pay-book-label">Book</span><span class="pay-book-title">{{ borrowing.book_title or "Book title" }}</span></div></div>
                 <div class="pay-summary"><div class="pay-summary-item"><strong>{{ borrowing_fee_bob or 100 }} BOB</strong><span>Borrowing fee</span></div><div class="pay-summary-item"><strong>90 days</strong><span>borrowing window</span></div></div>
-                <div class="pay-note"><i class="fas fa-circle-info" aria-hidden="true"></i><span>Annual membership is charged separately at 100 BOB for 12 months. This payment is only for borrowing this book.</span></div>
-                <div class="pay-actions"><a href="{{ url_for('my_borrowings') }}" class="btn btn-outline">Pay later</a><form method="POST" action="{{ url_for('pay_borrowing', borrowing_id=borrowing.id) }}" class="pay-form"><label class="pay-phone-field">M-Pesa phone number<input type="tel" name="phone" placeholder="07XXXXXXXX" value="{{ current_user.phone if current_user.phone is defined else '' }}" required></label><button type="submit" class="btn btn-brand">Pay 100 BOB <i class="fas fa-arrow-right" aria-hidden="true"></i></button></form></div>
+                <div class="pay-note"><i class="fas fa-circle-info" aria-hidden="true"></i><span>Open M-Pesa, choose <strong>Pochi la Biashara</strong>, then send <strong>{{ borrowing_fee_bob or 100 }} BOB</strong> to <strong>+254 722 682129</strong>. Annual membership is charged separately.</span></div>
+                <div class="pay-actions"><a href="{{ url_for('my_borrowings') }}" class="btn btn-outline">Back to My Borrowings</a></div>
             </div>
         </section>
     </div>
