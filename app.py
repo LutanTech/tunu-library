@@ -514,9 +514,7 @@ def membership():
     x=auth()
     if x:
         return x
-    user = g.user
-    user.membership_expires = datetime.utcnow() + timedelta(days=365)
-    db.session.commit()
+
     if request.method == 'POST':
         user = g.user
         user.membership_expires = datetime.utcnow() + timedelta(days=365)
