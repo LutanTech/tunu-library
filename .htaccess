@@ -1,0 +1,21 @@
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION BEGIN
+PassengerAppRoot "/home3/tunupublsh/repositories/tunu-library"
+PassengerBaseURI "/"
+PassengerPython "/home3/tunupublsh/virtualenv/repositories/tunu-library/3.13/bin/python"
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
+PassengerMinInstances 1
+PassengerMaxInstances 2
+PassengerAppType wsgi
+PassengerStartupFile passenger_wsgi.py
+
+# DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION BEGIN
+<IfModule Litespeed>
+SetEnv DB_URL sqlite:///tunu.db
+SetEnv M_P ykcx tugs uzcf uwix
+SetEnv MPESA_CONSUMER_KEY pYwvNujQD1T5h2hExpjijTe4LyfdvyjYA2Gd7dClrcvT7GTL
+SetEnv MPESA_CONSUMER_SECRET SnuU5AB6VUi7JcrGozQa29fEvWhiQeoh0Tw5xDHyJ3Z9rssjNpfdW74zOLKPjMbg
+SetEnv MPESA_SHORTCODE 174379
+SetEnv MPESA_PASSKEY bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919
+SetEnv MPESA_ENV sandbox
+</IfModule>
+# DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION END

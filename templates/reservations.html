@@ -82,7 +82,7 @@
                                 <div class="reservation-book">
                                     <span class="reservation-book-icon" aria-hidden="true">
                                         {% if b.book_image %}
-                                            <img src="{{ b.book_image }}" alt="">
+                                            <img src="https://tunupublishers.com{{ b.book_image }}" alt="">
                                         {% else %}
                                             <i class="fas fa-book-open"></i>
                                         {% endif %}
@@ -96,7 +96,7 @@
                                 <div><span class="reservation-meta-label">Saved on</span><span class="reservation-meta-value">{{ b.reserved_at.strftime('%b %d, %Y') if b.reserved_at else "Recently" }}</span></div>
                             </div>
                             <div class="reservation-actions">
-                                <a href="{{ url_for('book_detail', book_id=b.book_id) }}" class="btn btn-brand">View Details</a>
+                                <a href="{{ url_for('book', book_id=b.book_id) }}" class="btn btn-brand">View Details</a>
                                 <form action="{{ url_for('cancel_reservation', res_id=b.id) }}" method="POST" style="margin:0;">
                                     <button type="submit" class="btn btn-outline" style="color:var(--danger); border-color:var(--danger);">Remove</button>
                                 </form>

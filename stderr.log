@@ -1,0 +1,51 @@
+[2026-10-20 18:25:28,677] ERROR in app: Exception on /my-reservations [GET]
+Traceback (most recent call last):
+  File "/home3/tunupublsh/virtualenv/repositories/tunu-library/3.13/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home3/tunupublsh/virtualenv/repositories/tunu-library/3.13/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home3/tunupublsh/virtualenv/repositories/tunu-library/3.13/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home3/tunupublsh/virtualenv/repositories/tunu-library/3.13/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home3/tunupublsh/repositories/tunu-library/app.py", line 541, in my_reservations
+    return render_template("reservations.html",reservations=items,borrowing_fee_bob=BORROWING_FEE_BOB,borrowing_window_days=BORROWING_WINDOW_DAYS,membership_fee_bob=MEMBERSHIP_FEE_BOB)
+  File "/home3/tunupublsh/virtualenv/repositories/tunu-library/3.13/lib/python3.13/site-packages/flask/templating.py", line 151, in render_template
+    return _render(app, template, context)
+  File "/home3/tunupublsh/virtualenv/repositories/tunu-library/3.13/lib/python3.13/site-packages/flask/templating.py", line 132, in _render
+    rv = template.render(context)
+  File "/home3/tunupublsh/virtualenv/repositories/tunu-library/3.13/lib/python3.13/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home3/tunupublsh/virtualenv/repositories/tunu-library/3.13/lib/python3.13/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home3/tunupublsh/repositories/tunu-library/templates/reservations.html", line 1, in top-level template code
+    {% extends "base.html" %}
+  File "/home3/tunupublsh/repositories/tunu-library/templates/base.html", line 746, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^
+  File "/home3/tunupublsh/repositories/tunu-library/templates/reservations.html", line 99, in block 'content'
+    <a href="{{ url_for('book_detail', book_id=b.book_id) }}" class="btn btn-brand">View Details</a>
+    
+  File "/home3/tunupublsh/virtualenv/repositories/tunu-library/3.13/lib/python3.13/site-packages/flask/app.py", line 1121, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home3/tunupublsh/virtualenv/repositories/tunu-library/3.13/lib/python3.13/site-packages/flask/app.py", line 1110, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+        endpoint,
+    ...<3 lines>...
+        force_external=_external,
+    )
+  File "/home3/tunupublsh/virtualenv/repositories/tunu-library/3.13/lib/python3.13/site-packages/werkzeug/routing/map.py", line 901, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'book_detail' with values ['book_id']. Did you mean 'book' instead?
+[UID:3251][1658080] Child process with pid: 1658134 was killed by signal: 15, core dumped: no
+[UID:3251][1663484] Child process with pid: 1663629 was killed by signal: 15, core dumped: no
+[UID:3251][1663484] Child process with pid: 1663593 was killed by signal: 15, core dumped: no
+[UID:3251][1663484] Child process with pid: 1663618 was killed by signal: 15, core dumped: no
+[UID:3251][1686650] Child process with pid: 1686828 was killed by signal: 15, core dumped: no
+[UID:3251][1686650] Child process with pid: 1687652 was killed by signal: 15, core dumped: no
+[UID:3251][1686650] Child process with pid: 1686787 was killed by signal: 15, core dumped: no
+[UID:3251][1722111] Child process with pid: 1722255 was killed by signal: 15, core dumped: no
+[UID:3251][1722111] Child process with pid: 1722623 was killed by signal: 15, core dumped: no
