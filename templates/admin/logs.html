@@ -1,0 +1,282 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Activity Logs & Analytics — Tunu Library{% endblock %}
+
+{% block head %}
+<style>
+    .logs-page { --logs-ink: #17231f; --logs-muted: #718078; --logs-line: #dfe3da; --logs-leaf: #2f6b4f; --logs-leaf-soft: #e6f0e8; --logs-coral: #e46d4d; }
+    .logs-wrap { width: min(100% - 48px, 1280px); margin-inline: auto; padding: 40px 0 90px; }
+    
+    .admin-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid var(--logs-line); }
+    .admin-eyebrow { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 6px; color: var(--logs-leaf); font-size: 10px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+    .admin-header-content h1 { margin: 0; color: var(--logs-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(28px, 4vw, 36px); font-weight: 400; letter-spacing: -0.02em; line-height: 1.1; }
+    .admin-header-content p { margin: 6px 0 0; color: var(--logs-muted); font-size: 13px; }
+
+    .admin-nav-tabs { display: flex; gap: 6px; margin-bottom: 32px; padding: 6px; border-radius: var(--radius-md); background: var(--surface); border: 1px solid var(--logs-line); overflow-x: auto; }
+    .admin-nav-tab { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: var(--radius-sm); color: var(--logs-muted); font-size: 12px; font-weight: 800; text-decoration: none; white-space: nowrap; transition: all 0.2s ease; }
+    .admin-nav-tab i { font-size: 12px; color: var(--logs-leaf); }
+    .admin-nav-tab:hover { color: var(--logs-ink); background: var(--logs-leaf-soft); }
+    .admin-nav-tab.active { color: #fff; background: var(--logs-leaf); }
+    .admin-nav-tab.active i { color: #fff; }
+
+    .logs-card { overflow: hidden; border: 1px solid var(--logs-line); border-radius: var(--radius-md); background: #fff; box-shadow: 0 4px 15px rgba(23,35,31,.03); margin-bottom: 30px; }
+    
+    .analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; padding: 24px; background: #f9fbf9; border-bottom: 1px solid var(--logs-line); }
+    .analytics-card { background: #fff; border: 1px solid var(--logs-line); border-radius: var(--radius-sm); padding: 18px; box-shadow: 0 2px 8px rgba(23,35,31,.02); }
+    .analytics-card h3 { margin: 0 0 10px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--logs-muted); display: flex; align-items: center; gap: 6px; }
+    .analytics-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+    .analytics-list li { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--logs-ink); padding: 4px 0; border-bottom: 1px dashed var(--logs-line); }
+    .analytics-list li:last-child { border-bottom: none; }
+    .analytics-list span { font-weight: 700; color: var(--logs-leaf); }
+
+    .logs-toolbar { padding: 18px 24px; background: #f9fbf9; border-bottom: 1px solid var(--logs-line); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; }
+    .logs-search-form { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1; }
+    .logs-input, .logs-select { height: 36px; padding: 0 14px; border: 1px solid var(--logs-line); border-radius: var(--radius-sm); outline: none; font-size: 12px; color: var(--logs-ink); background: #fff; }
+    .logs-input { min-width: 220px; flex: 1; }
+    .logs-input:focus, .logs-select:focus { border-color: var(--logs-leaf); box-shadow: 0 0 0 3px rgba(47,107,79,.1); }
+    
+    .logs-card-body { padding: 0; overflow-x: auto; }
+    .logs-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; color: var(--logs-ink); }
+    .logs-table th { background: #f9fbf9; padding: 16px 20px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: var(--logs-muted); border-bottom: 1px solid var(--logs-line); }
+    .logs-table td { padding: 18px 20px; border-bottom: 1px solid var(--logs-line); vertical-align: middle; }
+    .logs-table tr:last-child td { border-bottom: none; }
+    
+    .log-badge { display: inline-block; padding: 3px 8px; border-radius: var(--pill); font-size: 10px; font-weight: 800; text-transform: uppercase; }
+    .log-badge-get { background: var(--logs-leaf-soft); color: var(--logs-leaf); }
+    .log-badge-post { background: #fff9e8; color: #80621b; }
+    .log-badge-other { background: #edf2f7; color: #4a5568; }
+    
+    .log-status { font-weight: 700; font-size: 11px; }
+    .log-status-200 { color: var(--logs-leaf); }
+    .log-status-err { color: var(--logs-coral); }
+    .logs-ua { max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--logs-muted); font-size: 11px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="logs-page">
+    <div class="logs-wrap">
+        <header class="admin-header">
+            <div class="admin-header-content">
+                <span class="admin-eyebrow"><i class="fas fa-shield-halved"></i> Control Panel</span>
+                <h1>System Auditing & Analytics</h1>
+                <p>Comprehensive tracking of traffic, bots, daily volumes, and key metrics.</p>
+            </div>
+            <div class="admin-header-actions">
+                <form action="{{ url_for('clear_logs') }}" method="POST" onsubmit="return confirm('Are you sure you want to delete all logs?');">
+                    <button type="submit" class="btn btn-outline" style="color: var(--logs-coral); border-color: var(--logs-coral);">
+                        <i class="fas fa-trash-alt" aria-hidden="true"></i> Clear All Logs
+                    </button>
+                </form>
+            </div>
+        </header>
+
+        <nav class="admin-nav-tabs" aria-label="Admin navigation">
+            <a href="{{ url_for('admin_dashboard') }}" class="admin-nav-tab"><i class="fas fa-gauge"></i> Overview</a>
+            <a href="{{ url_for('admin_borrowing') }}" class="admin-nav-tab"><i class="fas fa-hand-holding-heart"></i> Borrowings</a>
+            <a href="{{ url_for('admin_reservations') }}" class="admin-nav-tab"><i class="fas fa-bookmark"></i> Reservations</a>
+            <a href="{{ url_for('admin_users') }}" class="admin-nav-tab"><i class="fas fa-users"></i> Users</a>
+            <a href="{{ url_for('admin_payments') }}" class="admin-nav-tab"><i class="fas fa-receipt"></i> Payments</a>
+            <a href="{{ url_for('admin_book_flags') }}" class="admin-nav-tab"><i class="fas fa-flag"></i> Book flags</a>
+            <a href="{{ url_for('logs') }}" class="admin-nav-tab active"><i class="fas fa-list-check"></i> System Logs</a>
+        </nav>
+
+        <section class="logs-card" aria-labelledby="logs-title">
+            {% set ns = namespace(top_ips={}, top_routes={}, top_staff={}, last_5_days={}, bot_count=0, total_count=0) %}
+            {% for l in logs %}
+                {% set ns.total_count = ns.total_count + 1 %}
+                {% if 'bot' in l.user_agent.lower() or 'crawler' in l.user_agent.lower() or 'spider' in l.user_agent.lower() %}
+                    {% set ns.bot_count = ns.bot_count + 1 %}
+                {% endif %}
+                {% set _ = ns.top_ips.update({l.ip_address: ns.top_ips.get(l.ip_address, 0) + 1}) %}
+                {% set _ = ns.top_routes.update({l.endpoint: ns.top_routes.get(l.endpoint, 0) + 1}) %}
+                {% set _ = ns.top_staff.update({l.staff: ns.top_staff.get(l.staff, 0) + 1}) %}
+                
+                {% set day_str = l.time.strftime('%Y-%m-%d') %}
+                {% set _ = ns.last_5_days.update({day_str: ns.last_5_days.get(day_str, 0) + 1}) %}
+            {% endfor %}
+
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <h3><i class="fas fa-chart-bar"></i> Traffic Overview</h3>
+                    <ul class="analytics-list">
+                        <li>Total Requests <span>{{ ns.total_count }}</span></li>
+                        <li>Detected Bots <span>{{ ns.bot_count }}</span></li>
+                        <li>Unique IPs <span>{{ ns.top_ips | length }}</span></li>
+                    </ul>
+                </div>
+
+                <div class="analytics-card">
+                    <h3><i class="fas fa-calendar-alt"></i> Last 5 Days Activity</h3>
+                    <ul class="analytics-list">
+                        {% set sorted_days = ns.last_5_days.keys() | sort(reverse=True) %}
+                        {% for d in sorted_days[:5] %}
+                        <li>{{ d }} <span>{{ ns.last_5_days[d] }} reqs</span></li>
+                        {% else %}
+                        <li>No activity recorded <span>0</span></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="analytics-card">
+                    <h3><i class="fas fa-network-wired"></i> Most Active IP</h3>
+                    <ul class="analytics-list">
+                        {% set top_ip = ns.top_ips.items() | sort(attribute=1, reverse=True) | first %}
+                        {% if top_ip %}
+                        <li>{{ top_ip[0] }} <span>{{ top_ip[1] }} hits</span></li>
+                        {% else %}
+                        <li>None <span>0</span></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <div class="analytics-card">
+                    <h3><i class="fas fa-route"></i> Most Visited Route</h3>
+                    <ul class="analytics-list">
+                        {% set top_route = ns.top_routes.items() | sort(attribute=1, reverse=True) | first %}
+                        {% if top_route %}
+                        <li style="word-break: break-all;">{{ top_route[0] }} <span style="flex-shrink:0;">{{ top_route[1] }} hits</span></li>
+                        {% else %}
+                        <li>None <span>0</span></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <div class="analytics-card">
+                    <h3><i class="fas fa-user-shield"></i> Most Active Staff</h3>
+                    <ul class="analytics-list">
+                        {% set top_stf = ns.top_staff.items() | sort(attribute=1, reverse=True) | first %}
+                        {% if top_stf %}
+                        <li>{{ top_stf[0] }} <span>{{ top_stf[1] }} actions</span></li>
+                        {% else %}
+                        <li>None <span>0</span></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="logs-toolbar">
+                <div class="logs-search-form">
+                    <input type="text" id="searchInput" placeholder="Instant search any field..." class="logs-input" onkeyup="filterLogs()">
+                    <select id="methodFilter" class="logs-select" onchange="filterLogs()">
+                        <option value="">All Methods</option>
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                    </select>
+                    <select id="statusFilter" class="logs-select" onchange="filterLogs()">
+                        <option value="">All Statuses</option>
+                        <option value="200">200 OK</option>
+                        <option value="error">Errors (4xx/5xx)</option>
+                    </select>
+                </div>
+
+                <div class="logs-actions-bar">
+                    <button type="submit" form="bulkDeleteForm" id="deleteSelectedBtn" class="btn btn-outline" style="display: none; color: var(--logs-coral); border-color: var(--logs-coral);" onclick="return confirm('Delete selected logs?');">
+                        <i class="fas fa-trash" aria-hidden="true"></i> Delete Selected (<span id="selectedCount">0</span>)
+                    </button>
+                </div>
+            </div>
+
+            <div class="logs-card-body">
+                <form id="bulkDeleteForm" method="POST" action="{{ url_for('delete_logs') }}">
+                    <table class="logs-table" id="logsTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px; text-align: center;"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
+                                <th>Time</th>
+                                <th>IP</th>
+                                <th>Staff</th>
+                                <th>Method</th>
+                                <th>Endpoint</th>
+                                <th>Action</th>
+                                <th>Status</th>
+                                <th>User Agent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in logs %}
+                            <tr class="log-row" data-method="{{ log.method }}" data-status="{{ log.status_code }}">
+                                <td style="text-align: center;"><input type="checkbox" name="log_ids" value="{{ log.id }}" class="log-checkbox" onclick="updateDeleteButton()"></td>
+                                <td style="white-space: nowrap;">{{ log.time.strftime('%d %b %Y, %I:%M %p') }}</td>
+                                <td style="font-family: monospace;">{{ log.ip_address }}</td>
+                                <td><strong>{{ log.staff }}</strong></td>
+                                <td>
+                                    <span class="log-badge {% if log.method == 'GET' %}log-badge-get{% elif log.method == 'POST' %}log-badge-post{% else %}log-badge-other{% endif %}">
+                                        {{ log.method }}
+                                    </span>
+                                </td>
+                                <td style="font-family: monospace; font-size: 11px;">{{ log.endpoint }}</td>
+                                <td>{{ log.action }}</td>
+                                <td>
+                                    <span class="log-status {% if log.status_code == 200 %}log-status-200{% else %}log-status-err{% endif %}">
+                                        {{ log.status_code }}
+                                    </span>
+                                </td>
+                                <td><div class="logs-ua" title="{{ log.user_agent }}">{{ log.user_agent }}</div></td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="9" style="text-align: center; padding: 60px 20px; color: var(--logs-muted);">
+                                    <i class="fas fa-list-check" style="font-size: 32px; margin-bottom: 12px; display: block;"></i>
+                                    No activity logs recorded yet.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+function toggleSelectAll(source) {
+    const checkboxes = document.querySelectorAll('.log-checkbox');
+    checkboxes.forEach(cb => cb.checked = source.checked);
+    updateDeleteButton();
+}
+
+function updateDeleteButton() {
+    const checkboxes = document.querySelectorAll('.log-checkbox:checked');
+    const deleteBtn = document.getElementById('deleteSelectedBtn');
+    const countSpan = document.getElementById('selectedCount');
+    
+    countSpan.innerText = checkboxes.length;
+    if (checkboxes.length > 0) {
+        deleteBtn.style.display = 'inline-flex';
+    } else {
+        deleteBtn.style.display = 'none';
+    }
+}
+
+function filterLogs() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    const method = document.getElementById('methodFilter').value;
+    const status = document.getElementById('statusFilter').value;
+    const rows = document.querySelectorAll('.log-row');
+
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        const rowMethod = row.getAttribute('data-method');
+        const rowStatus = parseInt(row.getAttribute('data-status'), 10);
+
+        let matchesSearch = text.includes(query);
+        let matchesMethod = !method || rowMethod === method;
+        let matchesStatus = true;
+
+        if (status === '200') {
+            matchesStatus = rowStatus === 200;
+        } else if (status === 'error') {
+            matchesStatus = rowStatus >= 400;
+        }
+
+        if (matchesSearch && matchesMethod && matchesStatus) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+</script>
+{% endblock %}

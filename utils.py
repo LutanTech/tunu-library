@@ -6,7 +6,7 @@ from models import AdminPermission,LibraryBook,Book,db
 
 import secrets,string, time, random
 
-SECRET=os.getenv("SESSION_SECRET","change-me").encode()
+SECRET=os.getenv("SESSION_SECRET", "treuytyuieu8764yiorIOUiuy4e89ie94ui894ur").encode()
 SESSION_DURATION=30*24*60*60
 BOOKS_API=os.getenv("BOOKS_API","https://tunupublishers.com/api/books")
 BOOKS_SITE=os.getenv("BOOKS_SITE","https://tunupublishers.com")

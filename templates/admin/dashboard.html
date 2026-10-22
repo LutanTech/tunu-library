@@ -1,41 +1,193 @@
-{% extends "base.html" %}
+{% extends "admin_base.html" %}
 
-{% block title %}Admin Dashboard — Tunu Library{% endblock %}
+{% block title %}Admin Control Panel — Tunu Library{% endblock %}
 
 {% block head %}
 <style>
-    .admin-page { --adm-ink: #17231f; --adm-muted: #718078; --adm-paper: #f7f5ef; --adm-line: #dfe3da; --adm-leaf: #2f6b4f; --adm-leaf-soft: #e6f0e8; --adm-coral: #e46d4d; }
-    .admin-container { width: min(100% - 48px, 1200px); margin-inline: auto; padding: 40px 0 80px; }
+    .admin-page { 
+        --adm-ink: #17231f; 
+        --adm-muted: #718078; 
+        --adm-paper: #f7f5ef; 
+        --adm-line: #dfe3da; 
+        --adm-leaf: #2f6b4f; 
+        --adm-leaf-soft: #e6f0e8; 
+        --adm-coral: #e46d4d;
+        --adm-coral-soft: #fbe9e2;
+        --adm-gold: #d6a84f;
+    }
+    .admin-container { 
+        width: min(100% - 48px, 1280px); 
+        margin-inline: auto; 
+        padding: 40px 0 90px; 
+    }
     
-    .admin-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--adm-line); }
-    .admin-header-content h1 { margin: 0; color: var(--adm-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 32px; font-weight: 400; letter-spacing: -0.02em; }
-    .admin-header-content p { margin: 4px 0 0; color: var(--adm-muted); font-size: 13px; }
+    .admin-header { 
+        display: flex; 
+        align-items: center; 
+        justify-content: space-between; 
+        gap: 24px; 
+        margin-bottom: 28px; 
+        padding-bottom: 24px; 
+        border-bottom: 1px solid var(--adm-line); 
+    }
+    .admin-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+        color: var(--adm-leaf);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .15em;
+        text-transform: uppercase;
+    }
+    .admin-header-content h1 { 
+        margin: 0; 
+        color: var(--adm-ink); 
+        font-family: 'DM Serif Display', Georgia, serif; 
+        font-size: clamp(28px, 4vw, 36px); 
+        font-weight: 400; 
+        letter-spacing: -0.02em; 
+        line-height: 1.1;
+    }
+    .admin-header-content p { 
+        margin: 6px 0 0; 
+        color: var(--adm-muted); 
+        font-size: 13px; 
+    }
 
-    .admin-nav-tabs { display: flex; gap: 8px; margin-bottom: 32px; padding: 6px; border-radius: var(--radius-md); background: var(--adm-leaf-soft); }
-    .admin-nav-tab { padding: 10px 18px; border-radius: var(--radius-sm); color: var(--adm-muted); font-size: 12px; font-weight: 800; transition: all 0.2s ease; }
-    .admin-nav-tab:hover { color: var(--adm-ink); background: rgba(255,255,255,0.5); }
-    .admin-nav-tab.active { color: #fff; background: var(--adm-leaf); box-shadow: 0 4px 12px rgba(47, 107, 79, 0.2); }
+    .admin-nav-tabs { 
+        display: flex; 
+        gap: 6px; 
+        margin-bottom: 32px; 
+        padding: 6px; 
+        border-radius: var(--radius-md); 
+        background: var(--surface); 
+        border: 1px solid var(--adm-line);
+        overflow-x: auto;
+    }
+    .admin-nav-tab { 
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 16px; 
+        border-radius: var(--radius-sm); 
+        color: var(--adm-muted); 
+        font-size: 12px; 
+        font-weight: 800; 
+        text-decoration: none;
+        white-space: nowrap;
+        transition: all 0.2s ease; 
+    }
+    .admin-nav-tab i { font-size: 12px; color: var(--adm-leaf); }
+    .admin-nav-tab:hover { color: var(--adm-ink); background: var(--adm-leaf-soft); }
+    .admin-nav-tab.active { color: #fff; background: var(--adm-leaf); }
+    .admin-nav-tab.active i { color: #fff; }
 
-    .stats-overview { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px; }
-    .stat-card { padding: 24px; border: 1px solid var(--adm-line); border-radius: var(--radius-md); background: #fff; box-shadow: var(--shadow-sm); }
-    .stat-label { display: block; margin-bottom: 8px; color: var(--adm-muted); font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
-    .stat-value { display: block; color: var(--adm-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 36px; line-height: 1; }
-    .stat-trend { display: inline-flex; align-items: center; gap: 4px; margin-top: 12px; font-size: 11px; font-weight: 700; }
-    .trend-up { color: var(--adm-leaf); }
+    .stats-overview { 
+        display: grid; 
+        grid-template-columns: repeat(4, 1fr); 
+        gap: 20px; 
+        margin-bottom: 32px; 
+    }
+    .stat-card { 
+        position: relative;
+        padding: 22px 24px; 
+        border: 1px solid var(--adm-line); 
+        border-radius: var(--radius-md); 
+        background: #fff; 
+        box-shadow: 0 4px 15px rgba(23, 35, 31, .03);
+        transition: transform .2s ease, border-color .2s ease;
+    }
+    .stat-card:hover { transform: translateY(-2px); border-color: var(--adm-leaf); }
+    .stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .stat-label { color: var(--adm-muted); font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+    .stat-icon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 8px; background: var(--adm-leaf-soft); color: var(--adm-leaf); font-size: 14px; }
+    .stat-value { display: block; color: var(--adm-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 38px; line-height: 1; }
+    .stat-subtext { display: block; margin-top: 10px; font-size: 11px; font-weight: 700; color: var(--adm-muted); }
 
-    .admin-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 32px; }
-    .admin-section { padding: 24px; border: 1px solid var(--adm-line); border-radius: var(--radius-md); background: #fff; }
-    .section-title { display: flex; align-items: center; justify-content: space-between; margin: 0 0 20px; }
-    .section-title h2 { margin: 0; color: var(--adm-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 22px; font-weight: 400; }
-    
-    .quick-links { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .quick-link-card { display: flex; flex-direction: column; gap: 12px; padding: 20px; border: 1px solid var(--adm-line); border-radius: var(--radius-sm); transition: all 0.2s ease; }
-    .quick-link-card:hover { border-color: var(--adm-leaf); background: var(--adm-leaf-soft); }
-    .quick-link-card i { font-size: 20px; color: var(--adm-leaf); }
-    .quick-link-card span { font-size: 13px; font-weight: 800; color: var(--adm-ink); }
+    .admin-grid { 
+        display: grid; 
+        grid-template-columns: 1.8fr 1fr; 
+        gap: 28px; 
+    }
+    .admin-section { 
+        padding: 26px; 
+        border: 1px solid var(--adm-line); 
+        border-radius: var(--radius-md); 
+        background: #fff; 
+        box-shadow: 0 4px 15px rgba(23, 35, 31, .03);
+    }
+    .section-title { 
+        display: flex; 
+        align-items: center; 
+        justify-content: space-between; 
+        margin: 0 0 22px; 
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--adm-line);
+    }
+    .section-title h2 { 
+        margin: 0; 
+        color: var(--adm-ink); 
+        font-family: 'DM Serif Display', Georgia, serif; 
+        font-size: 22px; 
+        font-weight: 400; 
+    }
+    .section-title small { color: var(--adm-muted); font-size: 11px; font-weight: 700; }
 
-    @media (max-width: 1000px) { .stats-overview { grid-template-columns: repeat(2, 1fr); } .admin-grid { grid-template-columns: 1fr; } }
-    @media (max-width: 600px) { .stats-overview { grid-template-columns: 1fr; } .quick-links { grid-template-columns: 1fr; } }
+    .quick-links { 
+        display: grid; 
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 14px; 
+    }
+    .quick-link-card { 
+        display: flex; 
+        align-items: center; 
+        gap: 14px; 
+        padding: 16px 18px; 
+        border: 1px solid var(--adm-line); 
+        border-radius: var(--radius-sm); 
+        background: #fff;
+        text-decoration: none;
+        transition: all 0.2s ease; 
+    }
+    .quick-link-card:hover { 
+        border-color: var(--adm-leaf); 
+        background: var(--adm-leaf-soft); 
+        transform: translateY(-2px);
+    }
+    .quick-link-icon {
+        width: 40px;
+        height: 40px;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+        border-radius: 10px;
+        background: var(--adm-leaf-soft);
+        color: var(--adm-leaf);
+        font-size: 16px;
+    }
+    .quick-link-info span { display: block; font-size: 13px; font-weight: 800; color: var(--adm-ink); line-height: 1.2; }
+    .quick-link-info small { display: block; margin-top: 3px; font-size: 10px; color: var(--adm-muted); font-weight: 600; }
+
+    .status-list { display: flex; flex-direction: column; gap: 14px; }
+    .status-item { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px dashed var(--adm-line); }
+    .status-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .status-info { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 700; color: var(--adm-ink); }
+    .status-info i { color: var(--adm-muted); width: 16px; text-align: center; }
+    .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: var(--pill); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+    .status-badge-ok { background: var(--adm-leaf-soft); color: var(--adm-leaf); }
+    .status-badge-ok::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--adm-leaf); }
+
+    @media (max-width: 1024px) { 
+        .stats-overview { grid-template-columns: repeat(2, 1fr); } 
+        .admin-grid { grid-template-columns: 1fr; } 
+    }
+    @media (max-width: 600px) { 
+        .stats-overview { grid-template-columns: 1fr; } 
+        .quick-links { grid-template-columns: 1fr; } 
+        .admin-header { flex-direction: column; align-items: flex-start; gap: 14px; }
+    }
 </style>
 {% endblock %}
 
@@ -44,86 +196,139 @@
     <div class="admin-container">
         <header class="admin-header">
             <div class="admin-header-content">
+                <span class="admin-eyebrow"><i class="fas fa-shield-halved"></i> Control Panel</span>
                 <h1>Admin Dashboard</h1>
-                <p>Welcome back. Here's what's happening at Tunu Library today.</p>
+                <p>Welcome back. Real-time overview and system actions for Tunu Library.</p>
             </div>
             <div class="admin-header-actions">
-                <a href="{{ url_for('index') }}" class="btn btn-outline"><i class="fas fa-eye"></i> View Site</a>
+                <a href="{{ url_for('index') }}" class="btn btn-outline" target="_blank"><i class="fas fa-arrow-up-right-from-square"></i> Live Library Site</a>
             </div>
         </header>
 
         <nav class="admin-nav-tabs" aria-label="Admin navigation">
-            <a href="{{ url_for('admin_dashboard') }}" class="admin-nav-tab {{ 'active' if request.endpoint == 'admin_dashboard' else '' }}">Overview</a>
-            <a href="{{ url_for('admin_borrowing') }}" class="admin-nav-tab">Borrowings</a>
-            <a href="{{ url_for('admin_reservations') }}" class="admin-nav-tab">Reservations</a>
-            <a href="{{ url_for('admin_users') }}" class="admin-nav-tab">Users</a>
-            <a href="{{ url_for('admin_payments') }}" class="admin-nav-tab">Payments</a>
+            <a href="{{ url_for('admin_dashboard') }}" class="admin-nav-tab {{ 'active' if request.endpoint == 'admin_dashboard' else '' }}"><i class="fas fa-gauge"></i> Overview</a>
+            <a href="{{ url_for('admin_borrowing') }}" class="admin-nav-tab {{ 'active' if request.endpoint == 'admin_borrowing' else '' }}"><i class="fas fa-hand-holding-heart"></i> Borrowings</a>
+            <a href="{{ url_for('admin_reservations') }}" class="admin-nav-tab {{ 'active' if request.endpoint == 'admin_reservations' else '' }}"><i class="fas fa-bookmark"></i> Reservations</a>
+            <a href="{{ url_for('admin_users') }}" class="admin-nav-tab {{ 'active' if request.endpoint == 'admin_users' else '' }}"><i class="fas fa-users"></i> Users</a>
+            <a href="{{ url_for('admin_payments') }}" class="admin-nav-tab {{ 'active' if request.endpoint == 'admin_payments' else '' }}"><i class="fas fa-receipt"></i> Payments</a>
+            <a href="{{ url_for('logs') }}" class="admin-nav-tab {{ 'active' if request.endpoint == 'logs' else '' }}"><i class="fas fa-list-check"></i> System Logs</a>
         </nav>
 
         <div class="stats-overview">
             <div class="stat-card">
-                <span class="stat-label">Total Books</span>
+                <div class="stat-top">
+                    <span class="stat-label">Total Books</span>
+                    <span class="stat-icon"><i class="fas fa-book"></i></span>
+                </div>
                 <span class="stat-value">{{ total_books or 0 }}</span>
-                <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> Inventory stable</div>
+                <span class="stat-subtext"><i class="fas fa-layer-group" style="color: var(--adm-leaf);"></i> Catalog Items</span>
             </div>
+
             <div class="stat-card">
-                <span class="stat-label">Active Borrowings</span>
+                <div class="stat-top">
+                    <span class="stat-label">Active Borrowings</span>
+                    <span class="stat-icon"><i class="fas fa-book-reader"></i></span>
+                </div>
                 <span class="stat-value">{{ active_borrowings or 0 }}</span>
-                <div class="stat-trend trend-up"><i class="fas fa-book-reader"></i> Reading in progress</div>
+                <span class="stat-subtext"><i class="fas fa-clock" style="color: var(--adm-leaf);"></i> Books out with readers</span>
             </div>
+
             <div class="stat-card">
-                <span class="stat-label">Pending Reserves</span>
-                <span class="stat-value">{{ pending_reservations or 0 }}</span>
-                <div class="stat-trend" style="color: var(--adm-coral);"><i class="fas fa-clock"></i> Needs attention</div>
+                <div class="stat-top">
+                    <span class="stat-label">Pending Reserves</span>
+                    <span class="stat-icon" style="background: var(--adm-coral-soft); color: var(--adm-coral);"><i class="fas fa-hourglass-half"></i></span>
+                </div>
+                <span class="stat-value" style="color: var(--adm-coral);">{{ pending_reservations or 0 }}</span>
+                <span class="stat-subtext"><i class="fas fa-exclamation-circle" style="color: var(--adm-coral);"></i> Awaiting processing</span>
             </div>
+
             <div class="stat-card">
-                <span class="stat-label">Total Members</span>
+                <div class="stat-top">
+                    <span class="stat-label">Total Members</span>
+                    <span class="stat-icon"><i class="fas fa-users"></i></span>
+                </div>
                 <span class="stat-value">{{ total_users or 0 }}</span>
-                <div class="stat-trend trend-up"><i class="fas fa-users"></i> Community growing</div>
+                <span class="stat-subtext"><i class="fas fa-user-check" style="color: var(--adm-leaf);"></i> Registered accounts</span>
             </div>
         </div>
 
         <div class="admin-grid">
             <section class="admin-section">
                 <div class="section-title">
-                    <h2>Quick Management</h2>
+                    <h2>Quick Actions & Operations</h2>
+                    <small>Frequently performed tasks</small>
                 </div>
                 <div class="quick-links">
                     <a href="{{ url_for('admin_borrowing') }}" class="quick-link-card">
-                        <i class="fas fa-hand-holding-heart"></i>
-                        <span>Confirm Pickups</span>
+                        <div class="quick-link-icon"><i class="fas fa-hand-holding-heart"></i></div>
+                        <div class="quick-link-info">
+                            <span>Confirm Pickups</span>
+                            <small>Process book checkout requests</small>
+                        </div>
                     </a>
                     <a href="{{ url_for('admin_borrowing') }}" class="quick-link-card">
-                        <i class="fas fa-undo"></i>
-                        <span>Process Returns</span>
+                        <div class="quick-link-icon"><i class="fas fa-undo"></i></div>
+                        <div class="quick-link-info">
+                            <span>Process Returns</span>
+                            <small>Mark books returned to library</small>
+                        </div>
                     </a>
                     <a href="{{ url_for('admin_books') }}" class="quick-link-card">
-                        <i class="fas fa-book"></i>
-                        <span>Manage Inventory</span>
+                        <div class="quick-link-icon"><i class="fas fa-book-open"></i></div>
+                        <div class="quick-link-info">
+                            <span>Manage Books</span>
+                            <small>View inventory & catalog items</small>
+                        </div>
                     </a>
                     <a href="{{ url_for('admin_users') }}" class="quick-link-card">
-                        <i class="fas fa-user-shield"></i>
-                        <span>Manage Access</span>
+                        <div class="quick-link-icon"><i class="fas fa-user-shield"></i></div>
+                        <div class="quick-link-info">
+                            <span>User Access</span>
+                            <small>Manage member roles & permissions</small>
+                        </div>
+                    </a>
+                    <a href="{{ url_for('admin_payments') }}" class="quick-link-card">
+                        <div class="quick-link-icon"><i class="fas fa-receipt"></i></div>
+                        <div class="quick-link-info">
+                            <span>Review Payments</span>
+                            <small>Audit M-Pesa membership transactions</small>
+                        </div>
+                    </a>
+                    <a href="{{ url_for('logs') }}" class="quick-link-card">
+                        <div class="quick-link-icon"><i class="fas fa-list-check"></i></div>
+                        <div class="quick-link-info">
+                            <span>System Activity</span>
+                            <small>View server logs & traffic stats</small>
+                        </div>
                     </a>
                 </div>
             </section>
 
             <section class="admin-section">
                 <div class="section-title">
-                    <h2>System Status</h2>
+                    <h2>Infrastructure Status</h2>
+                    <small>System diagnostics</small>
                 </div>
-                <div style="display: flex; flex-direction: column; gap: 16px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--adm-line);">
-                        <span style="font-size: 13px; color: var(--adm-muted);">Database</span>
-                        <span style="font-size: 11px; font-weight: 800; color: var(--adm-leaf);">CONNECTED</span>
+                <div class="status-list">
+                    <div class="status-item">
+                        <div class="status-info"><i class="fas fa-database"></i> Database Store</div>
+                        <span class="status-badge status-badge-ok">Connected</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--adm-line);">
-                        <span style="font-size: 13px; color: var(--adm-muted);">M-Pesa Integration</span>
-                        <span style="font-size: 11px; font-weight: 800; color: var(--adm-leaf);">ACTIVE</span>
+                    <div class="status-item">
+                        <div class="status-info"><i class="fas fa-mobile-screen-button"></i> M-Pesa Gateway</div>
+                        <span class="status-badge status-badge-ok">Active</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--adm-line);">
-                        <span style="font-size: 13px; color: var(--adm-muted);">Email Service</span>
-                        <span style="font-size: 11px; font-weight: 800; color: var(--adm-leaf);">OPERATIONAL</span>
+                    <div class="status-item">
+                        <div class="status-info"><i class="fas fa-envelope"></i> Mail Dispatcher</div>
+                        <span class="status-badge status-badge-ok">Operational</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-info"><i class="fas fa-shield-virus"></i> reCAPTCHA v2</div>
+                        <span class="status-badge status-badge-ok">Protected</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-info"><i class="fas fa-cloud"></i> Catalog Sync</div>
+                        <span class="status-badge status-badge-ok">Online</span>
                     </div>
                 </div>
             </section>

@@ -183,3 +183,20 @@ class BookFlag(db.Model):
     resolved_at=db.Column(db.DateTime)
     user=db.relationship("User",foreign_keys=[user_id],backref="book_flags")
     reviewed_by_user=db.relationship("User",foreign_keys=[reviewed_by])
+
+
+class Log(db.Model):
+    __tablename__ = "log"
+
+    id = db.Column(db.Integer, primary_key=True)
+    time = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    ip_address = db.Column(db.String(45), nullable=False)
+    staff = db.Column(db.String(100), default="Guest", nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
+    method = db.Column(db.String(10), nullable=False)
+    endpoint = db.Column(db.String(255), nullable=False)
+    action = db.Column(db.String(500), nullable=False)
+    status_code = db.Column(db.Integer, nullable=False)
+    user_agent = db.Column(db.Text, nullable=True)
+
+    user = db.relationship("User", foreign_keys=[user_id], backref="logs")

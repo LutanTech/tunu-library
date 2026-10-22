@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Tunu Library — Administration{% endblock %}</title>
+    <meta name="theme-color" content="#17231f">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='logo/favicon-32.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='logo/apple-touch-icon.png') }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+
+    <style>
+        :root {
+            --ink: #17231f;
+            --ink-soft: #34443d;
+            --muted: #718078;
+            --paper: #f7f5ef;
+            --paper-deep: #efede4;
+            --surface: #ffffff;
+            --line: #dfe3da;
+            --line-dark: #c8d0c7;
+            --leaf: #2f6b4f;
+            --leaf-dark: #22543e;
+            --leaf-soft: #e6f0e8;
+            --coral: #e46d4d;
+            --coral-soft: #fbe9e2;
+            --gold: #d6a84f;
+            --danger: #b5473a;
+            --shadow-sm: 0 5px 20px rgba(23, 35, 31, .06);
+            --shadow-md: 0 16px 45px rgba(23, 35, 31, .11);
+            --shadow-lg: 0 28px 70px rgba(23, 35, 31, .16);
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            --radius-xl: 10px;
+            --pill: 4px;
+            --nav-height: 70px;
+            --container: 1300px;
+            --ease: cubic-bezier(.22, 1, .36, 1);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            min-width: 320px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+        body.menu-open { overflow: hidden; }
+        a { color: inherit; text-decoration: none; }
+        button, input { font: inherit; color: inherit; }
+        img { max-width: 100%; display: block; }
+        :focus-visible { outline: 3px solid rgba(47, 107, 79, .72); outline-offset: 2px; }
+        ::selection { background: var(--leaf); color: #fff; }
+
+        .container {
+            width: min(100% - 48px, var(--container));
+            margin-inline: auto;
+        }
+        .skip-link {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 2000;
+            transform: translateY(-180%);
+            padding: 8px 14px;
+            border-radius: var(--pill);
+            background: var(--ink);
+            color: #fff;
+            font-weight: 800;
+            transition: transform .2s ease;
+        }
+        .skip-link:focus { transform: translateY(0); }
+
+        /* Header */
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            height: var(--nav-height);
+            border-bottom: 1px solid var(--line);
+            background: rgba(247, 245, 239, .95);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+        .navbar {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        .brand-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            flex: 0 0 auto;
+            color: var(--ink);
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: -.03em;
+        }
+        .brand-mark {
+            width: 34px;
+            height: 34px;
+            display: grid;
+            place-items: center;
+            border-radius: var(--radius-sm);
+            background: var(--ink);
+            color: #fff;
+        }
+        .brand-wordmark small {
+            display: block;
+            margin-top: 2px;
+            color: var(--muted);
+            font-size: 8px;
+            font-weight: 800;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+        }
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: 0 auto 0 0;
+            padding: 0;
+            list-style: none;
+        }
+        .nav-link {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 12px;
+            border-radius: var(--pill);
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 700;
+            transition: color .2s ease, background .2s ease;
+        }
+        .nav-link i { font-size: 12px; color: var(--leaf); }
+        .nav-link:hover, .nav-link.active { color: var(--ink); background: var(--leaf-soft); }
+        .nav-link.active { color: var(--leaf-dark); }
+
+        .nav-actions { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+        
+        .user-dropdown-container { position: relative; }
+        .user-avatar-btn {
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 2px 10px 2px 4px;
+            border: 1px solid var(--line);
+            border-radius: var(--pill);
+            background: #fff;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 800;
+        }
+        .user-avatar-icon {
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: var(--leaf-soft);
+            color: var(--leaf-dark);
+            font-size: 11px;
+        }
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 220px;
+            display: none;
+            padding: 6px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+            background: var(--surface);
+            box-shadow: var(--shadow-md);
+        }
+        .dropdown-menu.show { display: block; }
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: var(--radius-sm);
+            color: var(--ink-soft);
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .dropdown-item i { width: 16px; color: var(--leaf); text-align: center; }
+        .dropdown-item:hover { background: var(--paper); color: var(--ink); }
+        .dropdown-divider { height: 1px; margin: 5px 2px; background: var(--line); }
+
+        /* Shared controls */
+        .btn {
+            min-height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border: 1px solid transparent;
+            border-radius: var(--pill);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 800;
+            transition: background .2s ease, border .2s ease;
+        }
+        .btn-brand { background: var(--ink); color: #fff; }
+        .btn-brand:hover { background: var(--leaf-dark); }
+        .btn-outline { border-color: var(--line-dark); background: transparent; color: var(--ink); }
+        .btn-outline:hover { border-color: var(--ink); background: var(--surface); }
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-danger:hover { background: #96382e; }
+
+        .mobile-toggle-btn { display: none; width: 36px; height: 36px; place-items: center; border: 1px solid var(--line); border-radius: var(--radius-sm); background: #fff; cursor: pointer; }
+
+        /* Alerts */
+        .flash-container { padding-top: 20px; }
+        .alert-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 10px;
+            padding: 12px 16px;
+            border: 1px solid;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .alert-box span { display: inline-flex; align-items: center; gap: 8px; }
+        .alert-success { border-color: #b8dec4; background: #edf8ef; color: #27643f; }
+        .alert-warning { border-color: #ead59b; background: #fff9e8; color: #80621b; }
+        .alert-danger { border-color: #efc2bb; background: #fff0ed; color: #963f34; }
+        .alert-close { padding: 2px 4px; border: 0; background: transparent; color: inherit; cursor: pointer; opacity: .6; }
+        .alert-close:hover { opacity: 1; }
+
+        /* Content surface */
+        .main-wrapper { flex: 1; min-width: 0; }
+        .content-frame { min-height: 320px; }
+
+        /* Footer */
+        .site-footer {
+            margin-top: 60px;
+            padding: 24px 0;
+            border-top: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--muted);
+            font-size: 11px;
+        }
+        .footer-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .footer-links { display: flex; gap: 16px; list-style: none; margin: 0; padding: 0; }
+        .footer-links a:hover { color: var(--ink); }
+
+        /* Mobile drawer */
+        .mobile-drawer-backdrop { position: fixed; inset: 0; z-index: 998; visibility: hidden; background: rgba(23,35,31,.4); opacity: 0; transition: opacity .2s ease; }
+        .mobile-drawer-backdrop.active { visibility: visible; opacity: 1; }
+        .mobile-drawer { position: fixed; top: 0; right: 0; z-index: 999; width: 300px; height: 100vh; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; background: var(--surface); box-shadow: -10px 0 30px rgba(0,0,0,0.1); transform: translateX(100%); transition: transform .25s ease; }
+        .mobile-drawer.active { transform: translateX(0); }
+        .mobile-nav-list { display: flex; flex-direction: column; gap: 4px; margin: 20px 0 0; padding: 0; list-style: none; }
+        .mobile-nav-link { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius-sm); color: var(--ink-soft); font-size: 13px; font-weight: 700; }
+        .mobile-nav-link i { width: 16px; color: var(--leaf); text-align: center; }
+        .mobile-nav-link:hover, .mobile-nav-link.active { background: var(--leaf-soft); color: var(--leaf-dark); }
+
+        @media (max-width: 960px) {
+            .nav-menu { display: none; }
+            .mobile-toggle-btn { display: grid; }
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <header class="site-header">
+        <div class="container navbar">
+            <a href="{{ url_for('admin_dashboard') }}" class="brand-logo">
+                <span class="brand-mark"><i class="fas fa-shield-halved"></i></span>
+                <span class="brand-wordmark">Tunu Control<small>Administration</small></span>
+            </a>
+
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}"><i class="fas fa-gauge"></i>Dashboard</a></li>
+                    <li><a href="{{ url_for('admin_books') }}" class="nav-link"><i class="fas fa-book"></i>Catalog</a></li>
+                    <li><a href="{{ url_for('logs') }}" class="nav-link {% if request.endpoint == 'logs' %}active{% endif %}"><i class="fas fa-list-check"></i>Activity Logs</a></li>
+                </ul>
+            </nav>
+
+            <div class="nav-actions">
+                {% if current_user %}
+                    <div class="user-dropdown-container">
+                        <button type="button" class="user-avatar-btn" id="userMenuBtn" aria-expanded="false">
+                            <span class="user-avatar-icon"><i class="fas fa-user-shield"></i></span>
+                            <span>{{ current_user.username or "Admin" }}</span>
+                            <i class="fas fa-chevron-down" style="font-size: 9px; color: var(--muted);"></i>
+                        </button>
+                        <div class="dropdown-menu" id="userDropdown">
+                            <a href="{{ url_for('dashboard') }}" class="dropdown-item"><i class="fas fa-arrow-left"></i>Exit to Library</a>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('logout') }}" class="dropdown-item" style="color: var(--danger);"><i class="fas fa-right-from-bracket" style="color: currentColor;"></i>Log out</a>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <button type="button" class="mobile-toggle-btn" id="mobileToggleBtn" aria-label="Open navigation menu">
+                    <i class="fas fa-bars" id="toggleIcon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="mobile-drawer-backdrop" id="drawerBackdrop"></div>
+    <aside class="mobile-drawer" id="mobileDrawer">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 12px;">
+            <strong>Admin Navigation</strong>
+            <button type="button" id="drawerCloseBtn" style="border: none; background: none; cursor: pointer;"><i class="fas fa-xmark fa-lg"></i></button>
+        </div>
+        <ul class="mobile-nav-list">
+            <li><a href="{{ url_for('admin_dashboard') }}" class="mobile-nav-link"><i class="fas fa-gauge"></i>Dashboard</a></li>
+            <li><a href="{{ url_for('books') }}" class="mobile-nav-link"><i class="fas fa-book"></i>Catalog</a></li>
+            <li><a href="{{ url_for('logs') }}" class="mobile-nav-link"><i class="fas fa-list-check"></i>Activity Logs</a></li>
+            <li><a href="{{ url_for('dashboard') }}" class="mobile-nav-link"><i class="fas fa-arrow-left"></i>Exit to Library</a></li>
+        </ul>
+    </aside>
+
+    <main id="main-content" class="main-wrapper">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="container flash-container">
+                    {% for category, message in messages %}
+                        <div class="alert-box alert-{{ category if category in ['success', 'warning', 'danger'] else 'warning' }}">
+                            <span>
+                                {% if category == 'success' %}<i class="fas fa-circle-check"></i>
+                                {% elif category == 'danger' %}<i class="fas fa-circle-xmark"></i>
+                                {% else %}<i class="fas fa-circle-info"></i>{% endif %}
+                                {{ message }}
+                            </span>
+                            <button type="button" class="alert-close" onclick="this.closest('.alert-box').remove();">&times;</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        <div class="content-frame">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-content">
+            <p>&copy; 2026 Tunu Library Admin Control Panel.</p>
+            <ul class="footer-links">
+                <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ url_for('logs') }}">Logs</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            const userDropdown = document.getElementById('userDropdown');
+            const mobileToggleBtn = document.getElementById('mobileToggleBtn');
+            const mobileDrawer = document.getElementById('mobileDrawer');
+            const drawerBackdrop = document.getElementById('drawerBackdrop');
+            const drawerCloseBtn = document.getElementById('drawerCloseBtn');
+
+            if (userMenuBtn && userDropdown) {
+                userMenuBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('show');
+                });
+                document.addEventListener('click', () => userDropdown.classList.remove('show'));
+            }
+
+            const toggleDrawer = (open) => {
+                mobileDrawer.classList.toggle('active', open);
+                drawerBackdrop.classList.toggle('active', open);
+                document.body.classList.toggle('menu-open', open);
+            };
+
+            if (mobileToggleBtn) mobileToggleBtn.addEventListener('click', () => toggleDrawer(true));
+            if (drawerCloseBtn) drawerCloseBtn.addEventListener('click', () => toggleDrawer(false));
+            if (drawerBackdrop) drawerBackdrop.addEventListener('click', () => toggleDrawer(false));
+        });
+    </script>
+</body>
+</html>

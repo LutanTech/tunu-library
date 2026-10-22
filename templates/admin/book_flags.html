@@ -1,34 +1,131 @@
-{% extends "base.html" %}
+{% extends "admin_base.html" %}
 
 {% block title %}Book Flags — Admin{% endblock %}
 
+{% block head %}
+<style>
+    .admin-page { --adm-ink: #17231f; --adm-muted: #718078; --adm-paper: #f7f5ef; --adm-line: #dfe3da; --adm-leaf: #2f6b4f; --adm-leaf-soft: #e6f0e8; --adm-coral: #e46d4d; }
+    .admin-container { width: min(100% - 48px, 1200px); margin-inline: auto; padding: 40px 0 80px; }
+    
+    .admin-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--adm-line); }
+    .admin-header-content h1 { margin: 0; color: var(--adm-ink); font-family: 'DM Serif Display', Georgia, serif; font-size: 32px; font-weight: 400; letter-spacing: -0.02em; }
+    .admin-header-content p { margin: 4px 0 0; color: var(--adm-muted); font-size: 13px; }
+
+    .admin-nav-tabs { display: flex; gap: 8px; margin-bottom: 32px; padding: 6px; border-radius: var(--radius-md); background: var(--adm-leaf-soft); overflow: auto; }
+    .admin-nav-tab { padding: 10px 18px; border-radius: var(--radius-sm); color: var(--adm-muted); font-size: 12px; font-weight: 800; transition: all 0.2s ease; text-decoration: none; white-space: nowrap; }
+    .admin-nav-tab:hover { color: var(--adm-ink); background: rgba(255,255,255,0.5); }
+    .admin-nav-tab.active { color: #fff; background: var(--adm-leaf); box-shadow: 0 4px 12px rgba(47, 107, 79, 0.2); }
+
+    .admin-table-card { border: 1px solid var(--adm-line); border-radius: var(--radius-md); background: #fff; overflow: auto; box-shadow: var(--shadow-sm); }
+    .admin-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .admin-table th { padding: 16px 20px; background: var(--adm-leaf-soft); color: var(--adm-leaf); font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; border-bottom: 1px solid var(--adm-line); }
+    .admin-table td { padding: 18px 20px; border-bottom: 1px solid var(--adm-line); vertical-align: top; font-size: 13px; }
+    .admin-table tr:last-child td { border-bottom: 0; }
+
+    .pagination { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 32px; }
+    .page-link { display: grid; place-items: center; min-width: 36px; height: 36px; border: 1px solid var(--adm-line); border-radius: 4px; background: #fff; color: var(--adm-ink); font-size: 13px; font-weight: 700; transition: all 0.2s ease; text-decoration: none; }
+    .page-link:hover:not(.disabled) { border-color: var(--adm-leaf); color: var(--adm-leaf); }
+    .page-link.active { background: var(--adm-leaf); border-color: var(--adm-leaf); color: #fff; }
+    .page-link.disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .select-field, .input-field { height: 36px; padding: 0 10px; border: 1px solid var(--adm-line); border-radius: 4px; font-size: 12px; outline: none; background: #fff; width: 100%; }
+    .select-field:focus, .input-field:focus { border-color: var(--adm-leaf); }
+</style>
+{% endblock %}
+
 {% block content %}
-<main style="width:min(100% - 48px,1200px); margin:40px auto 80px;">
-    <header style="margin-bottom:24px;">
-        <h1 style="margin:0;">Book flags</h1>
-        <p>Review reports about damaged copies, missing pages, availability, and incorrect details.</p>
-        <p><a class="btn btn-outline" href="{{ url_for('admin_borrowing') }}">Back to borrowings</a></p>
-    </header>
-    <div style="overflow:auto; border:1px solid #dfe3da; border-radius:8px;">
-        <table style="width:100%; border-collapse:collapse; text-align:left;">
-            <thead><tr><th style="padding:12px;">Book</th><th style="padding:12px;">Reported by</th><th style="padding:12px;">Report</th><th style="padding:12px;">Status</th><th style="padding:12px;">Review</th></tr></thead>
-            <tbody>
-            {% for flag in flags %}
-                <tr style="border-top:1px solid #dfe3da; vertical-align:top;">
-                    <td style="padding:12px;"><code>{{ flag.book_id }}</code><br><small>{{ flag.created_at.strftime('%d %b %Y, %H:%M') }}</small></td>
-                    <td style="padding:12px;">{{ flag.user.username if flag.user else 'Anonymous / removed user' }}</td>
-                    <td style="padding:12px;"><strong>{{ flag.category|replace('_',' ')|title }}</strong><br>{{ flag.reason }}{% if flag.details %}<br><small>{{ flag.details }}</small>{% endif %}</td>
-                    <td style="padding:12px;">{{ flag.status|title }}{% if flag.admin_note %}<br><small>{{ flag.admin_note }}</small>{% endif %}</td>
-                    <td style="padding:12px;"><form method="POST" action="{{ url_for('review_book_flag', flag_id=flag.id) }}" style="display:grid; gap:7px;"><select name="status"><option value="reviewed">Reviewed</option><option value="resolved">Resolved</option><option value="dismissed">Dismissed</option></select><input name="admin_note" placeholder="Admin note"><button class="btn btn-brand" type="submit">Save</button></form></td>
-                </tr>
-            {% else %}
-                <tr><td colspan="5" style="padding:40px; text-align:center;">No book flags have been submitted.</td></tr>
+<div class="admin-page">
+    <div class="admin-container">
+        <header class="admin-header">
+            <div class="admin-header-content">
+                <h1>Book flags</h1>
+                <p>Review reports about damaged copies, missing pages, availability, and incorrect details[cite: 4].</p>
+            </div>
+            <div class="admin-header-actions">
+                <a class="btn btn-outline" href="{{ url_for('admin_borrowing') }}">Back to borrowings</a>
+            </div>
+        </header>
+
+        <nav class="admin-nav-tabs" aria-label="Admin navigation">
+            <a href="{{ url_for('admin_dashboard') }}" class="admin-nav-tab">Overview</a>
+            <a href="{{ url_for('admin_borrowing') }}" class="admin-nav-tab">Borrowings</a>
+            <a href="{{ url_for('admin_reservations') }}" class="admin-nav-tab">Reservations</a>
+            <a href="{{ url_for('admin_users') }}" class="admin-nav-tab">Users</a>
+            <a href="{{ url_for('admin_payments') }}" class="admin-nav-tab">Payments</a>
+            <a href="{{ url_for('admin_book_flags') }}" class="admin-nav-tab active">Book flags</a>
+        </nav>
+
+        <div class="admin-table-card">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>Reported by</th>
+                        <th>Report</th>
+                        <th>Status</th>
+                        <th>Review</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for flag in flags %}
+                    <tr>
+                        <td>
+                            <code style="font-size: 11px; font-weight: 800; color: var(--adm-ink);">{{ flag.book_id }}</code><br>
+                            <small style="color: var(--adm-muted);">{{ flag.created_at.strftime('%d %b %Y, %H:%M') }}</small>
+                        </td>
+                        <td>
+                            <span style="font-weight: 700;">{{ flag.user.username if flag.user else 'Anonymous / removed user' }}[cite: 4]</span>
+                        </td>
+                        <td>
+                            <strong style="color: var(--adm-ink);">{{ flag.category|replace('_',' ')|title }}</strong><br>
+                            <span>{{ flag.reason }}</span>
+                            {% if flag.details %}<br><small style="color: var(--adm-muted);">{{ flag.details }}</small>{% endif %}
+                        </td>
+                        <td>
+                            <span style="font-weight: 700;">{{ flag.status|title }}</span>
+                            {% if flag.admin_note %}<br><small style="color: var(--adm-muted);">{{ flag.admin_note }}</small>{% endif %}
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('review_book_flag', flag_id=flag.id) }}" style="display: grid; gap: 7px; min-width: 150px;">
+                                <select name="status" class="select-field">
+                                    <option value="reviewed">Reviewed</option>
+                                    <option value="resolved">Resolved</option>
+                                    <option value="dismissed">Dismissed</option>
+                                </select>
+                                <input name="admin_note" placeholder="Admin note" class="input-field">
+                                <button class="btn btn-brand btn-sm" type="submit" style="width: 100%;">Save</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="padding: 60px 20px; text-align: center; color: var(--adm-muted);">
+                            <i class="fas fa-flag" style="font-size: 32px; margin-bottom: 12px; display: block;"></i>
+                            No book flags have been submitted[cite: 4].
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if pagination and pagination.pages > 1 %}
+        <div class="pagination">
+            <a href="{{ url_for('admin_book_flags', page=pagination.prev_num) }}" class="page-link {{ 'disabled' if not pagination.has_prev else '' }}">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            {% for page_num in pagination.iter_pages() %}
+                {% if page_num %}
+                    <a href="{{ url_for('admin_book_flags', page=page_num) }}" class="page-link {{ 'active' if page_num == pagination.page else '' }}">{{ page_num }}</a>
+                {% else %}
+                    <span class="page-link disabled">...</span>
+                {% endif %}
             {% endfor %}
-            </tbody>
-        </table>
+            <a href="{{ url_for('admin_book_flags', page=pagination.next_num) }}" class="page-link {{ 'disabled' if not pagination.has_next else '' }}">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+        {% endif %}
     </div>
-    {% if pagination and pagination.pages > 1 %}
-    <p style="margin-top:20px;">{% if pagination.has_prev %}<a href="{{ url_for('admin_book_flags',page=pagination.prev_num) }}">Previous</a>{% endif %} Page {{ pagination.page }} of {{ pagination.pages }} {% if pagination.has_next %}<a href="{{ url_for('admin_book_flags',page=pagination.next_num) }}">Next</a>{% endif %}</p>
-    {% endif %}
-</main>
+</div>
 {% endblock %}

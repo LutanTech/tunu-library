@@ -147,6 +147,17 @@
             scale: 0.9;
         }
     }
+    .password-eye{
+        position: absolute;
+        right: 5%;
+        top: 51%;
+        background: none;
+        border: none;
+        &:active{
+          scale:0.8;
+        }
+}
+
 </style>
 {% endblock %}
 
@@ -168,13 +179,18 @@
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="position: relative;">
                 <label for="password">Password</label>
                 <div class="inp-group">
 
                 <div class="inp-icon"> <i class="fas fa-lock-open"></i></div>
                 <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
                 </div>
+                <button type="button" class="password-eye"><i class="fas fa-eye"></i></button>
+            </div>
+
+            <div class="form-group" style="display: flex; align-items: center; justify-content: center;">
+                <div class="g-recaptcha" data-sitekey="6LdMtPgtAAAAALMoNCB4yr_YBFQt7ecYo0WT0iA0"></div>
             </div>
 
             <button type="submit" class="btn btn-brand" style="width: 100%; padding: 12px; margin-top: 10px;">
@@ -198,4 +214,15 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        const btn = document.querySelector('.password-eye')
+        const i = document.querySelector('.password-eye i')
+        const inp = document.querySelector('#password')
+        btn.addEventListener('click', ()=>{
+            inp.setAttribute('type', inp.getAttribute('type') == 'password' ? 'text' : 'password')
+            i.classList = `fas ${i.classList.contains("fa-eye-slash") ? 'fa-eye' : 'fa-eye-slash'}`
+        })
+    })
+</script>
 {% endblock %}

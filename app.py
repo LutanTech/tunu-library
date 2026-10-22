@@ -1,20 +1,60 @@
-import os, re, base64, requests, traceback
-from datetime import datetime,timedelta
-from sqlalchemy import or_
-from flask import Flask,render_template,request,redirect,url_for,abort,g,make_response,jsonify,flash,send_from_directory, session
-from models import db,User,LibraryBook,Reservation,Borrowing,Payment,Notification,AdminPermission,BookFlag,Book
-from utils import *
-from emails import mail
-from notifications import notify,unread, unreadCount
-from flask_migrate import Migrate
+import base64
+from datetime import datetime, timedelta
+from functools import wraps
+import os
+import re
+import re
+import traceback
+
+from email_validator import EmailNotValidError, validate_email
+from flask import (
+    Flask,
+    abort,
+    flash,
+    g,
+    jsonify,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    send_from_directory,
+    session,
+    url_for,
+    
+)
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_migrate import Migrate
 from google.auth import default
 from google_auth_oauthlib.flow import Flow
+from markupsafe import escape
+import requests
+from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+
+from emails import mail
+from models import (
+    AdminPermission,
+    Book,
+    BookFlag,
+    Borrowing,
+    LibraryBook,
+    Notification,
+    Payment,
+    Reservation,
+    User,
+    db,
+    Log
+)
+from notifications import notify, unread, unreadCount
+from utils import *
 
 app=Flask(__name__)
 migrate = Migrate(app, db)
 COOKIE_SECURE=os.getenv("SESSION_COOKIE_SECURE","0")=="1"
+RECAPTCHA_SECRET_KEY = os.getenv('RECAPTCHA_SECRET_KEY')
+delta = 3
+
 app.config.update(
     MAX_CONTENT_LENGTH=25*1024*1024,
     SESSION_COOKIE_HTTPONLY=True,
@@ -31,6 +71,7 @@ app.config.update(
     MAIL_PASSWORD = os.getenv("MAIL_PASS"),
 )
 SENDER_MAIL = "library@tunupublishers.com"
+
 
 
 app.config["MAIL_DEFAULT_SENDER"] = (
@@ -77,6 +118,115 @@ def load_user():
     requested_language=request.args.get("lang")
     cookie_language=request.cookies.get("tunu_language")
     g.language=requested_language or cookie_language or "en"
+
+
+
+@app.after_request
+def log_request(response):
+    path = request.path
+    
+    if path.startswith('/.well-known') or path.startswith('/static'):
+        return response
+
+    image_extensions = ('.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.ico', '.bmp', '.tiff')
+    if path.lower().endswith(image_extensions) or path.startswith('/static/images/'):
+        return response
+
+    user = getattr(g, 'user', None)
+    if user:
+        staff_display = getattr(user, 'username', None) or getattr(user, 'email', 'User')
+        user_id = getattr(user, 'id', None)
+    else:
+        staff_display = 'Guest'
+        user_id = None
+
+    action = f"{request.method} {path}"
+
+    log_entry = Log(
+        time=datetime.utcnow() + timedelta(hours=delta),
+        ip_address=request.remote_addr or '127.0.0.1',
+        staff=staff_display,
+        user_id=user_id,
+        method=request.method,
+        endpoint=request.endpoint or path,
+        action=action,
+        status_code=response.status_code,
+        user_agent=request.headers.get('User-Agent', '')
+    )
+
+    try:
+        db.session.add(log_entry)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+
+    return response
+
+def captcha_verify(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if request.method == "POST":
+            if request.form.get("website_url"):
+                if (
+                    request.is_json
+                    or request.headers.get("Accept") == "application/json"
+                ):
+                    return jsonify({"error": "Invalid request."}), 400
+                flash("Please complete the reCAPTCHA checkbox verification.", "error")
+                return redirect(request.referrer or "/")
+
+            token = request.form.get("g-recaptcha-response")
+
+            if not token:
+                if (
+                    request.is_json
+                    or request.headers.get("Accept") == "application/json"
+                    or request.headers.get("X-Requested-With") == "XMLHttpRequest"
+                ):
+                    return jsonify(
+                        {"error": "Please complete the reCAPTCHA verification."}
+                    ), 400
+                flash("Please complete the reCAPTCHA checkbox verification.", "error")
+                return redirect(request.referrer or "/")
+
+            try:
+                result = requests.post(
+                    "https://www.google.com/recaptcha/api/siteverify",
+                    data={
+                        "secret": RECAPTCHA_SECRET_KEY,
+                        "response": token,
+                        "remoteip": request.remote_addr,
+                    },
+                    timeout=10,
+                ).json()
+            except requests.RequestException:
+                if (
+                    request.is_json
+                    or request.headers.get("Accept") == "application/json"
+                    or request.headers.get("X-Requested-With") == "XMLHttpRequest"
+                ):
+                    return jsonify(
+                        {"error": "reCAPTCHA verification failed. Please try again."}
+                    ), 400
+                flash("reCAPTCHA verification failed. Please try again.", "error")
+                return redirect(request.referrer or "/")
+
+            if not result.get("success"):
+                if (
+                    request.is_json
+                    or request.headers.get("Accept") == "application/json"
+                    or request.headers.get("X-Requested-With") == "XMLHttpRequest"
+                ):
+                    return jsonify(
+                        {"error": "Please complete the reCAPTCHA verification."}
+                    ), 400
+                flash("Please complete the reCAPTCHA checkbox verification.", "error")
+                return redirect(request.referrer or "/")
+
+        return f(*args, **kwargs)
+
+    return wrapper
+
 
 @app.context_processor
 def globals():
@@ -232,45 +382,149 @@ def flag_book(book_id):
     flash("Thank you. Your book flag has been sent to the library team.","success")
     return redirect(url_for("book",book_id=book_id))
 
-@app.route("/register",methods=["GET","POST"])
-@limiter.limit("5 per minute")
+
+
+@app.route("/register", methods=["GET", "POST"])
+@limiter.limit("50 per minute")
+@captcha_verify
 def register():
-    if g.user:return redirect(url_for("dashboard"))
-    if request.method=="POST":
-        username=request.form.get("username","").strip()
-        email=request.form.get("email","").strip().lower()
-        password=request.form.get("password","")
-        phone=request.form.get("phone","")
-        if not username or not email or not password or not phone:
-            flash("All fields are required.","error")
+    if g.user:
+        return redirect(url_for("dashboard"))
+
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
+        country = request.form.get("country", "").strip()
+        phone = request.form.get("phone", "").strip()
+
+        username = re.sub(r"\s+", " ", username)
+        email = re.sub(r"\s+", "", email).lower()
+        phone = re.sub(r"\D", "", phone)
+
+        if not all([username, email, password, country, phone]):
+            flash("All fields are required.", "error")
             return render_template("register.html")
-        
-        if len(password) < 8 or not any(c.isupper() for c in password) or not any(c.isdigit() for c in password) or not any(not c.isalnum() for c in password):
-            flash("Password does not meet security requirements.","error")
+
+        if len(username) < 3 or len(username) > 50 or not re.fullmatch(r"[A-Za-z0-9_. ]+", username):
+            flash("Username must be 3 to 50 characters and contain only letters, numbers, spaces, underscores or periods.", "error")
+            return render_template("register.html")
+
+        try:
+            email = validate_email(email, check_deliverability=False).normalized
+        except EmailNotValidError:
+            flash("Please enter a valid email address.", "error")
+            return render_template("register.html")
+
+        if len(email) > 254:
+            flash("Email address is too long.", "error")
+            return render_template("register.html")
+
+        if country not in ("+254", "+256", "+255"):
+            flash("Please select a valid country code.", "error")
+            return render_template("register.html")
+
+        if not re.fullmatch(r"[0-9]{9}", phone):
+            flash("Please enter a valid 9 digit phone number.", "error")
+            return render_template("register.html")
+
+        phone = country + phone
+
+        if len(password) < 8 or len(password) > 128 or not re.search(r"[A-Z]", password) or not re.search(r"[0-9]", password) or not re.search(r"[^A-Za-z0-9]", password):
+            flash("Password must contain at least 8 characters, an uppercase letter, a number and a special symbol. Maximum length is 128 characters.", "error")
             return render_template("register.html")
 
         if User.query.filter_by(username=username).first():
-            flash("Username already exists.","error")
+            flash("Username already exists.", "error")
             return render_template("register.html")
+
         if User.query.filter_by(phone=phone).first():
-            flash("Phone already registered.","error")
+            flash("Phone already registered.", "error")
             return render_template("register.html")
+
         if User.query.filter_by(email=email).first():
-            flash("Email already exists.","error")
+            flash("Email already exists.", "error")
             return render_template("register.html")
-        
-        user=User(username=username,email=email,password_hash=hash_password(password),login_method="email", phone=phone)
-        db.session.add(user)
-        db.session.commit()
-        notify(user.id,"Welcome to Tunu Library","Your account has been created.")
-        try:mail.send(email,"Welcome to Tunu Library",f"<h2>Welcome to Tunu Library</h2><p>Hello {username}, your account is ready.</p>")
-        except:pass
-        flash("Account created successfully.","success")
-        return login_response(user)
+
+        try:
+            user = User(
+                username=username,
+                email=email,
+                password_hash=hash_password(password),
+                login_method="email",
+                phone=phone
+            )
+            db.session.add(user)
+            db.session.commit()
+
+            try:
+                notify(user.id, "Welcome to Tunu Library", "Your account has been created.")
+            except Exception:
+                app.logger.exception("Registration notification failed")
+
+            try:
+                safe_username = escape(username)
+                mail.send(
+                    email,
+                    "Welcome to Tunu Library",
+                    f"<h2>Welcome to Tunu Library</h2><p>Hello {safe_username}, your account is ready.</p>"
+                )
+            except Exception:
+                app.logger.exception("Registration email failed")
+
+            flash("Account created successfully.", "success")
+            return login_response(user)
+
+        except IntegrityError:
+            db.session.rollback()
+            flash("An account with these details already exists.", "error")
+            return render_template("register.html")
+
+        except SQLAlchemyError:
+            db.session.rollback()
+            app.logger.exception("Registration database error")
+            flash("Unable to create your account right now. Please try again.", "error")
+            return render_template("register.html")
+
     return render_template("register.html")
+
+
+@app.route('/cp/logs')
+def logs():
+    if not g.user or not getattr(g.user, 'is_admin', False):
+        flash("Access denied. Admin privileges required.", "error")
+        return redirect(url_for("dashboard"))
+    
+    all_logs = Log.query.order_by(Log.time.desc()).limit(2000).all()
+    return render_template('admin/logs.html', logs=all_logs)
+
+
+@app.route('/cp/logs/delete', methods=['POST'])
+def delete_logs():
+    if not g.user or not getattr(g.user, 'is_admin', False):
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    log_ids = request.form.getlist('log_ids')
+    if log_ids:
+        Log.query.filter(Log.id.in_(log_ids)).delete(synchronize_session=False)
+        db.session.commit()
+        flash("Selected logs deleted successfully.", "success")
+    return redirect(url_for('logs'))
+
+
+@app.route('/cp/logs/clear', methods=['POST'])
+def clear_logs():
+    if not g.user or not getattr(g.user, 'is_admin', False):
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    Log.query.delete()
+    db.session.commit()
+    flash("All logs cleared successfully.", "success")
+    return redirect(url_for('logs'))
 
 @app.route("/login",methods=["GET","POST"])
 @limiter.limit("5 per minute")
+@captcha_verify
 def login():
     if g.user:return redirect(url_for("dashboard"))
     if request.method=="POST":
@@ -397,13 +651,13 @@ def callback():
         flash("Google registration failed. Please try again.", "error")
         return redirect(url_for("register"))
 
-@app.route("/admin/login")
+@app.route("/cp/login")
 def admin_login():
     if g.user and g.user.is_admin:
         return redirect(url_for("admin_dashboard"))
-    next_url=request.args.get("next", "/admin")
+    next_url=request.args.get("next", "/cp")
     if not next_url.startswith("/") or next_url.startswith("//"):
-        next_url="/admin"
+        next_url="/cp"
     return redirect(url_for("login", next=next_url))
 
 @app.route("/logout")
@@ -661,19 +915,19 @@ def notification_read(id):
     db.session.commit()
     return redirect(url_for('notifications_tab'))
 
-@app.route("/admin")
+@app.route("/cp")
 def admin_dashboard():
     admin()
     return render_template("admin/dashboard.html",total_books=LibraryBook.query.count(),pending_reservations=Reservation.query.filter_by(status="pending").count(),active_borrowings=Borrowing.query.filter(Borrowing.status.in_(["requested","borrowed"])).count(),total_users=User.query.count())
 
-@app.route("/admin/reservations")
+@app.route("/cp/reservations")
 def admin_reservations():
     admin("reservations")
     page = request.args.get("page", 1, type=int)
     pagination = Reservation.query.order_by(Reservation.reserved_at.desc()).paginate(page=page, per_page=20, error_out=False)
     return render_template("admin/reservations.html", reservations=pagination.items, pagination=pagination)
 
-@app.route("/admin/reservations/<int:id>/approve",methods=["POST"])
+@app.route("/cp/reservations/<int:id>/approve",methods=["POST"])
 def approve_reservation(id):
     admin("reservations")
     r=Reservation.query.get_or_404(id)
@@ -691,7 +945,7 @@ def approve_reservation(id):
     flash(f"{r.book_title} reservation approved.","success")
     return redirect(url_for("admin_reservations"))
 
-@app.route("/admin/borrowing")
+@app.route("/cp/borrowing")
 def admin_borrowing():
     admin("borrowing")
     page = request.args.get("page", 1, type=int)
@@ -708,7 +962,7 @@ def admin_borrowing():
         .order_by(Book.title).all())
     return render_template("admin/borrowings.html", borrowings=pagination.items, pagination=pagination, show_closed=show_closed, manual_books=manual_books)
 
-@app.route("/admin/borrowing/<int:borrowing_id>/borrowed",methods=["POST"])
+@app.route("/cp/borrowing/<int:borrowing_id>/borrowed",methods=["POST"])
 def mark_borrowed(borrowing_id):
     admin("borrowing")
     borrowing=Borrowing.query.get_or_404(borrowing_id)
@@ -737,7 +991,7 @@ def mark_borrowed(borrowing_id):
     flash(f"{borrowing.book_title} marked as borrowed.","success")
     return redirect(url_for("admin_borrowing"))
 
-@app.route("/admin/borrowing/<int:borrowing_id>/returned",methods=["POST"])
+@app.route("/cp/borrowing/<int:borrowing_id>/returned",methods=["POST"])
 @limiter.limit("40 per minute")
 def mark_returned(borrowing_id):
     admin("borrowing")
@@ -755,31 +1009,31 @@ def mark_returned(borrowing_id):
     flash("Borrowing marked as returned.","success")
     return redirect(url_for("admin_borrowing"))
 
-@app.route("/admin/users")
+@app.route("/cp/users")
 def admin_users():
     admin("users")
     page = request.args.get("page", 1, type=int)
     pagination = User.query.order_by(User.created_at.desc()).paginate(page=page, per_page=20, error_out=False)
     return render_template("admin/users.html", users=pagination.items, pagination=pagination)
 
-@app.route("/admin/payments")
+@app.route("/cp/payments")
 def admin_payments():
     admin("payments")
     page = request.args.get("page", 1, type=int)
     pagination = Payment.query.order_by(Payment.created_at.desc()).paginate(page=page, per_page=20, error_out=False)
     return render_template("admin/payments.html", payments=pagination.items, pagination=pagination)
 
-@app.route("/admin/notifications")
+@app.route("/cp/notifications")
 def admin_notifications():
     admin("notifications")
     return render_template("admin/notifications.html",notifications=Notification.query.order_by(Notification.created_at.desc()).all())
 
-@app.route("/admin/manage-admins")
+@app.route("/cp/manage-admins")
 def manage_admins():
     admin("admins")
-    return render_template("admin/admins.html",users=User.query.filter_by(is_admin=True).all())
+    return render_template("admin/cps.html",users=User.query.filter_by(is_admin=True).all())
 
-@app.route("/admin/manage-admins/<int:user_id>",methods=["POST"])
+@app.route("/cp/manage-admins/<int:user_id>",methods=["POST"])
 def update_admin_permissions(user_id):
     admin("admins")
     user=User.query.get_or_404(user_id)
@@ -793,6 +1047,51 @@ def update_admin_permissions(user_id):
     db.session.commit()
     flash(f"Permissions for {user.username} updated.","success")
     return redirect(url_for("manage_admins"))
+
+
+@app.route('/cp/deactivate-account/<string:id>', methods=['POST', 'GET'])
+def deactivate_account(id):
+    if not g.user or not g.user.is_admin:
+        abort(403)
+        
+    user = User.query.get_or_404(id)
+    
+    if user.id == g.user.id:
+        flash("You cannot deactivate your own active admin account.", "error")
+        return redirect(url_for('admin_users'))
+        
+    user.is_active = False
+    db.session.commit()
+    
+    flash(f"Account for {user.username} has been deactivated.", "success")
+    return redirect(url_for('admin_users'))
+
+
+@app.route('/cp/activate-account/<string:id>', methods=['POST', 'GET'])
+def activate_account(id):
+    if not g.user or not g.user.is_admin:
+        abort(403)
+        
+    user = User.query.get_or_404(id)
+    user.is_active = True
+    db.session.commit()
+    
+    flash(f"Account for {user.username} has been activated.", "success")
+    return redirect(url_for('admin_users'))
+
+
+@app.route('/cp/mark-as-paid/membership/<string:id>', methods=['POST', 'GET'])
+def mark_membership_paid(id):
+    if not g.user or not g.user.is_admin:
+        abort(403)
+        
+    user = User.query.get_or_404(id)
+    user.membership_expires = datetime.utcnow() + timedelta(days=365)
+    db.session.commit()
+    
+    flash(f"Membership marked as paid for {user.username}.", "success")
+    return redirect(url_for('admin_users'))
+
 
 @app.route("/api/pay", methods=["POST"])
 def pay():
@@ -865,7 +1164,7 @@ def sync_wishlist():
     db.session.commit()
     return jsonify({"success": True})
 
-@app.route("/admin/borrowing/manual", methods=["POST"])
+@app.route("/cp/borrowing/manual", methods=["POST"])
 def admin_manual_borrowing():
     admin("borrowing")
     book_id = request.form.get("book_id")
@@ -917,14 +1216,14 @@ def admin_manual_borrowing():
     flash(f"Manual borrowing for {book['title']} saved.", "success")
     return redirect(url_for("admin_borrowing"))
 
-@app.route("/admin/book-flags")
+@app.route("/cp/book-flags")
 def admin_book_flags():
     admin("flags")
     page=request.args.get("page",1,type=int)
     pagination=BookFlag.query.order_by(BookFlag.created_at.desc()).paginate(page=page,per_page=20,error_out=False)
     return render_template("admin/book_flags.html",flags=pagination.items,pagination=pagination)
 
-@app.route("/admin/book-flags/<int:flag_id>/review",methods=["POST"])
+@app.route("/cp/book-flags/<int:flag_id>/review",methods=["POST"])
 def review_book_flag(flag_id):
     admin("flags")
     flag=BookFlag.query.get_or_404(flag_id)
@@ -944,25 +1243,43 @@ def review_book_flag(flag_id):
     flash("Book flag updated.","success")
     return redirect(url_for("admin_book_flags"))
 
-@app.route("/admin/books")
+@app.route("/cp/books")
 def admin_books():
     admin("books")
     page = request.args.get("page", 1, type=int)
-    pagination = LibraryBook.query.paginate(page=page, per_page=20, error_out=False)
+    pagination = Book.query.paginate(page=page, per_page=20, error_out=False)
     
     books = []
     for lb in pagination.items:
-        details = find_book(lb.book_id)
+        details = find_book(lb.id)
         if details:
-            details['available_copies'] = lb.available_copies
-            details['total_copies'] = lb.total_copies
+            details['available_copies'] = '87'
+            details['total_copies'] = '87'
             books.append(details)
             
     return render_template("admin/books.html", books=books, pagination=pagination)
 
 
+@app.route('/cp/books/delete/<book_id>', methods=['POST'])
+def delete_book(book_id):
+    if not g.user or not getattr(g.user, 'is_admin', False):
+        flash("Access denied. Admin privileges required.", "error")
+        return redirect(url_for("dashboard"))
+    
+    book = db.session.get(Book, book_id)
+    if not book:
+        flash("Book not found.", "error")
+        return redirect(url_for("admin_books"))
+    
+    db.session.delete(book)
+    db.session.commit()
+    flash("Book deleted successfully.", "success")
+    return redirect(url_for("admin_books"))
+
+
+
 def render_http_error(code):
-    return render_template(f"{code}.html"),code
+    return render_template(f"errors/{code}.html"),code
 
 @app.errorhandler(400)
 def bad_request(error):
