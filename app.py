@@ -22,6 +22,8 @@ from flask import (
     session,
     url_for,
 )
+from flask import Response
+from flask import Response
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_migrate import Migrate
@@ -248,16 +250,13 @@ def get_ip_location(ip):
 
         ip = str(ip)
         now = datetime.utcnow()
-
         cached = db.session.get(IPLocationCache, ip)
 
         if cached and now - cached.updated_at < timedelta(hours=6):
             return cached.location
 
-        response = requests.get(
-            f"https://ipapi.co/{ip}/json/",
-            timeout=3
-        )
+        url = f"https://ipwho.is/{ip}"
+        response = requests.get(url, timeout=3)
         response.raise_for_status()
         data = response.json()
 
@@ -269,8 +268,7 @@ def get_ip_location(ip):
                 data.get("city"),
                 data.get("region"),
                 data.get("country_name")
-            )
-            if value
+            ) if value
         )
 
         if not location:
@@ -280,21 +278,18 @@ def get_ip_location(ip):
             cached.location = location
             cached.updated_at = now
         else:
-            db.session.add(
-                IPLocationCache(
-                    ip_address=ip,
-                    location=location,
-                    updated_at=now
-                )
-            )
+            db.session.add(IPLocationCache(
+                ip_address=ip,
+                location=location,
+                updated_at=now
+            ))
 
         db.session.commit()
         return location
 
-    except (ValueError, requests.RequestException, Exception):
+    except Exception:
         db.session.rollback()
         return "Unknown"
-
 
 def get_access_token():
     if not mpesa_is_configured():
@@ -1306,6 +1301,7 @@ def admin_books():
     return render_template("admin/books.html", books=books, pagination=pagination)
 
 
+
 @app.route('/cp/books/delete/<book_id>', methods=['POST'])
 def delete_book(book_id):
     if not g.user or not getattr(g.user, 'is_admin', False):
@@ -1322,7 +1318,12 @@ def delete_book(book_id):
     flash("Book deleted successfully.", "success")
     return redirect(url_for("admin_books"))
 
-
+@app.route("/robots.txt")
+def robots_txt():
+    return Response(
+        "User-agent: *\nAllow: /\n\nSitemap: https://library.tunupublishers.com/sitemap.xml\n",
+        mimetype="text/plain"
+    )
 
 def render_http_error(code):
     return render_template(f"errors/{code}.html"),code
