@@ -800,7 +800,7 @@ def borrowing_rules():
         pickup_wait_days=PICKUP_WAIT_DAYS,
     )
 
-@app.route("/help_center")
+@app.route("/help-center")
 def help_center():
     return render_template('support.html')
 
@@ -1324,6 +1324,36 @@ def robots_txt():
         "User-agent: *\nAllow: /\n\nSitemap: https://library.tunupublishers.com/sitemap.xml\n",
         mimetype="text/plain"
     )
+
+@app.route("/sitemap.xml")
+def sitemap_xml():
+    from flask import Response, url_for
+    from xml.sax.saxutils import escape
+
+    excluded = {
+        "static", "robots_txt", "sitemap_xml", "service_worker",
+        "google_login", "google_callback", "logout", "dashboard",
+         "open_notification"
+    }
+
+    urls = []
+    for rule in app.url_map.iter_rules():
+        if rule.endpoint in excluded or rule.rule.startswith("/cp") or rule.arguments or rule.methods.intersection({"POST", "PUT", "PATCH", "DELETE"}):
+            continue
+        if rule.methods and not rule.methods.intersection({"GET", "HEAD"}):
+            continue
+        try:
+            urls.append(url_for(rule.endpoint, _external=True))
+        except Exception:
+            continue
+
+    xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    xml += "".join(f"  <url><loc>{escape(url)}</loc></url>\n" for url in sorted(set(urls)))
+    xml += "</urlset>"
+
+    return Response(xml, mimetype="application/xml")
+
 
 def render_http_error(code):
     return render_template(f"errors/{code}.html"),code
