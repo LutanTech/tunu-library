@@ -1,7 +1,20 @@
+import base64
 from datetime import datetime, timedelta
+from datetime import datetime, timedelta
+import hashlib
+import hmac
+import ipaddress
+import json
+import os
+import random
+import secrets
+import string
+import time
+import time
+
 from flask_sqlalchemy import SQLAlchemy
-import secrets,string, time, random
-import os,hmac,hashlib,base64,json,time,requests
+import requests
+import requests
 
 db=SQLAlchemy()
 
@@ -185,12 +198,14 @@ class BookFlag(db.Model):
     reviewed_by_user=db.relationship("User",foreign_keys=[reviewed_by])
 
 
+
 class Log(db.Model):
     __tablename__ = "log"
 
     id = db.Column(db.Integer, primary_key=True)
     time = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     ip_address = db.Column(db.String(45), nullable=False)
+    location = db.Column(db.String(255), nullable=True)
     staff = db.Column(db.String(100), default="Guest", nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
     method = db.Column(db.String(10), nullable=False)
@@ -200,3 +215,17 @@ class Log(db.Model):
     user_agent = db.Column(db.Text, nullable=True)
 
     user = db.relationship("User", foreign_keys=[user_id], backref="logs")
+
+
+class IPLocationCache(db.Model):
+    __tablename__ = "ip_location_cache"
+
+    ip_address = db.Column(db.String(45), primary_key=True)
+    location = db.Column(db.String(255), nullable=False)
+    updated_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow,
+        nullable=False
+    )
+
+

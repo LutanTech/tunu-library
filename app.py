@@ -1,6 +1,7 @@
 import base64
 from datetime import datetime, timedelta
 from functools import wraps
+import ipaddress
 import os
 import re
 import re
@@ -20,7 +21,6 @@ from flask import (
     send_from_directory,
     session,
     url_for,
-    
 )
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -38,13 +38,14 @@ from models import (
     Book,
     BookFlag,
     Borrowing,
+    IPLocationCache,
     LibraryBook,
+    Log,
     Notification,
     Payment,
     Reservation,
     User,
     db,
-    Log
 )
 from notifications import notify, unread, unreadCount
 from utils import *
@@ -119,43 +120,30 @@ def load_user():
     cookie_language=request.cookies.get("tunu_language")
     g.language=requested_language or cookie_language or "en"
 
-
-
 @app.after_request
 def log_request(response):
     path = request.path
-    
-    if path.startswith('/.well-known') or path.startswith('/static'):
-        return response
-
-    image_extensions = ('.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.ico', '.bmp', '.tiff')
-    if path.lower().endswith(image_extensions) or path.startswith('/static/images/'):
+    if path.startswith(('/.well-known', '/static')) or path.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.ico', '.bmp', '.tiff')):
         return response
 
     user = getattr(g, 'user', None)
-    if user:
-        staff_display = getattr(user, 'username', None) or getattr(user, 'email', 'User')
-        user_id = getattr(user, 'id', None)
-    else:
-        staff_display = 'Guest'
-        user_id = None
-
-    action = f"{request.method} {path}"
-
-    log_entry = Log(
-        time=datetime.utcnow() + timedelta(hours=delta),
-        ip_address=request.remote_addr or '127.0.0.1',
-        staff=staff_display,
-        user_id=user_id,
-        method=request.method,
-        endpoint=request.endpoint or path,
-        action=action,
-        status_code=response.status_code,
-        user_agent=request.headers.get('User-Agent', '')
-    )
+    staff_display = (getattr(user, 'username', None) or getattr(user, 'email', 'User')) if user else 'Guest'
+    ip = request.remote_addr or '127.0.0.1'
 
     try:
-        db.session.add(log_entry)
+        location = get_ip_location(ip)
+        db.session.add(Log(
+            time=datetime.utcnow() + timedelta(hours=delta),
+            ip_address=ip,
+            location=location,
+            staff=staff_display,
+            user_id=getattr(user, 'id', None) if user else None,
+            method=request.method,
+            endpoint=request.endpoint or path,
+            action=f"{request.method} {path}",
+            status_code=response.status_code,
+            user_agent=request.headers.get('User-Agent', '')
+        ))
         db.session.commit()
     except Exception:
         db.session.rollback()
@@ -227,7 +215,6 @@ def captcha_verify(f):
 
     return wrapper
 
-
 @app.context_processor
 def globals():
     user = getattr(g, "user", None)
@@ -239,7 +226,10 @@ def globals():
     }
 
 def auth():
-    if not g.user:return redirect(url_for("login",next=request.path))
+    if not g.user:
+        return redirect(url_for("login",next=request.path))
+    if not g.user.is_active:
+        return render_template('/errors/inactive.html')
 
 def format_phone(num):
     if not num: return None
@@ -248,6 +238,62 @@ def format_phone(num):
 
 def mpesa_is_configured():
     return all([CONSUMER_KEY, CONSUMER_SECRET, SHORTCODE, PASSKEY])
+
+def get_ip_location(ip):
+    try:
+        ip = ipaddress.ip_address(ip.strip())
+
+        if not ip.is_global:
+            return "Local or private IP"
+
+        ip = str(ip)
+        now = datetime.utcnow()
+
+        cached = db.session.get(IPLocationCache, ip)
+
+        if cached and now - cached.updated_at < timedelta(hours=6):
+            return cached.location
+
+        response = requests.get(
+            f"https://ipapi.co/{ip}/json/",
+            timeout=3
+        )
+        response.raise_for_status()
+        data = response.json()
+
+        if data.get("error"):
+            return cached.location if cached else "Unknown"
+
+        location = ", ".join(
+            value for value in (
+                data.get("city"),
+                data.get("region"),
+                data.get("country_name")
+            )
+            if value
+        )
+
+        if not location:
+            return cached.location if cached else "Unknown"
+
+        if cached:
+            cached.location = location
+            cached.updated_at = now
+        else:
+            db.session.add(
+                IPLocationCache(
+                    ip_address=ip,
+                    location=location,
+                    updated_at=now
+                )
+            )
+
+        db.session.commit()
+        return location
+
+    except (ValueError, requests.RequestException, Exception):
+        db.session.rollback()
+        return "Unknown"
 
 
 def get_access_token():
@@ -602,7 +648,7 @@ def callback():
         if user:
             if not user.is_active:
                 flash("Your account has been suspended. Please contact support.", "error")
-                return redirect(url_for("register"))
+                return redirect(url_for("login"))
 
             if user.google_id and user.google_id != google_id:
                 flash("This email is linked to another Google account.", "error")

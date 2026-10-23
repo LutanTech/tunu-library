@@ -187,8 +187,8 @@
                                 <th>IP</th>
                                 <th>Staff</th>
                                 <th>Method</th>
-                                <th>Endpoint</th>
                                 <th>Action</th>
+                                <th>Location</th>
                                 <th>Status</th>
                                 <th>User Agent</th>
                             </tr>
@@ -205,12 +205,14 @@
                                         {{ log.method }}
                                     </span>
                                 </td>
-                                <td style="font-family: monospace; font-size: 11px;">{{ log.endpoint }}</td>
                                 <td>{{ log.action }}</td>
                                 <td>
                                     <span class="log-status {% if log.status_code == 200 %}log-status-200{% else %}log-status-err{% endif %}">
                                         {{ log.status_code }}
                                     </span>
+                                </td>
+                                <td>
+                                    {{ log.location }}
                                 </td>
                                 <td><div class="logs-ua" title="{{ log.user_agent }}">{{ log.user_agent }}</div></td>
                             </tr>

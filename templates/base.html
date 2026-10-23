@@ -154,7 +154,7 @@
             border-radius: 13px 13px 13px 4px;
             background: var(--ink);
             color: #fff;
-            box-shadow: 5px 5px 0 var(--coral);
+            box-shadow: 5px 5px 0 magenta;
             transition: transform .25s var(--ease), box-shadow .25s var(--ease);
         }
         .brand-mark::after {
@@ -612,7 +612,7 @@
     <header class="site-header">
         <div class="container navbar">
             <a href="{{ url_for('index') }}" class="brand-logo" aria-label="Tunu Library home">
-                <span class="brand-mark" aria-hidden="true"><i class="fas fa-book-open"></i></span>
+                <span class="brand-mark" aria-hidden="true"><img src="{{ url_for('static', filename='logo/icon-512.png') }}"></span>
                 <span class="brand-wordmark" no-translate translate="no">Tunu Library<small>Read. Discover. Belong.</small></span>
             </a>
 
@@ -621,7 +621,7 @@
                     <li><a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}"><i class="fas fa-house" aria-hidden="true"></i><span>Home</span></a></li>
                     <li><a href="{{ url_for('books') }}" class="nav-link {% if request.endpoint == 'books' %}active{% endif %}"><i class="fas fa-book-open" aria-hidden="true"></i><span>Browse catalog</span></a></li>
                     <li><a href="{{ url_for('books') }}?category=all" class="nav-link"><i class="fas fa-layer-group" aria-hidden="true"></i><span>Categories</span></a></li>
-                    <li><a href="#about" class="nav-link"><i class="fas fa-circle-info" aria-hidden="true"></i><span>About us</span></a></li>
+                    <li><a href="{{ url_for('about')}}" class="nav-link"><i class="fas fa-circle-info" aria-hidden="true"></i><span>About us</span></a></li>
                 </ul>
             </nav>
 
@@ -767,7 +767,7 @@
                     <ul class="footer-links">
                         <li><a href="{{ url_for('index') }}" class="footer-link"> <i class="fas fa-home"></i> Home</a></li>
                         <li><a href="{{ url_for('books') }}" class="footer-link"> <i class="fas fa-book"></i> Browse catalog</a></li>
-                        {% if current_user %}<li><a href="{{ url_for('dashboard') }}" class="footer-link"> <i class="fas fa-user-circle"></i> My dashboard</a></li>{% else %}<li><a href="{{ url_for('register') }}" class="footer-link">Join the library</a></li>{% endif %}
+                        {% if current_user %}<li><a href="{{ url_for('dashboard') }}" class="footer-link"> <i class="fas fa-user-circle"></i> My dashboard</a></li>{% else %}<li><a href="{{ url_for('register') }}" class="footer-link"> <i class="fas fa-sign-in-alt"></i> Join the library</a></li>{% endif %}
                         <li><a href="https://lutan-tech.is-great.org/?utm_source=tunu_library&utm_medium=dev_api_link" class="footer-link"><i class="fas fa-external-link"></i> Developer API </a></li>
 
                     </ul>
