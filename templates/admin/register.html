@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Admin — Register Person — Tunu Library{% endblock %}
+
+{% block head %}
+<style>
+    .auth-wrapper {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 10px;
+    }
+
+    .auth-card {
+        background: white;
+        width: 100%;
+        max-width: 540px;
+        padding: 24px 30px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 28px;
+    }
+
+    .auth-header h1 {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--primary);
+    }
+
+    .auth-header p {
+        color: var(--text-muted);
+        font-size: 14px;
+        margin-top: 4px;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 6px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 40px 12px 35px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        font-size: 14px;
+        outline: none;
+    }
+
+    .form-control:focus {
+        border-color: var(--brand);
+    }
+
+    .inp-group {
+        position: relative;
+    }
+
+    .inp-group .inp-icon {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        padding-right: 8px;
+        border-right: 1px solid #11ff0026;
+        color: var(--text-muted);
+    }
+
+    .inp-group input, .inp-group select {
+        border: 1px solid #0c460826;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>Register New Member</h1>
+            <p>Admin Control — Manually register a new person</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('admin_register') }}" id="admin-register-form">
+            <div class="form-group">
+                <label for="username">Full Name / Username</label>
+                <div class="inp-group">
+                    <div class="inp-icon"><i class="fas fa-user-circle"></i></div>
+                    <input type="text" id="username" name="username" class="form-control" placeholder="John Reese" maxlength="50" autocomplete="off" style="padding-left: 35px;" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <div class="inp-group">
+                    <div class="inp-icon"><i class="fas fa-envelope"></i></div>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="you@example.com" maxlength="254" autocomplete="off" style="padding-left: 35px;" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <div class="inp-group">
+                    <select name="country" class="inp-icon form-control" id="country" style="max-width: 70px; background: none; padding: 9px; border-radius: 0; padding-right: 15px; border-right: 1px solid rgb(52, 51, 51)" required>
+                        <option value="">+25--</option>
+                        <option value="+254" selected>KE</option>
+                        <option value="+256">UG</option>
+                        <option value="+255">TZ</option>
+                    </select>
+                    <input type="tel" id="phone" name="phone" maxlength="9" inputmode="numeric" pattern="[0-9]{9}" autocomplete="off" class="form-control" placeholder="700000000" style="padding-left: 85px;" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="role">Assign System Role</label>
+                <div class="inp-group">
+                    <div class="inp-icon"><i class="fas fa-user-shield"></i></div>
+                    <select id="role" name="role" class="form-control" style="padding-left: 35px; background: white;" required>
+                        <option value="member" selected>Member / Borrower</option>
+                        <option value="librarian">Librarian</option>
+                        <option value="admin">Administrator</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" id="submit-btn" class="btn btn-brand" style="width: 100%; padding: 12px; margin-top: 15px;">
+                Register Person & Send Credentials
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+const form = document.getElementById('admin-register-form');
+const usernameInput = document.getElementById('username');
+const emailInput = document.getElementById('email');
+const countryInput = document.getElementById('country');
+const phoneInput = document.getElementById('phone');
+
+function sanitizeEmail(value) {
+    return value.trim().replace(/\s+/g, '').toLowerCase();
+}
+
+function sanitizePhone(value) {
+    return value.replace(/\D/g, '').slice(0, 9);
+}
+
+emailInput.addEventListener('input', () => {
+    emailInput.value = sanitizeEmail(emailInput.value);
+});
+
+phoneInput.addEventListener('input', () => {
+    phoneInput.value = sanitizePhone(phoneInput.value);
+});
+
+form.addEventListener('submit', event => {
+    emailInput.value = sanitizeEmail(emailInput.value);
+    phoneInput.value = sanitizePhone(phoneInput.value);
+
+    if (
+        usernameInput.value.length < 3 ||
+        usernameInput.value.length > 50 ||
+        !/^[a-zA-Z0-9_. ]+$/.test(usernameInput.value) ||
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value) ||
+        !['+254', '+256', '+255'].includes(countryInput.value) ||
+        !/^[0-9]{9}$/.test(phoneInput.value)
+    ) {
+        event.preventDefault();
+        alert('Please check the registration details entered.');
+        return;
+    }
+});
+</script>
+{% endblock %}

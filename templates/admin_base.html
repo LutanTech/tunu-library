@@ -310,6 +310,7 @@
                     <li><a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}"><i class="fas fa-gauge"></i>Dashboard</a></li>
                     <li><a href="{{ url_for('admin_books') }}" class="nav-link"><i class="fas fa-book"></i>Catalog</a></li>
                     <li><a href="{{ url_for('logs') }}" class="nav-link {% if request.endpoint == 'logs' %}active{% endif %}"><i class="fas fa-list-check"></i>Activity Logs</a></li>
+                    <li><a href="{{ url_for('admin_register') }}" class="nav-link {% if request.endpoint == 'admin_register' %}active{% endif %}"><i class="fas fa-user-plus"></i>Register User</a></li>
                 </ul>
             </nav>
 
@@ -347,6 +348,7 @@
             <li><a href="{{ url_for('books') }}" class="mobile-nav-link"><i class="fas fa-book"></i>Catalog</a></li>
             <li><a href="{{ url_for('logs') }}" class="mobile-nav-link"><i class="fas fa-list-check"></i>Activity Logs</a></li>
             <li><a href="{{ url_for('dashboard') }}" class="mobile-nav-link"><i class="fas fa-arrow-left"></i>Exit to Library</a></li>
+            <li><a href="{{ url_for('admin_register') }}" class="mobile-nav-link {% if request.endpoint == 'admin_register' %}active{% endif %}"><i class="fas fa-user-plus"></i>Register User</a></li>
         </ul>
     </aside>
 

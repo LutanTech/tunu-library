@@ -5,6 +5,8 @@ import ipaddress
 import os
 import re
 import re
+import secrets
+import string
 import traceback
 
 from email_validator import EmailNotValidError, validate_email
@@ -224,7 +226,8 @@ def globals():
         "current_user": user,
         "unread_notifications": unread(user.id) if user else None,
         "unread_count": unreadCount(user.id) if user else 0,
-        "language": getattr(g, "language", "en")
+        "language": getattr(g, "language", "en"),
+        "year":datetime.utcnow().year
     }
 
 def auth():
@@ -968,6 +971,145 @@ def cancel_reservation(res_id):
     db.session.commit()
     flash("Item removed from wishlist.","success")
     return redirect(url_for("my_reservations"))
+
+
+import secrets
+import string
+import random
+
+@app.route("/cp/users/register", methods=["GET", "POST"])
+def admin_register():
+    admin("users")  # Ensures only admins with user management permissions can access[cite: 3]
+    
+    if request.method == "POST":
+        full_name = request.form.get("username", "").strip()
+        email = request.form.get("email", "").strip()
+        country = request.form.get("country", "").strip()
+        phone = request.form.get("phone", "").strip()
+        role = request.form.get("role", "member").strip()
+
+        full_name = re.sub(r"\s+", " ", full_name)
+        email = re.sub(r"\s+", "", email).lower()
+        phone = re.sub(r"\D", "", phone)
+
+        if not all([full_name, email, country, phone]):
+            flash("All fields are required.", "error")
+            return render_template("admin/register.html")
+
+        try:
+            email = validate_email(email, check_deliverability=False).normalized
+        except EmailNotValidError:
+            flash("Please enter a valid email address.", "error")
+            return render_template("admin/register.html")
+
+        if country not in ("+254", "+256", "+255"):
+            flash("Please select a valid country code.", "error")
+            return render_template("admin/register.html")
+
+        if not re.fullmatch(r"[0-9]{9}", phone):
+            flash("Please enter a valid 9 digit phone number.", "error")
+            return render_template("admin/register.html")
+
+        phone = country + phone
+
+        if User.query.filter_by(phone=phone).first():
+            flash("Phone already registered.", "error")
+            return render_template("admin/register.html")
+
+        if User.query.filter_by(email=email).first():
+            flash("Email already exists.", "error")
+            return render_template("admin/register.html")
+
+        first_name = full_name.split()[0].lower()
+        first_name = re.sub(r"[^a-z0-9]", "", first_name)
+        if not first_name:
+            first_name = "user"
+
+        while True:
+            random_suffix = ''.join(secrets.choice(string.digits) for _ in range(4))
+            generated_username = f"{first_name}{random_suffix}"
+            if not User.query.filter_by(username=generated_username).first():
+                break
+
+        alphabet_upper = string.ascii_uppercase
+        alphabet_lower = string.ascii_lowercase
+        digits = string.digits
+        symbols = "!@#$%^&*()_+-=[]{}|;:,.<>?"
+        
+        raw_password = [
+            secrets.choice(alphabet_upper),
+            secrets.choice(digits),
+            secrets.choice(symbols)
+        ]
+        
+        all_chars = alphabet_upper + alphabet_lower + digits + symbols
+        for _ in range(9):
+            raw_password.append(secrets.choice(all_chars))
+            
+        secrets.SystemRandom().shuffle(raw_password)
+        temp_password = "".join(raw_password)
+
+        try:
+            is_admin_user = role in ("admin", "librarian")
+            user = User(
+                username=generated_username,
+                email=email,
+                password_hash=hash_password(temp_password),
+                login_method="email",
+                phone=phone,
+                is_admin=is_admin_user,
+                tkv=gen_id("TK", 10)
+            )
+            db.session.add(user)
+            db.session.commit()
+
+            if role == "admin":
+                allowed = {"users", "books", "reservations", "borrowing", "payments", "notifications", "admins", "settings", "flags"}
+                for perm in allowed:
+                    db.session.add(AdminPermission(user_id=user.id, permission=perm, enabled=True))
+                db.session.commit()
+
+            try:
+                email_html = render_template(
+                    "emails/notification.html",
+                    title="Your Tunu Library Account Details",
+                    category_label="Account Creation Notice",
+                    created_at=datetime.utcnow().strftime("%d %b %Y, %H:%M UTC"),
+                    user=user,
+                    message=f"Hello {full_name}, an account has been created for you by the library administration. Since login is by email, you can use your email address along with the temporary password below to sign in.",
+                    item_details={
+                        "Email (for Login)": email,
+                        "Generated Username": generated_username,
+                        "Temporary Password": temp_password,
+                        "Assigned Role": role.capitalize()
+                    },
+                    action_url=url_for("login", _external=True),
+                    action_text="Sign In to Tunu Library →"
+                )
+                
+                mail.send(
+                    email,
+                    "Your Tunu Library Account Details",
+                    email_html
+                )
+            except Exception:
+                app.logger.exception("Admin registration email dispatch failed")
+
+            flash(f"User {full_name} registered successfully. Credentials have been emailed.", "success")
+            return redirect(url_for("admin_users"))
+
+        except IntegrityError:
+            db.session.rollback()
+            flash("An account with these details already exists.", "error")
+            return render_template("admin/register.html")
+
+        except SQLAlchemyError:
+            db.session.rollback()
+            app.logger.exception("Admin user registration database error")
+            flash("Unable to create account right now. Please try again.", "error")
+            return render_template("admin/register.html")
+
+    return render_template("admin/register.html")
 
 @app.route("/notifications/<int:id>/read",methods=["GET"])
 @limiter.limit("40 per minute")
