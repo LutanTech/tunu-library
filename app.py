@@ -423,8 +423,6 @@ def flag_book(book_id):
     flash("Thank you. Your book flag has been sent to the library team.","success")
     return redirect(url_for("book",book_id=book_id))
 
-
-
 @app.route("/register", methods=["GET", "POST"])
 @limiter.limit("50 per minute")
 @captcha_verify
@@ -529,7 +527,6 @@ def register():
 
     return render_template("register.html")
 
-
 @app.route('/cp/logs')
 def logs():
     if not g.user or not getattr(g.user, 'is_admin', False):
@@ -538,7 +535,6 @@ def logs():
     
     all_logs = Log.query.order_by(Log.time.desc()).limit(2000).all()
     return render_template('admin/logs.html', logs=all_logs)
-
 
 @app.route('/cp/logs/delete', methods=['POST'])
 def delete_logs():
@@ -551,7 +547,6 @@ def delete_logs():
         db.session.commit()
         flash("Selected logs deleted successfully.", "success")
     return redirect(url_for('logs'))
-
 
 @app.route('/cp/logs/clear', methods=['POST'])
 def clear_logs():
@@ -931,6 +926,34 @@ def pay_borrowing(borrowing_id):
         borrowing=borrowing,
         borrowing_fee_bob=BORROWING_FEE_BOB
     )
+
+
+@app.route("/cp/borrowings/<int:borrowing_id>/delete",methods=["DELETE"])
+def delete_borrowing(borrowing_id):
+    x=auth()
+    if x:return x
+    
+    admin_id = g.id
+    
+    if not g:
+        return " Log in please"
+
+    borrowing=Borrowing.query.filter_by(
+        id=borrowing_id,
+        user_id=g.user.id
+    ).first_or_404()
+    
+    admin = User.query.filter_by(id=admin_id).first()
+    
+    if admin_id and admin.is_admin and borrowing:
+        db.session.delete(borrowing)
+        db.session.commit()
+        flash('Deleted successfully', 'success')
+    else:
+        flash('Some data is missing', 'success')
+
+    return redirect(url_for("admin_borrowing"))
+
 
 @app.route("/reservations/<int:res_id>/cancel",methods=["POST"])
 def cancel_reservation(res_id):

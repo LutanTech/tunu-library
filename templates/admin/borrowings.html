@@ -167,7 +167,7 @@
                                 <div class="action-group">
                                     {% if b.status == 'requested' and not b.fee_paid %}
                                         <form method="POST" action="{{ url_for('pay_borrowing', borrowing_id=b.id, admin_id=current_user.id) }}">
-                                            <button type="submit" class="btn btn-brand btn-sm" style="background: var(--adm-gold); color: #fff;">Mark as Paid</button>
+                                            <button type="submit" class="btn btn-brand btn-sm" style="background:rgb(0, 209, 191); color: rgb(255, 255, 255);">Mark as Paid</button>
                                         </form>
                                     {% elif b.status == 'paid' and b.fee_paid %}
                                         <form method="POST" action="{{ url_for('mark_borrowed', borrowing_id=b.id) }}">
@@ -180,6 +180,9 @@
                                     {% else %}
                                         <span style="color: var(--adm-muted); font-size: 11px; font-weight: 700;">Completed</span>
                                     {% endif %}
+                                    <form method="POST" action="{{ url_for('delete_borrowing', borrowing_id=b.id, admin_id=current_user.id) }}">
+                                        <button type="submit" class="btn btn-brand btn-sm" style="background:rgb(209, 84, 0); color: rgb(255, 255, 255);"><i class="fas fa-trash"></i></button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
