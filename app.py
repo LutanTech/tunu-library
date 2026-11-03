@@ -1079,7 +1079,6 @@ def admin_register():
                         "Email (for Login)": email,
                         "Generated Username": generated_username,
                         "Temporary Password": temp_password,
-                        "Assigned Role": role.capitalize()
                     },
                     action_url=url_for("login", _external=True),
                     action_text="Sign In to Tunu Library →"

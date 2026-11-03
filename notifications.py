@@ -2,7 +2,6 @@ from flask import render_template
 from models import db, User, Notification
 from emails import mail
 
-
 def notify(user_id, title, message, summary=None):
     n = Notification(
         user_id=user_id,
@@ -17,17 +16,19 @@ def notify(user_id, title, message, summary=None):
 
     if user and user.email:
         try:
-            mail.send(
-                user.email,
-                title,
-                html=render_template(
+            if isinstance(message, str) and message.lstrip().startswith('<!DOCTYPE html>'):
+                html = message
+            else:
+                html = render_template(
                     "emails/notification.html",
                     user=user,
                     title=title,
                     message=message,
                     summary=summary or title
                 )
-            )
+
+            mail.send(user.email, title, html=html)
+
         except Exception:
             import logging
             logging.exception("Failed to send notification email to %s", user.email)
@@ -35,6 +36,7 @@ def notify(user_id, title, message, summary=None):
     return n
 
 def read(notification_id, user_id):
+
     n = Notification.query.filter_by(
         id=notification_id,
         user_id=user_id
