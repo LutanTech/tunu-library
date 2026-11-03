@@ -3,7 +3,7 @@ from models import db, User, Notification
 from emails import mail
 
 
-def notify(user_id, title, message):
+def notify(user_id, title, message, summary=None):
     n = Notification(
         user_id=user_id,
         title=title,
@@ -20,22 +20,19 @@ def notify(user_id, title, message):
             mail.send(
                 user.email,
                 title,
-                render_template(
+                html=render_template(
                     "emails/notification.html",
                     user=user,
                     title=title,
-                    message=message
+                    message=message,
+                    summary=summary or title
                 )
             )
         except Exception:
             import logging
-            logging.exception(
-                "Failed to send notification email to %s",
-                user.email
-            )
+            logging.exception("Failed to send notification email to %s", user.email)
 
     return n
-
 
 def read(notification_id, user_id):
     n = Notification.query.filter_by(

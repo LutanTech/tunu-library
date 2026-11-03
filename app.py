@@ -591,6 +591,7 @@ def google_login():
 
 @app.route("/google/callback")
 def callback():
+    is_to_send = False
     try:
         if "google_state" not in session or "google_code_verifier" not in session:
             flash("Google registration session expired. Please try again.", "error")
@@ -643,6 +644,7 @@ def callback():
             user.google_id = google_id
             user.login_method = "google"
             user.tkv = gen_id("TK", 10)
+            
 
         else:
             if User.query.filter_by(username=username).first():
@@ -659,8 +661,12 @@ def callback():
             )
 
             db.session.add(user)
+            is_to_send = True
 
         db.session.commit()
+        if is_to_send:
+            notify(user.id, "Welcome to Tunu Library",
+                    f"Hello {user.username}, your account is ready.")
 
         session["user_id"] = user.id
         session["token"] = generate_token(user.id, user.tkv)
@@ -670,6 +676,7 @@ def callback():
         session.pop("google_code_verifier", None)
 
         flash("Logged in Successfully", "success")
+        
         return login_response(user)
 
     except requests.exceptions.RequestException:
@@ -704,9 +711,6 @@ def logout():
 def dashboard():
     x=auth()
     if x:return x
-    if not g.user.membership_expires or g.user.membership_expires<datetime.utcnow():
-        flash("Your membership has expired, please renew again to be able to borrow a book")
-        return redirect(url_for(f'membership'))
     expires = g.user.membership_expires
     borrowings=Borrowing.query.filter_by(user_id=g.user.id).all()
     reservations=Reservation.query.filter_by(user_id=g.user.id).order_by(Reservation.reserved_at.desc()).all()
