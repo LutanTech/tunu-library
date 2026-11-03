@@ -1,12 +1,19 @@
+from bs4 import BeautifulSoup
 from flask import render_template
-from models import db, User, Notification
+from markupsafe import Markup
+
 from emails import mail
+from models import Notification, User, db
 
 def notify(user_id, title, message, summary=None):
+    is_html = isinstance(message, str) and '<' in message and '>' in message
+
+    plain_message = BeautifulSoup(message, 'html.parser').get_text(' ', strip=True) if is_html else message
+
     n = Notification(
         user_id=user_id,
         title=title,
-        message=message
+        message=plain_message
     )
 
     db.session.add(n)
@@ -16,7 +23,7 @@ def notify(user_id, title, message, summary=None):
 
     if user and user.email:
         try:
-            if isinstance(message, str) and message.lstrip().startswith('<!DOCTYPE html>'):
+            if is_html:
                 html = message
             else:
                 html = render_template(
@@ -34,7 +41,6 @@ def notify(user_id, title, message, summary=None):
             logging.exception("Failed to send notification email to %s", user.email)
 
     return n
-
 def read(notification_id, user_id):
 
     n = Notification.query.filter_by(
