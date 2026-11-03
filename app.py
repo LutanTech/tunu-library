@@ -494,25 +494,18 @@ def register():
                 email=email,
                 password_hash=hash_password(password),
                 login_method="email",
-                phone=phone
+                phone=phone,
+                is_active=True
             )
             db.session.add(user)
             db.session.commit()
-
+            safe_username = escape(username)
+            
             try:
-                notify(user.id, "Welcome to Tunu Library", "Your account has been created.")
+                notify(user.id, "Welcome to Tunu Library",
+                    f"<h2>Welcome to Tunu Library</h2><p>Hello {safe_username}, your account is ready.</p>")
             except Exception:
                 app.logger.exception("Registration notification failed")
-
-            try:
-                safe_username = escape(username)
-                mail.send(
-                    email,
-                    "Welcome to Tunu Library",
-                    f"<h2>Welcome to Tunu Library</h2><p>Hello {safe_username}, your account is ready.</p>"
-                )
-            except Exception:
-                app.logger.exception("Registration email failed")
 
             flash("Account created successfully.", "success")
             return login_response(user)
@@ -979,7 +972,7 @@ import random
 
 @app.route("/cp/users/register", methods=["GET", "POST"])
 def admin_register():
-    admin("users")  # Ensures only admins with user management permissions can access[cite: 3]
+    admin("users")  
     
     if request.method == "POST":
         full_name = request.form.get("username", "").strip()
@@ -1058,6 +1051,7 @@ def admin_register():
                 login_method="email",
                 phone=phone,
                 is_admin=is_admin_user,
+                is_active=True,
                 tkv=gen_id("TK", 10)
             )
             db.session.add(user)
@@ -1087,8 +1081,8 @@ def admin_register():
                     action_text="Sign In to Tunu Library →"
                 )
                 
-                mail.send(
-                    email,
+                notify(
+                    user.id,
                     "Your Tunu Library Account Details",
                     email_html
                 )
@@ -1146,7 +1140,8 @@ def approve_reservation(id):
     db.session.commit()
     notify(r.user_id,"Reservation Approved",f"{r.book_title} is ready for pickup.")
     if r.user.email:
-        try:mail.send(r.user.email,"Your Tunu Library Reservation Is Ready",f"<h2>Reservation Approved</h2><p>{r.book_title} is ready for pickup.</p>")
+        try:
+            notify(r.user.id,"Your Tunu Library Reservation Is Ready",f"<h2>Reservation Approved</h2><p>{r.book_title} is ready for pickup.</p>")
         except:pass
     flash(f"{r.book_title} reservation approved.","success")
     return redirect(url_for("admin_reservations"))
@@ -1254,7 +1249,6 @@ def update_admin_permissions(user_id):
     flash(f"Permissions for {user.username} updated.","success")
     return redirect(url_for("manage_admins"))
 
-
 @app.route('/cp/deactivate-account/<string:id>', methods=['POST', 'GET'])
 def deactivate_account(id):
     if not g.user or not g.user.is_admin:
@@ -1268,10 +1262,25 @@ def deactivate_account(id):
         
     user.is_active = False
     db.session.commit()
+    try:
+        safe_username = escape(user.username)
+        notify(
+            user.id,
+            "Account Status Update",
+            f"""
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff;">
+                <h2 style="color: #0f172a; margin-top: 0;">Account Deactivated</h2>
+                <p style="color: #334155; font-size: 16px;">Hello <strong>{safe_username}</strong>,</p>
+                <p style="color: #334155; font-size: 16px;">We are writing to let you know that your account has been temporarily deactivated by an administrator.</p>
+                <p style="color: #334155; font-size: 16px;">If you believe this is a mistake or require further assistance, please reach out to support.</p>
+            </div>
+            """
+        )
+    except Exception:
+        app.logger.exception("Deactivation email failed")
     
     flash(f"Account for {user.username} has been deactivated.", "success")
     return redirect(url_for('admin_users'))
-
 
 @app.route('/cp/activate-account/<string:id>', methods=['POST', 'GET'])
 def activate_account(id):
@@ -1279,12 +1288,32 @@ def activate_account(id):
         abort(403)
         
     user = User.query.get_or_404(id)
-    user.is_active = True
-    db.session.commit()
+    
+    if not user.is_active:
+        user.is_active = True
+        db.session.commit()
+        try:
+            safe_username = escape(user.username)
+            notify(
+                user.id,
+                "Account Activated — Welcome Aboard!",
+                f"""
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff;">
+                    <h2 style="color: #0f172a; margin-top: 0;">Account Successfully Activated</h2>
+                    <p style="color: #334155; font-size: 16px;">Hello <strong>{safe_username}</strong>,</p>
+                    <p style="color: #334155; font-size: 16px;">Great news! Your account has been approved and activated by an administrator. You can now log in and access all platform features.</p>
+                    <div style="margin: 30px 0;">
+                        <a href="{url_for('login', _external=True)}" style="background-color: #2563eb; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Log In Now</a>
+                    </div>
+                    <p style="color: #64748b; font-size: 14px;">If you have any questions or didn't request this change, please ignore this message.</p>
+                </div>
+                """
+            )
+        except Exception:
+            app.logger.exception("Registration email failed")
     
     flash(f"Account for {user.username} has been activated.", "success")
     return redirect(url_for('admin_users'))
-
 
 @app.route('/cp/mark-as-paid/membership/<string:id>', methods=['POST', 'GET'])
 def mark_membership_paid(id):
@@ -1294,15 +1323,68 @@ def mark_membership_paid(id):
     user = User.query.get_or_404(id)
     user.membership_expires = datetime.utcnow() + timedelta(days=365)
     db.session.commit()
+    try:
+        safe_username = escape(user.username)
+        notify(
+            user.id,
+            "Membership Payment Confirmed",
+            f"""
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff;">
+                <h2 style="color: #0f172a; margin-top: 0;">Membership Activated</h2>
+                <p style="color: #334155; font-size: 16px;">Hello <strong>{safe_username}</strong>,</p>
+                <p style="color: #334155; font-size: 16px;">Your membership payment has been confirmed and recorded by an administrator. Your subscription is now active for the next year.</p>
+                <div style="margin: 30px 0;">
+                    <a href="{url_for('login', _external=True)}" style="background-color: #2563eb; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Go to Dashboard</a>
+                </div>
+                <p style="color: #64748b; font-size: 14px;">Thank you for being part of our community!</p>
+            </div>
+            """
+        )
+    except Exception:
+        app.logger.exception("Membership email failed")
     
     flash(f"Membership marked as paid for {user.username}.", "success")
     return redirect(url_for('admin_users'))
-
 
 @app.route("/api/pay", methods=["POST"])
 def pay():
     return jsonify({"error": "This endpoint is for the borrowing payment flow. Use /borrowings/<borrowing_id>/pay."}), 410
 
+@app.route('/cp/delete-user/<string:id>', methods=['POST', 'GET'])
+def delete_user(id):
+    if not g.user or not g.user.is_admin:
+        abort(403)
+        
+    user = User.query.get_or_404(id)
+    
+    if user.id == g.user.id:
+        flash("You cannot delete your own active admin account.", "error")
+        return redirect(url_for('admin_users'))
+        
+    try:
+        safe_username = escape(user.username)
+        notify(
+            user.id,
+            "Account Deletion Notice",
+            f"""
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff;">
+                <h2 style="color: #0f172a; margin-top: 0;">Account Deleted</h2>
+                <p style="color: #334155; font-size: 16px;">Hello <strong>{safe_username}</strong>,</p>
+                <p style="color: #334155; font-size: 16px;">Your account has been permanently deleted by an administrator.</p>
+                <p style="color: #334155; font-size: 16px;">If you have any questions regarding this action, please contact support.</p>
+            </div>
+            """
+        )
+    except Exception:
+        app.logger.exception("Deletion email failed")
+        
+    Notification.query.filter_by(user_id=user.id).delete(synchronize_session=False)
+
+    db.session.delete(user)
+    db.session.commit()
+    
+    flash(f"Account for {user.username} has been deleted.", "success")
+    return redirect(url_for('admin_users'))
 
 @app.route("/open/notifications/newtab")
 def notifications_tab():
