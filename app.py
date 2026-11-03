@@ -8,6 +8,8 @@ import re
 import secrets
 import string
 import traceback
+from markupsafe import Markup
+from bs4 import BeautifulSoup
 
 from email_validator import EmailNotValidError, validate_email
 from flask import (
@@ -1117,6 +1119,29 @@ def notification_read(id):
     n.is_read=True
     db.session.commit()
     return redirect(url_for('notifications_tab'))
+
+@app.route('/cp/clean-notifications', methods=['GET'])
+def clean_notifications():
+    if not g.user or not g.user.is_admin:
+        abort(403)
+
+    notifications = Notification.query.all()
+    cleaned = 0
+
+    for n in notifications:
+        if '<' in n.message and '>' in n.message:
+            soup = BeautifulSoup(n.message, 'html.parser')
+
+            for tag in soup(['style', 'script', 'head']):
+                tag.decompose()
+
+            n.message = soup.get_text(' ', strip=True)
+            cleaned += 1
+
+    db.session.commit()
+
+    flash(f"Successfully cleaned {cleaned} notifications.", "success")
+    return redirect(url_for('admin_users'))
 
 @app.route("/cp")
 def admin_dashboard():
